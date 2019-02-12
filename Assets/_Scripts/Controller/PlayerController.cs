@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Experimental.Input;
 
-namespace Controller
+namespace Game.Controller
 {
     public class PlayerController : MonoBehaviour
     {
