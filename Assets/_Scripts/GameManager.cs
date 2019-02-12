@@ -18,7 +18,8 @@ namespace Game
         private PlayerController player;
 
         [SerializeField]
-        private GameObject[] enemies;
+        private EnemyBase[] enemies;
+        private int deadEnemies;
 
         [SerializeField]
         private TextMeshProUGUI countdownText;

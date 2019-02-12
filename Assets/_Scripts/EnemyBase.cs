@@ -15,6 +15,13 @@ namespace Game
 
         public virtual void Damage(int amount)
         {
+            currentHP -= amount;
+            if (currentHP <= 0)
+                Die();
+        }
+
+        protected virtual void Die()
+        {
 
         }
     }
