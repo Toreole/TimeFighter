@@ -1,0 +1,25 @@
+Player:
+- Jumping:
+	- Grounded check 
+	- Wall jumping (as seen in titles like Super meat Boy)
+- Movement:
+	- Consistent on slopes
+
+- Combat:
+	- Melee attacks
+	- Be damagable (removes from your time)
+	- Limited projectile based attacks (1-3 uses per level)
+
+Enemies
+- Different Behaviour based on settings
+- Shielded enemy first, other types later.
+
+- Settings:
+	- Time gain (green Aura + time refund for player)
+	- Enemy HP
+	- Turnspeed (when player is either left or right from them)
+	- Allowed to move?
+		- enum:
+			- short distance?
+			- stationary
+			- red koopa (from mario)

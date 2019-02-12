@@ -36,6 +36,8 @@ namespace Game
 
         public static bool GameStarted { get; private set; } = false;
 
+        public Transform PlayerTransform { get { return player.transform; } }
+
         //Set the instance boiii
         private void Awake()
         {
@@ -52,6 +54,11 @@ namespace Game
                     Debug.LogError("Could not find GameObject with tag Player");
                 else
                     player = p.GetComponent<PlayerController>();
+            }
+            if(enemies.Length == 0)
+            {
+                Debug.Log("Trying to find enemies in scene...");
+                //enemies = FindObjectsWithTag("Enemy");
             }
             StartCoroutine(StartLevel());
         }
@@ -72,12 +79,14 @@ namespace Game
         private IEnumerator StartLevel()
         {
             countdownText.gameObject.SetActive(true);
-            for(float t = countdownLength; t > 0; t -= Time.deltaTime)
+            for(float t = countdownLength; t > 0f; t -= Time.deltaTime)
             {
                 if (t < 0)
                     t = 0.000f;
-                string timeLeft = t.ToString().Remove(4);
-                countdownText.text = timeLeft;
+                string timeLeft = t.ToString();
+                if (timeLeft.Length > 4)
+                    timeLeft = timeLeft.Remove(4);
+                countdownText.text = timeLeft + "s";
                 yield return null;
             }
             countdownText.gameObject.SetActive(false);

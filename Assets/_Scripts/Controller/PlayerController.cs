@@ -3,10 +3,12 @@ using UnityEngine.Experimental.Input;
 
 namespace Game.Controller
 {
+    [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
         private float _horizontalDir;
-        [SerializeField] private float moveSpeed = 3f;
+        [SerializeField]
+        private float moveSpeed = 3f;
         
         private Rigidbody2D _rigid;
 
