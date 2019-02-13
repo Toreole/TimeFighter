@@ -31,7 +31,9 @@ namespace GameEditor
                 if(settings.Movement == MovementPattern.Teleportation)
                     settings.MovementSpeed = EditorGUILayout.FloatField("Teleport Cooldown", settings.MovementSpeed);
                 else
-                    settings.MovementSpeed = EditorGUILayout.FloatField("MovementSpeed", settings.MovementSpeed);
+                    settings.MovementSpeed = EditorGUILayout.FloatField("Movement Speed", settings.MovementSpeed);
+                if (settings.Movement == MovementPattern.ShortDistance)
+                    settings.WanderDistance = EditorGUILayout.FloatField("Wander Distance", settings.WanderDistance);
             }
             EditorGUILayout.EndVertical();
         }

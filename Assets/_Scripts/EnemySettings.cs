@@ -19,73 +19,23 @@ namespace Game
         MovementPattern movement;
         [SerializeField]
         float movementSpeed;
+        [SerializeField]
+        float wanderDistance;
 
-        public float TimeGain
-        {
-            get
-            {
-                return timeGain;
-            }
 #if UNITY_EDITOR
-            set
-            {
-                timeGain = value;
-            }
+        public int HP { get { return hp; } set { hp = value; } }
+        public float TimeGain { get { return timeGain; } set { timeGain = value; } }
+        public float TurnSpeed { get { return turnSpeed; } set { turnSpeed = value; } }
+        public float MovementSpeed { get { return movementSpeed; } set { movementSpeed = value; } }
+        public MovementPattern Movement { get { return movement; } set { movement = value; } }
+        public float WanderDistance { get { return wanderDistance; } set { wanderDistance = value; } }
+#else
+        public int   HP { get { return hp; } }
+        public float TimeGain { get { return timeGain; } }
+        public float TurnSpeed { get { return turnSpeed; } }
+        public float MovementSpeed { get { return movementSpeed; } }
+        public MovementPattern Movement { get { return movement; } }
+        public float WanderDistance { get { return wanderDistance; } }
 #endif
-        }
-
-        public int HP
-        {
-            get
-            {
-                return hp;
-            }
-#if UNITY_EDITOR
-            set
-            {
-                hp = value;
-            }
-#endif
-        }
-        public float TurnSpeed
-        {
-            get
-            {
-                return turnSpeed;
-            }
-#if UNITY_EDITOR
-            set
-            {
-                turnSpeed = value;
-            }
-#endif
-        }
-
-        public MovementPattern Movement
-        {
-            get
-            {
-                return movement;
-            }
-#if UNITY_EDITOR
-            set
-            {
-                movement = value;
-            }
-#endif
-        }
-        public float MovementSpeed
-        {
-            get
-            {
-                return movementSpeed;
-            }
-#if UNITY_EDITOR
-            set
-            {
-                movementSpeed = value;
-            }
-#endif
-        }
     }
 }
