@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd3558a2f3c9a57438da81362b76828f, type: 3}
   m_Name: Test
   m_EditorClassIdentifier: 
-  timeGain: 1.5
+  timeGain: 0
   hp: 1
   turnSpeed: 1
   movement: 1

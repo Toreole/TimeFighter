@@ -12,9 +12,12 @@ namespace Game
         protected int currentHP = 1;
         protected int facingDirection = 1;
         protected bool active = false;
+        protected bool turningAround = false;
         protected Vector2 startPos = Vector2.zero;
 
         protected Transform Player { get { return GameManager.instance.PlayerTransform; } }
+        protected float RelativePlayerX { get { return Player.position.x - transform.position.x; } }
+        protected float NormRelativeX { get { return RelativePlayerX / RelativePlayerX; } }
 
         [SerializeField]
         protected EnemySettings settings;
@@ -38,8 +41,12 @@ namespace Game
 
         protected void FixedUpdate()
         {
-            if (active)
-                UpdateEnemy();
+            if (!active)
+                return;
+            //TODO: redo turning around logic stuff. probably a field of vision detection thing?
+            if (!turningAround && NormRelativeX == facingDirection)
+                StartCoroutine(TurnAround());
+            UpdateEnemy();
         }
 
         protected virtual void OnLevelStart()
