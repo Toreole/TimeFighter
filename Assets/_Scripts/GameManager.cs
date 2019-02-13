@@ -18,7 +18,8 @@ namespace Game
         private PlayerController player;
 
         [SerializeField]
-        private EnemyBase[] enemies;
+        private List<EnemyBase> enemies;
+        private int enemyCount;
         private int deadEnemies;
 
         [SerializeField]
@@ -56,11 +57,12 @@ namespace Game
                 else
                     player = p.GetComponent<PlayerController>();
             }
-            if(enemies.Length == 0)
+            if(enemies.Count == 0)
             {
                 Debug.Log("Trying to find enemies in scene...");
-                //enemies = FindObjectsWithTag("Enemy");
+                enemies = new List<EnemyBase>(FindObjectsOfType<EnemyBase>());
             }
+            enemyCount = enemies.Count;
             StartCoroutine(StartLevel());
         }
 
@@ -99,6 +101,20 @@ namespace Game
         private void OnDestroy()
         {
             instance = null;
+        }
+
+        public void RegisterDead(EnemyBase deadEnemy)
+        {
+            if(enemies.Contains(deadEnemy))
+            {
+                enemies.Remove(deadEnemy);
+                deadEnemies++;
+
+                if(deadEnemies >= enemyCount && GameStarted)
+                {
+                    OnLevelComplete?.Invoke();
+                }
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   timeGain: 0
   hp: 1
-  turnSpeed: 1
+  turnSpeed: 0.4
   movement: 1
-  movementSpeed: 10
+  movementSpeed: 1.16
   wanderDistance: 1.02

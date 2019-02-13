@@ -13,11 +13,15 @@ namespace Game
         protected int facingDirection = 1;
         protected bool active = false;
         protected bool turningAround = false;
+        protected bool playerIsNear = false;
         protected Vector2 startPos = Vector2.zero;
+        protected Rigidbody2D body;
+        protected bool isGrounded = false;
 
         protected Transform Player { get { return GameManager.instance.PlayerTransform; } }
         protected float RelativePlayerX { get { return Player.position.x - transform.position.x; } }
-        protected float NormRelativeX { get { return RelativePlayerX / RelativePlayerX; } }
+        protected int NormRelativeX { get { return (int) (RelativePlayerX / RelativePlayerX); } }
+        protected bool LookingTowardsPlayer { get { return (facingDirection == NormRelativeX); } }
 
         [SerializeField]
         protected EnemySettings settings;
@@ -35,28 +39,33 @@ namespace Game
         {
             GameManager.OnLevelStart += OnLevelStart;
             GameManager.OnLevelFail  += OnLevelFail;
+
             currentHP = settings.HP;
             startPos = transform.position;
+            body = GetComponent<Rigidbody2D>();
+            //StartCoroutine(TurnAround()); <- only testing lol
         }
 
         protected void FixedUpdate()
         {
             if (!active)
                 return;
-            //TODO: redo turning around logic stuff. probably a field of vision detection thing?
-            if (!turningAround && NormRelativeX == facingDirection)
+            if (!turningAround && !LookingTowardsPlayer && playerIsNear)
                 StartCoroutine(TurnAround());
+            CheckGrounded();
             UpdateEnemy();
         }
 
         protected virtual void OnLevelStart()
         {
             active = true;
+            if (settings.Movement == MovementPattern.ShortDistance)
+                StartCoroutine(WanderAround());
         }
 
         protected virtual void OnLevelFail()
         {
-            active = false;
+            active = false; 
         }
 
         public virtual void ProcessHit(AttackHitData hitData)
@@ -73,7 +82,8 @@ namespace Game
 
         protected virtual void Die()
         {
-            //TODO: implement a way to tell the GameManager that this enemy just died. => also pass in the settings.TimeGain info
+            active = false;
+            GameManager.instance.RegisterDead(this);
         }
 
         /// <summary>
@@ -81,16 +91,91 @@ namespace Game
         /// </summary>
         protected virtual IEnumerator TurnAround()
         {
-            //TODO: all of this shit
-            return null;
+            //start turning after some delay
+            turningAround = true;
+            yield return new WaitForSeconds(settings.TurnSpeed);
+            //smooth the actual turn.
+            int turnEnd = (facingDirection == 1) ? -1 : 1;
+            float oldX = transform.localScale.x;
+            float newScaleX = transform.localScale.x;
+
+            //2 plus 3 is 5.5. weird maths!
+            for(float t = 0f; t < 0.2f; t += Time.deltaTime)
+            {
+                newScaleX = oldX + ((t * turnEnd) / 0.2f) * 2f;
+                transform.localScale = new Vector3(newScaleX, 1f, 1f);
+                yield return null;
+            }
+
+            facingDirection = turnEnd;
+            transform.localScale = new Vector3(turnEnd, 1f, 1f);
+            turningAround = false;
+        }
+
+        //just turn around on the spot.
+        protected virtual IEnumerator TurnAroundImmediate()
+        {
+            turningAround = true;
+            int turnEnd = (facingDirection == 1) ? -1 : 1;
+            float oldX = transform.localScale.x;
+            float newScaleX = transform.localScale.x;
+
+            //2 plus 3 is 5.5. weird maths!
+            for (float t = 0f; t < 0.15f; t += Time.deltaTime)
+            {
+                newScaleX = oldX + ((t * turnEnd) / 0.15f) * 2f;
+                transform.localScale = new Vector3(newScaleX, 1f, 1f);
+                yield return null;
+            }
+
+            facingDirection = turnEnd;
+            transform.localScale = new Vector3(turnEnd, 1f, 1f);
+            turningAround = false;
         }
 
         /// <summary>
-        /// Wander around the scene randomly. But max settings.WanderDistance away from the startPos.
+        /// Make sure not to walk away from the spawn too far.
         /// </summary>
-        protected virtual void Wander()
+        protected void WanderCheck()
         {
-            //TODO: This
+            if (turningAround)
+                return;
+
+            if(((Vector2) transform.position - startPos ).magnitude >= settings.WanderDistance)
+            {
+                //Move towards startPos
+            }
+           
+        }
+
+        protected virtual IEnumerator WanderAround()
+        {
+            while (active)
+            {
+                //else just go into a random direction / turn around when needed.
+                var rand = Random.Range(0.0f, 1.0f);
+                if (rand < 0.05f)
+                {
+                    //Turn around when player is not near
+                    if (!playerIsNear)
+                    {
+                        StartCoroutine(TurnAroundImmediate());
+                        yield return new WaitForSeconds(0.3f);
+                    }
+                }
+                else if (rand < 0.2f)
+                {
+                    body.velocity = new Vector2(0, body.velocity.y);
+                    yield return new WaitForSeconds(0.5f);
+                }
+                //Stop
+                else
+                {
+                    //Walk into the direction youre facing
+                    body.velocity = new Vector2(settings.MovementSpeed * facingDirection, body.velocity.y);
+                    yield return new WaitForSeconds(0.1f);
+                }
+            }
         }
 
         /// <summary>
@@ -98,7 +183,27 @@ namespace Game
         /// </summary>
         protected virtual void WalkUntilEdge()
         {
+            if (turningAround)
+                return;
             //TODO: This
+            //walk into the direction this entity is facing
+        }
+
+        protected virtual void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (collision.CompareTag("Player"))
+                playerIsNear = true;
+        }
+
+        protected virtual void OnTriggerExit2D(Collider2D collision)
+        {
+            if (collision.CompareTag("Player"))
+                playerIsNear = true;
+        }
+
+        protected void CheckGrounded()
+        {
+            isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1);
         }
     }
 }

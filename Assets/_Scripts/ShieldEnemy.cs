@@ -10,7 +10,7 @@ namespace Game
             switch(settings.Movement)
             {
                 case MovementPattern.ShortDistance:
-                    Wander();
+                    WanderCheck();
                     break;
                 case MovementPattern.EdgeToEdge:
                     WalkUntilEdge();
