@@ -25,8 +25,9 @@ namespace Game.Controller
 
         private void FixedUpdate()
         {
-            var moveDir = Vector2.right * _horizontalDir;
-            _rigid.velocity = moveDir * moveSpeed;
+            var moveDir = Vector2.right * _horizontalDir * moveSpeed;
+            moveDir.y = _rigid.velocity.y;
+            _rigid.velocity = moveDir;
         }
     }
 }

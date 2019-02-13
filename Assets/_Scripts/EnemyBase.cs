@@ -95,7 +95,7 @@ namespace Game
             turningAround = true;
             yield return new WaitForSeconds(settings.TurnSpeed);
             //smooth the actual turn.
-            int turnEnd = (facingDirection == 1) ? -1 : 1;
+            int turnEnd = 0 - facingDirection;
             float oldX = transform.localScale.x;
             float newScaleX = transform.localScale.x;
 
@@ -116,7 +116,7 @@ namespace Game
         protected virtual IEnumerator TurnAroundImmediate()
         {
             turningAround = true;
-            int turnEnd = (facingDirection == 1) ? -1 : 1;
+            int turnEnd = 0 - facingDirection;
             float oldX = transform.localScale.x;
             float newScaleX = transform.localScale.x;
 
@@ -144,6 +144,7 @@ namespace Game
             if(((Vector2) transform.position - startPos ).magnitude >= settings.WanderDistance)
             {
                 //Move towards startPos
+                StartCoroutine(TurnAroundImmediate());
             }
            
         }
