@@ -67,6 +67,7 @@ namespace Game
         protected virtual void OnLevelFail()
         {
             active = false; 
+            //reset enemy? idk lol
         }
 
         public virtual void ProcessHit(AttackHitData hitData)

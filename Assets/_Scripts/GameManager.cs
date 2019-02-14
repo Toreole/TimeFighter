@@ -32,9 +32,13 @@ namespace Game
 
         //Might come in handy.
         public delegate void GameEvent();
-        public static event GameEvent OnLevelStart    = null;
-        public static event GameEvent OnLevelFail     = null;
-        public static event GameEvent OnLevelComplete = null;
+        public static GameEvent OnLevelStart    { get { return instance.LevelStartEvent;    } set { instance.LevelStartEvent = value; } }
+        public static GameEvent OnLevelFail     { get { return instance.LevelFailEvent;     } set { instance.LevelFailEvent = value; } }
+        public static GameEvent OnLevelComplete { get { return instance.LevelCompleteEvent; } set { instance.LevelCompleteEvent = value; } }
+
+        protected event GameEvent LevelStartEvent = null;
+        protected event GameEvent LevelFailEvent = null;
+        protected event GameEvent LevelCompleteEvent = null;
 
         public static bool GameStarted { get; private set; } = false;
 
@@ -44,6 +48,10 @@ namespace Game
         private void Awake()
         {
             instance = this;
+            //reset these bois just in case.
+            OnLevelStart    = null;
+            OnLevelFail     = null;
+            OnLevelComplete = null;
         }
 
         //Entry point for StartLevel. nothing fancy.
