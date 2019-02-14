@@ -20,7 +20,7 @@ namespace Game
 
         protected Transform Player { get { return GameManager.instance.PlayerTransform; } }
         protected float RelativePlayerX { get { return Player.position.x - transform.position.x; } }
-        protected int NormRelativeX { get { return (int) (RelativePlayerX / RelativePlayerX); } }
+        protected int NormRelativeX { get { return (int) (RelativePlayerX / Mathf.Abs(RelativePlayerX)); } }
         protected bool LookingTowardsPlayer { get { return (facingDirection == NormRelativeX); } }
 
         [SerializeField]
@@ -43,7 +43,6 @@ namespace Game
             currentHP = settings.HP;
             startPos = transform.position;
             body = GetComponent<Rigidbody2D>();
-            //StartCoroutine(TurnAround()); <- only testing lol
         }
 
         protected void FixedUpdate()
@@ -52,7 +51,6 @@ namespace Game
                 return;
             if (!turningAround && !LookingTowardsPlayer && playerIsNear)
             {
-                Debug.Log(facingDirection + " --- " + NormRelativeX);
                 StartCoroutine(TurnAround());
             }
             CheckGrounded();
@@ -142,13 +140,18 @@ namespace Game
         protected void WanderCheck()
         {
             //TODO: Fix this piece of shit. => its constantly spinning. check whether im looking in the correct direction first.
-            if (turningAround)
+            if (turningAround || playerIsNear)
                 return;
-
+            
             if(((Vector2) transform.position - startPos ).magnitude >= settings.WanderDistance)
             {
+                var xDir = startPos.x - transform.position.x;
+                xDir /= Mathf.Abs(xDir);
+                if ((int)xDir != facingDirection)
                 //Move towards startPos
-                StartCoroutine(TurnAroundImmediate());
+                {
+                    StartCoroutine(TurnAroundImmediate());
+                }
             }
            
         }
@@ -168,7 +171,6 @@ namespace Game
                         //Turn around when player is not near
                         if (!playerIsNear)
                         {
-                            Debug.Log("reeeeeee");
                             StartCoroutine(TurnAroundImmediate());
                             yield return new WaitForSeconds(0.3f);
                         }
@@ -209,7 +211,7 @@ namespace Game
         protected virtual void OnTriggerExit2D(Collider2D collision)
         {
             if (collision.CompareTag("Player"))
-                playerIsNear = true;
+                playerIsNear = false;
         }
 
         protected void CheckGrounded()
