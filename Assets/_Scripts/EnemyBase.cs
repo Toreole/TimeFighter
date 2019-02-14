@@ -51,7 +51,10 @@ namespace Game
             if (!active)
                 return;
             if (!turningAround && !LookingTowardsPlayer && playerIsNear)
+            {
+                Debug.Log(facingDirection + " --- " + NormRelativeX);
                 StartCoroutine(TurnAround());
+            }
             CheckGrounded();
             UpdateEnemy();
         }
@@ -138,6 +141,7 @@ namespace Game
         /// </summary>
         protected void WanderCheck()
         {
+            //TODO: Fix this piece of shit. => its constantly spinning. check whether im looking in the correct direction first.
             if (turningAround)
                 return;
 
@@ -153,28 +157,34 @@ namespace Game
         {
             while (active)
             {
-                //else just go into a random direction / turn around when needed.
-                var rand = Random.Range(0.0f, 1.0f);
-                if (rand < 0.05f)
-                {
-                    //Turn around when player is not near
-                    if (!playerIsNear)
-                    {
-                        StartCoroutine(TurnAroundImmediate());
-                        yield return new WaitForSeconds(0.3f);
-                    }
-                }
-                else if (rand < 0.2f)
-                {
-                    body.velocity = new Vector2(0, body.velocity.y);
-                    yield return new WaitForSeconds(0.5f);
-                }
-                //Stop
+                if (playerIsNear)
+                    yield return new WaitForSeconds(0.2f);
                 else
                 {
-                    //Walk into the direction youre facing
-                    body.velocity = new Vector2(settings.MovementSpeed * facingDirection, body.velocity.y);
-                    yield return new WaitForSeconds(0.1f);
+                    //else just go into a random direction / turn around when needed.
+                    var rand = Random.Range(0, 100);
+                    if (rand < 2)
+                    {
+                        //Turn around when player is not near
+                        if (!playerIsNear)
+                        {
+                            Debug.Log("reeeeeee");
+                            StartCoroutine(TurnAroundImmediate());
+                            yield return new WaitForSeconds(0.3f);
+                        }
+                    }
+                    else if (rand < 8)
+                    {
+                        body.velocity = new Vector2(0, body.velocity.y);
+                        yield return new WaitForSeconds(0.5f);
+                    }
+                    //Stop
+                    else
+                    {
+                        //Walk into the direction youre facing
+                        body.velocity = new Vector2(settings.MovementSpeed * facingDirection, body.velocity.y);
+                        yield return new WaitForSeconds(0.1f);
+                    }
                 }
             }
         }
