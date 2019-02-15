@@ -27,20 +27,18 @@ namespace Game
         protected EnemySettings settings;
 
         /// <summary>
-        /// Move based on the movement pattern inside the settings.
-        /// </summary>
-        protected abstract void Move();
-        /// <summary>
         /// attention all gamers, this is basically FixedUpdate, but is only called when the enemy is active! double epic.
         /// </summary>
         protected abstract void UpdateEnemy();
 
+        /// <summary>
+        /// One time initial update
+        /// </summary>
         protected virtual void Start()
         {
             GameManager.OnLevelStart += OnLevelStart;
             GameManager.OnLevelFail  += OnLevelFail;
 
-            currentHP = settings.HP;
             startPos = transform.position;
             body = GetComponent<Rigidbody2D>();
         }
@@ -55,19 +53,49 @@ namespace Game
             }
             CheckGrounded();
             UpdateEnemy();
+            Move();
         }
 
+        /// <summary>
+        /// Do this when the level is started or re-started.
+        /// </summary>
         protected virtual void OnLevelStart()
         {
             active = true;
             if (settings.Movement == MovementPattern.ShortDistance)
                 StartCoroutine(WanderAround());
+
+            transform.position = startPos;
+            currentHP = settings.HP;
+            body.WakeUp();
+            foreach (var col in GetComponentsInChildren<Collider2D>())
+            {
+                col.enabled = true;
+            }
         }
 
         protected virtual void OnLevelFail()
         {
             active = false; 
             //reset enemy? idk lol
+        }
+
+        /// <summary>
+        /// Move based on the movement pattern inside the settings.
+        /// </summary>
+        protected virtual void Move()
+        {
+            switch(settings.Movement)
+            {
+                case MovementPattern.ShortDistance:
+                    WanderCheck();
+                    break;
+                case MovementPattern.EdgeToEdge:
+                    WalkUntilEdge();
+                    break;
+                default:
+                    break;
+            }
         }
 
         public virtual void ProcessHit(AttackHitData hitData)
@@ -86,6 +114,11 @@ namespace Game
         {
             active = false;
             GameManager.instance.RegisterDead(this);
+            body.Sleep();
+            foreach( var col in GetComponentsInChildren<Collider2D>() )
+            {
+                col.enabled = false;
+            }
         }
 
         /// <summary>
@@ -140,8 +173,7 @@ namespace Game
         /// </summary>
         protected void WanderCheck()
         {
-            //TODO: Fix this piece of shit. => its constantly spinning. check whether im looking in the correct direction first.
-            if (turningAround || playerIsNear)
+            if (turningAround || playerIsNear || settings.WanderDistance <= 0.1f)
                 return;
             
             if(((Vector2) transform.position - startPos ).magnitude >= settings.WanderDistance)
@@ -161,7 +193,7 @@ namespace Game
         {
             while (active)
             {
-                if (playerIsNear)
+                if (playerIsNear || !isGrounded)
                     yield return new WaitForSeconds(0.2f);
                 else
                 {
@@ -195,9 +227,10 @@ namespace Game
         /// <summary>
         /// Walk from left to right and right to left, until you hit a wall, or some sort of cliff.
         /// </summary>
+            //TODO: This is working pretty consistently and good, but maybe move the wall detection into a OnCollision thing? hmmmm
         protected virtual void WalkUntilEdge()
         {
-            if (turningAround || playerIsNear)
+            if (turningAround || playerIsNear || !isGrounded)
                 return;
             //walk into the direction this entity is facing
             if(Physics2D.Raycast(transform.position, new Vector2(facingDirection, 0), 0.6f))
@@ -220,6 +253,9 @@ namespace Game
             }
         }
 
+        /// <summary>
+        /// Player detection radius thing
+        /// </summary>
         protected virtual void OnTriggerEnter2D(Collider2D collision)
         {
             if (collision.CompareTag("Player"))
@@ -232,6 +268,9 @@ namespace Game
                 playerIsNear = false;
         }
 
+        /// <summary>
+        /// Checks if this Enemy is standing on the ground.
+        /// </summary>
         protected void CheckGrounded()
         {
             isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1);
