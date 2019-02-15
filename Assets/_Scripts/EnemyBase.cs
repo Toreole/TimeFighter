@@ -85,6 +85,8 @@ namespace Game
         /// </summary>
         protected virtual void Move()
         {
+            if (!isGrounded)
+                return;
             switch(settings.Movement)
             {
                 case MovementPattern.ShortDistance:
@@ -230,17 +232,18 @@ namespace Game
             //TODO: This is working pretty consistently and good, but maybe move the wall detection into a OnCollision thing? hmmmm
         protected virtual void WalkUntilEdge()
         {
-            if (turningAround || playerIsNear || !isGrounded)
+            if (turningAround || playerIsNear)
                 return;
             //walk into the direction this entity is facing
-            if(Physics2D.Raycast(transform.position, new Vector2(facingDirection, 0), 0.6f))
+            if (Physics2D.Raycast(transform.position, new Vector2(facingDirection, 0), 0.6f, 1))
             {
                 //Detect a wall
                 StartCoroutine(TurnAroundImmediate());
                 body.velocity = Vector2.zero;
                 //Debug.Log("Theres a wall in my way");
             }
-            else if(!Physics2D.Raycast((Vector2)transform.position + new Vector2(facingDirection * 0.6f, 0), Vector2.down, 0.6f))
+            else
+            if (!Physics2D.Raycast((Vector2)transform.position + new Vector2(facingDirection * 0.6f, 0), Vector2.down, 0.6f, 1))
             {
                 //Theres a cliff here or something thats not ground
                 StartCoroutine(TurnAroundImmediate());
@@ -250,6 +253,18 @@ namespace Game
             else
             {   //normal behaviour.
                 body.velocity = new Vector2(facingDirection * settings.MovementSpeed, body.velocity.y);
+            }
+        }
+
+        protected virtual void OnCollisionEnter2D(Collision2D col)
+        {
+            //TODO this does not account for new collisions with the same collider. Also make better tags for environment
+            if (settings.Movement != MovementPattern.EdgeToEdge || col.collider.CompareTag("Player"))
+                return;
+            var xNormal = Mathf.Abs(col.contacts[0].normal.x);
+            if (xNormal > 0.8f && !turningAround)
+            {
+                StartCoroutine(TurnAroundImmediate());
             }
         }
 

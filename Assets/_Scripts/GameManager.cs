@@ -15,7 +15,7 @@ namespace Game
         public static GameManager instance = null;
 
         [SerializeField]
-        private PlayerController player;
+        private GameObject player;
 
         [SerializeField]
         private List<EnemyBase> enemies;
@@ -63,7 +63,7 @@ namespace Game
                 if (p == null)
                     Debug.LogError("Could not find GameObject with tag Player");
                 else
-                    player = p.GetComponent<PlayerController>();
+                    player = p;
             }
             if(enemies.Count == 0)
             {
