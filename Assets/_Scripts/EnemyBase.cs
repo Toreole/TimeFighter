@@ -6,7 +6,7 @@ namespace Game
     /// <summary>
     /// The base class for all enemies
     /// </summary>
-    [RequireComponent(typeof(Rigidbody2D), typeof(BoxCollider2D))]
+    [RequireComponent(typeof(Rigidbody2D))]
     public abstract class EnemyBase : MonoBehaviour
     {
         protected int currentHP = 1;
@@ -197,10 +197,27 @@ namespace Game
         /// </summary>
         protected virtual void WalkUntilEdge()
         {
-            if (turningAround)
+            if (turningAround || playerIsNear)
                 return;
-            //TODO: This
             //walk into the direction this entity is facing
+            if(Physics2D.Raycast(transform.position, new Vector2(facingDirection, 0), 0.6f))
+            {
+                //Detect a wall
+                StartCoroutine(TurnAroundImmediate());
+                body.velocity = Vector2.zero;
+                //Debug.Log("Theres a wall in my way");
+            }
+            else if(!Physics2D.Raycast((Vector2)transform.position + new Vector2(facingDirection * 0.6f, 0), Vector2.down, 0.6f))
+            {
+                //Theres a cliff here or something thats not ground
+                StartCoroutine(TurnAroundImmediate());
+                body.velocity = Vector2.zero;
+                //Debug.Log("Theres a cliff in my way");
+            }
+            else
+            {   //normal behaviour.
+                body.velocity = new Vector2(facingDirection * settings.MovementSpeed, body.velocity.y);
+            }
         }
 
         protected virtual void OnTriggerEnter2D(Collider2D collision)

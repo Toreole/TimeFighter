@@ -15,6 +15,6 @@ MonoBehaviour:
   timeGain: 0
   hp: 1
   turnSpeed: 0.4
-  movement: 1
-  movementSpeed: 1.16
+  movement: 2
+  movementSpeed: 1.27
   wanderDistance: 1.5
