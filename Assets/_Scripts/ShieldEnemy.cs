@@ -5,24 +5,10 @@ namespace Game
 {
     public class ShieldEnemy : EnemyBase
     {
-        protected override void Move()
-        {
-            switch(settings.Movement)
-            {
-                case MovementPattern.ShortDistance:
-                    WanderCheck();
-                    break;
-                case MovementPattern.EdgeToEdge:
-                    WalkUntilEdge();
-                    break;
-                default:
-                    return; //stationary by default
-            }
-        }
 
         protected override void UpdateEnemy()
         {
-            Move();
+            //Uhhhh spaghet
         }
 
         public override void ProcessHit(AttackHitData hitData)

@@ -7,8 +7,14 @@ Player:
 
 - Combat:
 	- Melee attacks
+	- "Crosshair"(Mouse on screen) determines which way the player looks and how he attacks
+		- Left click for normal melees
+			- Middle click grapling hook? :pog:
+			- Right click special (projectile thingy)
 	- Be damagable (removes from your time)
 	- Limited projectile based attacks (1-3 uses per level)
+	- Two effect / ring slots (not visualized) depending on gameplay.
+		- e.g. +1 attack, but -2 seconds time
 
 Enemies
 - Different Behaviour based on settings
