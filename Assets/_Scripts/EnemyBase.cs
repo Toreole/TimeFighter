@@ -24,11 +24,14 @@ namespace Game
         protected bool LookingTowardsPlayer { get { return (facingDirection == NormRelativeX); } }
 
         [SerializeField]
-        protected EnemySettings settings;
+        protected internal EnemySettings settings;
+
+        public EnemySettings Settings { get { return settings; } }
 
         /// <summary>
         /// attention all gamers, this is basically FixedUpdate, but is only called when the enemy is active! double epic.
         /// </summary>
+        [System.Obsolete("Ughh i dont really need this i guess.")]
         protected abstract void UpdateEnemy();
 
         /// <summary>
@@ -43,7 +46,7 @@ namespace Game
             body = GetComponent<Rigidbody2D>();
         }
 
-        protected void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
             if (!active)
                 return;
@@ -234,8 +237,9 @@ namespace Game
         {
             if (turningAround || playerIsNear)
                 return;
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, new Vector2(facingDirection, 0), 0.6f, 1);
             //walk into the direction this entity is facing
-            if (Physics2D.Raycast(transform.position, new Vector2(facingDirection, 0), 0.6f, 1))
+            if ( hit )
             {
                 //Detect a wall
                 StartCoroutine(TurnAroundImmediate());
@@ -243,23 +247,27 @@ namespace Game
                 //Debug.Log("Theres a wall in my way");
             }
             else
-            if (!Physics2D.Raycast((Vector2)transform.position + new Vector2(facingDirection * 0.6f, 0), Vector2.down, 0.6f, 1))
             {
-                //Theres a cliff here or something thats not ground
-                StartCoroutine(TurnAroundImmediate());
-                body.velocity = Vector2.zero;
-                //Debug.Log("Theres a cliff in my way");
-            }
-            else
-            {   //normal behaviour.
-                body.velocity = new Vector2(facingDirection * settings.MovementSpeed, body.velocity.y);
+                hit = Physics2D.Raycast((Vector2)transform.position + new Vector2(facingDirection * 0.6f, 0), Vector2.down, 0.6f, 1);
+                if ( !hit )
+                {
+                    //Theres a cliff here or something thats not ground
+                    StartCoroutine(TurnAroundImmediate());
+                    body.velocity = Vector2.zero;
+                    //Debug.Log("Theres a cliff in my way");
+                }
+                else
+                {   //normal behaviour.
+                    if(hit.collider.CompareTag("Environment"))
+                        body.velocity = new Vector2(facingDirection * settings.MovementSpeed, body.velocity.y);
+                }
             }
         }
 
         protected virtual void OnCollisionEnter2D(Collision2D col)
         {
             //TODO this does not account for new collisions with the same collider. Also make better tags for environment
-            if (settings.Movement != MovementPattern.EdgeToEdge || col.collider.CompareTag("Player"))
+            if (settings.Movement != MovementPattern.EdgeToEdge)
                 return;
             var xNormal = Mathf.Abs(col.contacts[0].normal.x);
             if (xNormal > 0.8f && !turningAround)
@@ -288,7 +296,7 @@ namespace Game
         /// </summary>
         protected void CheckGrounded()
         {
-            isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 1);
+            isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.55f);
         }
     }
 }

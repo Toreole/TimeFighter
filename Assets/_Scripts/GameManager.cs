@@ -124,5 +124,10 @@ namespace Game
                 }
             }
         }
+
+        public void ResetLevel()
+        {
+            //How tho?
+        }
     }
 }

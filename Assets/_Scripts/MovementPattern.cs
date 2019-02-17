@@ -2,6 +2,6 @@
 {
     public enum MovementPattern
     {
-        Stationary, ShortDistance, EdgeToEdge, Teleportation
+        Stationary, ShortDistance, EdgeToEdge, Teleportation, Railed
     }
 }

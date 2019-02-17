@@ -22,11 +22,11 @@ Player:
 
 Enemies:
 > Different Behaviour based on settings
-	> fix movement
+	X fix movement
 X Shielded enemy first, other types later.
-- basic enemy
+X basic enemy
 - teleporting enemy
-- target dummy
+X target dummy
 
 - Settings:
 	- Time gain (green Aura + time refund for player)
