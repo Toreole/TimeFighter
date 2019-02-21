@@ -19,6 +19,8 @@ namespace Game.Controller
         protected Rigidbody2D body;
         [SerializeField, Tooltip("height of the players hitbox")]
         protected float playerHeight  = 1.0f;
+        [SerializeField, Tooltip("width of the players hitbox")]
+        protected float playerWidth = 1.0f;
         [SerializeField, Tooltip("The fixed height the player can jump (in Units).")]
         protected float jumpHeight = 1.0f;
         [SerializeField, Tooltip("how fast the player usually moves on the ground.")]
@@ -95,31 +97,65 @@ namespace Game.Controller
         /// </summary>
         private void CheckGrounded()
         {
-            RaycastHit2D hit;
-            if(hit = Physics2D.Raycast(transform.position, Vector2.down, playerHeight / 2f + 0.05f, 1))
+            if(body.velocity.y > 2)
             {
-                Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
-                ground.rotation = rot;
-                isGrounded = true;
+                isGrounded = false;
+                return;
+            }
+            RaycastHit2D hit;
+            var raycastPos = transform.position;
+            var rayLength = playerHeight / 2f + 0.05f;
+            Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
+            if(hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, 1))
+            {
+                SetGround(hit);
             }
             else
             {
-                isGrounded = false;
+                raycastPos += Vector3.right * playerWidth / 3f;
+                Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
+                if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, 1))
+                {
+                    SetGround(hit);
+                }
+                else
+                {
+                    raycastPos -= Vector3.right * playerWidth / 3f * 2f;
+                    Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
+                    if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, 1))
+                    {
+                        SetGround(hit);
+                    }
+                    else
+                        isGrounded = false;
+                }
             }
+        }
+        private void SetGround(RaycastHit2D hit)
+        {
+            Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
+            ground.rotation = rot;
+            isGrounded = true;
         }
         /// <summary>
         /// Use the input to move the player character.
         /// </summary>
         private void Move()
         {
-            if (!isGrounded)
-                return;
-            if (jump)
-                Jump();
+            if (isGrounded)
+            {
+                if (jump)
+                    Jump();
 
-            var velocity = xMove * movementSpeed * (Vector2)ground.right;
-            velocity.y = body.velocity.y;
-            body.velocity = velocity;
+                var velocity = xMove * movementSpeed * (Vector2)ground.right;
+                velocity.y = body.velocity.y;
+                body.velocity = velocity;
+            }
+            else
+            {
+                var airControl = xMove * movementSpeed * airControlStrength * Vector2.right;
+                body.AddForce(airControl);
+            }
         }
 
         /// <summary>

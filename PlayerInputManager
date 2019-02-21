@@ -34,6 +34,10 @@ namespace Game
         }
         private void Uninitialize()
         {
+            if (m_DefaultActionsCallbackInterface != null)
+            {
+                Default.SetCallbacks(null);
+            }
             m_Default = null;
             m_Default_Move = null;
             if (m_DefaultMoveActionStarted != null)
@@ -47,8 +51,10 @@ namespace Game
         public void SetAsset(InputActionAsset newAsset)
         {
             if (newAsset == asset) return;
+            var DefaultCallbacks = m_DefaultActionsCallbackInterface;
             if (m_Initialized) Uninitialize();
             asset = newAsset;
+            Default.SetCallbacks(DefaultCallbacks);
         }
         public override void MakePrivateCopyOfActions()
         {
@@ -56,6 +62,7 @@ namespace Game
         }
         // Default
         private InputActionMap m_Default;
+        private IDefaultActions m_DefaultActionsCallbackInterface;
         private InputAction m_Default_Move;
         [SerializeField] private ActionEvent m_DefaultMoveActionStarted;
         [SerializeField] private ActionEvent m_DefaultMoveActionPerformed;
@@ -74,6 +81,22 @@ namespace Game
             public bool enabled { get { return Get().enabled; } }
             public InputActionMap Clone() { return Get().Clone(); }
             public static implicit operator InputActionMap(DefaultActions set) { return set.Get(); }
+            public void SetCallbacks(IDefaultActions instance)
+            {
+                if (m_Wrapper.m_DefaultActionsCallbackInterface != null)
+                {
+                    Move.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
+                    Move.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
+                    Move.cancelled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
+                }
+                m_Wrapper.m_DefaultActionsCallbackInterface = instance;
+                if (instance != null)
+                {
+                    Move.started += instance.OnMove;
+                    Move.performed += instance.OnMove;
+                    Move.cancelled += instance.OnMove;
+                }
+            }
         }
         public DefaultActions @Default
         {
@@ -87,5 +110,9 @@ namespace Game
         public class ActionEvent : UnityEvent<InputAction.CallbackContext>
         {
         }
+    }
+    public interface IDefaultActions
+    {
+        void OnMove(InputAction.CallbackContext context);
     }
 }

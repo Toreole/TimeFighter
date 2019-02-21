@@ -14,6 +14,6 @@ ScriptedImporter:
   wrapperClassName: PlayerInputManager
   wrapperCodeNamespace: Game
   generateActionEvents: 1
-  generateInterfaces: 0
+  generateInterfaces: 1
   actionGuids: []
   actionMapGuids: []
