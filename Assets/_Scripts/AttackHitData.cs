@@ -4,21 +4,21 @@ namespace Game
 {
     public class AttackHitData
     {
-        public int Damage       { get; set; } = 0;
+        public float Damage     { get; set; } = 0f;
         public Vector2 Position { get; set; } = Vector2.positiveInfinity;
         public float HitForce   { get; set; } = 0f;
 
         public AttackHitData() { }
-        public AttackHitData(int damage)
+        public AttackHitData(float damage)
         {
             Damage = damage;
         }
-        public AttackHitData(int dmg, Vector2 pos)
+        public AttackHitData(float dmg, Vector2 pos)
         {
             Damage = dmg;
             Position = pos;
         }
-        public AttackHitData(int dmg, Vector2 pos, float force)
+        public AttackHitData(float dmg, Vector2 pos, float force)
         {
             Damage = dmg;
             Position = pos;

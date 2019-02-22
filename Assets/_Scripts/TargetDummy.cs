@@ -63,6 +63,7 @@ namespace Game
         }
 
         //Why does this even exist?
+        [System.Obsolete]
         protected override void UpdateEnemy()
         {
 

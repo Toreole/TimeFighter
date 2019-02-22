@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using TMPro;
 using Game.Controller;
 
@@ -14,21 +15,34 @@ namespace Game
     {
         public static GameManager instance = null;
 
+        [Header("Entities")]
         [SerializeField]
         private GameObject player;
+        private PlayerController controller;
 
         [SerializeField]
         private List<EnemyBase> enemies;
         private int enemyCount;
         private int deadEnemies;
 
+        [Header("Countdown")]
         [SerializeField]
         private TextMeshProUGUI countdownText;
         [SerializeField]
         private float countdownLength = 3.5f;
 
+        [Header("Timer")]
         [SerializeField]
         private Slider levelTimeSlider;
+        [SerializeField]
+        private Image sliderFill;
+        [SerializeField]
+        private Gradient sliderGradient;
+        private AttackHitData timerDamage = new AttackHitData();
+
+        [Header("Level Settings")]
+        [SerializeField]
+        private float clearTime = 10.0f;
 
         //Might come in handy.
         public delegate void GameEvent();
@@ -47,11 +61,12 @@ namespace Game
         //Set the instance boiii
         private void Awake()
         {
+            if (instance != null)
+            {
+                Destroy(instance.gameObject);
+                instance = null;
+            }
             instance = this;
-            //reset these bois just in case.
-            OnLevelStart    = null;
-            OnLevelFail     = null;
-            OnLevelComplete = null;
         }
 
         //Entry point for StartLevel. nothing fancy.
@@ -63,25 +78,53 @@ namespace Game
                 if (p == null)
                     Debug.LogError("Could not find GameObject with tag Player");
                 else
+                {
                     player = p;
+                }
             }
-            if(enemies.Count == 0)
+            if (player == null)
+                return;
+            controller = player.GetComponent<PlayerController>();
+            if (enemies.Count == 0)
             {
                 Debug.Log("Trying to find enemies in scene...");
                 enemies = new List<EnemyBase>(FindObjectsOfType<EnemyBase>());
             }
             enemyCount = enemies.Count;
+            SetupPlayer();
             StartCoroutine(StartLevel());
+            OnLevelFail += LevelFailed;
         }
 
-        //Update Health/Time
+        /// <summary>
+        /// Initial setup for the player health
+        /// </summary>
+        private void SetupPlayer()
+        {
+            controller.health = clearTime;
+            controller.currentHealth = clearTime;
+
+            levelTimeSlider.maxValue = clearTime;
+            levelTimeSlider.value = clearTime;
+            sliderFill.color = sliderGradient.Evaluate(1);
+        }
+
+        /// <summary>
+        /// Update player health every frame and also check stuff
+        /// </summary>
         private void LateUpdate()
         {
             if (!GameStarted)
                 return;
-            //levelTimeSlider.value = PLAYER.HEALTH;
-            //if(PLAYER.HEALTH >= 0f) OnLevelFailed?.Invoke();
-            //if(ALL_ENEMIES_DEAD AND PLAYER_ALIVE) OnLevelComplete?.Invoke();
+            timerDamage.Damage = Time.deltaTime;
+            controller.ProcessHit(timerDamage, true);
+            levelTimeSlider.value = controller.currentHealth;
+            sliderFill.color = sliderGradient.Evaluate(controller.currentHealth / controller.health);
+
+            if (controller.IsDead)
+                OnLevelFail?.Invoke();
+            if (deadEnemies >= enemyCount && !controller.IsDead)
+                OnLevelComplete?.Invoke();
         }
 
         /// <summary>
@@ -125,9 +168,21 @@ namespace Game
             }
         }
 
+        private void LevelFailed()
+        {
+            ResetLevel();
+            GameStarted = false;
+        }
+
         public void ResetLevel()
         {
-            //How tho?
+            //instead of just reloading the scene, actually Reset all values of the entities n shit
+            //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            foreach (var entity in enemies)
+                entity.ResetEntity();
+            controller.ResetEntity();
+            SetupPlayer();
+            StartCoroutine(StartLevel());
         }
     }
 }

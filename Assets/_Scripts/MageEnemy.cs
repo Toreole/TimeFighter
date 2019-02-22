@@ -5,6 +5,6 @@ namespace Game
 {
     public class MageEnemy : MonoBehaviour
     {
-        
+        //TODO: THIS
     }
 }

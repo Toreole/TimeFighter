@@ -1,11 +1,15 @@
 ﻿using UnityEngine;
-using UnityEngine.Experimental.Input;
+using Game;
 
 namespace Game.Controller
 {
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : MonoBehaviour
     {
+        [Header("Active Player Control")]
+        [SerializeField]
+        protected bool active = false;
+
         [Header("Camera Stuff")]
         [SerializeField]
         protected new Camera camera = null;
@@ -27,26 +31,64 @@ namespace Game.Controller
         protected float movementSpeed = 1.0f;
         [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
         protected float airControlStrength = 0.25f;
-        protected bool  isGrounded    = false;
 
-        //[Header("Input")]
-        //[SerializeField]
-        //protected PlayerInput playerInput;
+        protected Vector3 startPos = Vector3.zero;
+        protected bool  isGrounded    = false;
+        protected EntityState state   = EntityState.Idle;
+
+        [Header("Combat Stats")]
+        [SerializeField, Tooltip("The attack damage of normal attacks")]
+        protected int attackDamage = 1;
+        [SerializeField, Tooltip("The melee attack range")]
+        protected float attackRange = 0.6f;
+        [SerializeField, Tooltip("The time between attacks")]
+        protected float attackCooldown = 0.75f;
+
+        protected bool canAttack = true;
+        protected internal float health;
+        protected internal float currentHealth;
+
+        public bool IsDead { get { return currentHealth <= 0f; } }
+
+        //Input
         protected float xMove = 0f;
         protected int yMove = 0;
         protected bool jump;
+        protected bool attack;
 
         /// <summary>
         /// Start!
         /// </summary>
         private void Start()
         {
+            startPos = transform.position;
+
             if (camera == null)
                 camera = FindObjectOfType<Camera>();
             if (ground == null)
                 ground = transform.GetChild(0);
             if (body == null)
                 body = GetComponent<Rigidbody2D>();
+            //setup events
+            GameManager.OnLevelStart    += OnLevelStart;
+            GameManager.OnLevelFail     += OnLevelFail;
+            GameManager.OnLevelComplete += OnLevelComplete;
+        }
+
+        private void OnLevelStart()
+        {
+            active = true;
+        }
+
+        private void OnLevelFail()
+        {
+            active = false;
+            state  = EntityState.Dead;
+        }
+
+        private void OnLevelComplete()
+        {
+            active = false;
         }
 
         /// <summary>
@@ -54,8 +96,11 @@ namespace Game.Controller
         /// </summary>
         private void Update()
         {
+            if (!active)
+                return;
             FaceMouse();
             GetInput();
+            UpdateState();
         }
 
         /// <summary>
@@ -79,8 +124,36 @@ namespace Game.Controller
         private void GetInput()
         {
             xMove = Input.GetAxis("Horizontal");
-            yMove = (int) (Input.GetAxis("Vertical") + 0.5f);
+            yMove = (int) Input.GetAxisRaw("Vertical");
             jump =  Input.GetButton("Jump");
+            attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
+        }
+        
+        /// <summary>
+        /// Update the PlayerState
+        /// </summary>
+        private void UpdateState()
+        {
+            if (isGrounded)
+            {
+                if (xMove != 0 && !jump)
+                    state = EntityState.Run;
+                else if (jump)
+                    state = EntityState.Jump;
+                else 
+                    state = EntityState.Idle;
+            }
+            else
+            {
+                if(body.velocity.y > 0)
+                {
+                    state = EntityState.Jump;
+                }
+                else if (body.velocity.y < 0)
+                {
+                    state = EntityState.Fall;
+                }
+            }
         }
 
         /// <summary>
@@ -88,6 +161,8 @@ namespace Game.Controller
         /// </summary>
         private void FixedUpdate()
         {
+            if (!active)
+                return;
             CheckGrounded();
             Move();
         }
@@ -137,6 +212,7 @@ namespace Game.Controller
             ground.rotation = rot;
             isGrounded = true;
         }
+
         /// <summary>
         /// Use the input to move the player character.
         /// </summary>
@@ -170,6 +246,30 @@ namespace Game.Controller
             var velocity = body.velocity + jumpDir * v0;
             body.velocity = velocity;
             jump = false;
+        }
+
+        private void Attack()
+        {
+            canAttack = false;
+            attack = false;
+        }
+
+        public void ProcessHit(AttackHitData hitData)
+        {
+            currentHealth -= hitData.Damage;
+        }
+        public void ProcessHit(AttackHitData hitData, bool isOnlyDamage)
+        {
+            if (isOnlyDamage)
+                currentHealth -= hitData.Damage;
+            else
+                ProcessHit(hitData);
+        }
+
+        internal void ResetEntity()
+        {
+            transform.position = startPos;
+            body.velocity = Vector2.zero;
         }
     }
 }

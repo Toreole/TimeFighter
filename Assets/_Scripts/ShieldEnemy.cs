@@ -5,7 +5,7 @@ namespace Game
 {
     public class ShieldEnemy : EnemyBase
     {
-
+        [System.Obsolete]
         protected override void UpdateEnemy()
         {
             //Uhhhh spaghet
@@ -25,7 +25,7 @@ namespace Game
             if (facingDirection == normalizedHitDirection)
             {
                 //The attack hits this enemy.
-                Damage(hitData.Damage);
+                Damage(Mathf.RoundToInt(hitData.Damage));
             }
             else
             {

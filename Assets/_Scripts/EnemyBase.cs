@@ -55,7 +55,7 @@ namespace Game
                 StartCoroutine(TurnAround());
             }
             CheckGrounded();
-            UpdateEnemy();
+            //UpdateEnemy();
             Move();
         }
 
@@ -79,7 +79,7 @@ namespace Game
 
         protected virtual void OnLevelFail()
         {
-            active = false; 
+            active = false;
             //reset enemy? idk lol
         }
 
@@ -105,7 +105,7 @@ namespace Game
 
         public virtual void ProcessHit(AttackHitData hitData)
         {
-            Damage(hitData.Damage);
+            Damage(Mathf.RoundToInt(hitData.Damage));
         }
 
         protected void Damage(int amount)
@@ -297,6 +297,23 @@ namespace Game
         protected void CheckGrounded()
         {
             isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.55f);
+        }
+
+        /// <summary>
+        /// Reset this entity to the defaults
+        /// </summary>
+        internal virtual void ResetEntity()
+        {
+            StopAllCoroutines();
+            transform.position = startPos;
+            transform.localScale = Vector3.one;
+            active = false;
+            currentHP = settings.HP;
+            facingDirection = 1;
+            active = false;
+            turningAround = false;
+            playerIsNear = false;
+            body.velocity = Vector2.zero;
         }
     }
 }
