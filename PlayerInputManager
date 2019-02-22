@@ -1,0 +1,118 @@
+// GENERATED AUTOMATICALLY FROM 'Assets/_Input/PlayerControls.inputactions'
+
+using System;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Experimental.Input;
+
+
+namespace Game
+{
+    [Serializable]
+    public class PlayerInputManager : InputActionAssetReference
+    {
+        public PlayerInputManager()
+        {
+        }
+        public PlayerInputManager(InputActionAsset asset)
+            : base(asset)
+        {
+        }
+        private bool m_Initialized;
+        private void Initialize()
+        {
+            // Default
+            m_Default = asset.GetActionMap("Default");
+            m_Default_Move = m_Default.GetAction("Move");
+            if (m_DefaultMoveActionStarted != null)
+                m_Default_Move.started += m_DefaultMoveActionStarted.Invoke;
+            if (m_DefaultMoveActionPerformed != null)
+                m_Default_Move.performed += m_DefaultMoveActionPerformed.Invoke;
+            if (m_DefaultMoveActionCancelled != null)
+                m_Default_Move.cancelled += m_DefaultMoveActionCancelled.Invoke;
+            m_Initialized = true;
+        }
+        private void Uninitialize()
+        {
+            if (m_DefaultActionsCallbackInterface != null)
+            {
+                Default.SetCallbacks(null);
+            }
+            m_Default = null;
+            m_Default_Move = null;
+            if (m_DefaultMoveActionStarted != null)
+                m_Default_Move.started -= m_DefaultMoveActionStarted.Invoke;
+            if (m_DefaultMoveActionPerformed != null)
+                m_Default_Move.performed -= m_DefaultMoveActionPerformed.Invoke;
+            if (m_DefaultMoveActionCancelled != null)
+                m_Default_Move.cancelled -= m_DefaultMoveActionCancelled.Invoke;
+            m_Initialized = false;
+        }
+        public void SetAsset(InputActionAsset newAsset)
+        {
+            if (newAsset == asset) return;
+            var DefaultCallbacks = m_DefaultActionsCallbackInterface;
+            if (m_Initialized) Uninitialize();
+            asset = newAsset;
+            Default.SetCallbacks(DefaultCallbacks);
+        }
+        public override void MakePrivateCopyOfActions()
+        {
+            SetAsset(ScriptableObject.Instantiate(asset));
+        }
+        // Default
+        private InputActionMap m_Default;
+        private IDefaultActions m_DefaultActionsCallbackInterface;
+        private InputAction m_Default_Move;
+        [SerializeField] private ActionEvent m_DefaultMoveActionStarted;
+        [SerializeField] private ActionEvent m_DefaultMoveActionPerformed;
+        [SerializeField] private ActionEvent m_DefaultMoveActionCancelled;
+        public struct DefaultActions
+        {
+            private PlayerInputManager m_Wrapper;
+            public DefaultActions(PlayerInputManager wrapper) { m_Wrapper = wrapper; }
+            public InputAction @Move { get { return m_Wrapper.m_Default_Move; } }
+            public ActionEvent MoveStarted { get { return m_Wrapper.m_DefaultMoveActionStarted; } }
+            public ActionEvent MovePerformed { get { return m_Wrapper.m_DefaultMoveActionPerformed; } }
+            public ActionEvent MoveCancelled { get { return m_Wrapper.m_DefaultMoveActionCancelled; } }
+            public InputActionMap Get() { return m_Wrapper.m_Default; }
+            public void Enable() { Get().Enable(); }
+            public void Disable() { Get().Disable(); }
+            public bool enabled { get { return Get().enabled; } }
+            public InputActionMap Clone() { return Get().Clone(); }
+            public static implicit operator InputActionMap(DefaultActions set) { return set.Get(); }
+            public void SetCallbacks(IDefaultActions instance)
+            {
+                if (m_Wrapper.m_DefaultActionsCallbackInterface != null)
+                {
+                    Move.started -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
+                    Move.performed -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
+                    Move.cancelled -= m_Wrapper.m_DefaultActionsCallbackInterface.OnMove;
+                }
+                m_Wrapper.m_DefaultActionsCallbackInterface = instance;
+                if (instance != null)
+                {
+                    Move.started += instance.OnMove;
+                    Move.performed += instance.OnMove;
+                    Move.cancelled += instance.OnMove;
+                }
+            }
+        }
+        public DefaultActions @Default
+        {
+            get
+            {
+                if (!m_Initialized) Initialize();
+                return new DefaultActions(this);
+            }
+        }
+        [Serializable]
+        public class ActionEvent : UnityEvent<InputAction.CallbackContext>
+        {
+        }
+    }
+    public interface IDefaultActions
+    {
+        void OnMove(InputAction.CallbackContext context);
+    }
+}
