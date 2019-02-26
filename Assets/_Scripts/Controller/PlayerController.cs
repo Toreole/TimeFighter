@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
 using Game;
+using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Game.Controller
 {
@@ -36,18 +39,21 @@ namespace Game.Controller
         protected bool  isGrounded    = false;
         protected EntityState state   = EntityState.Idle;
 
+        //This could depend on different weapons?
         [Header("Combat Stats")]
         [SerializeField, Tooltip("The attack damage of normal attacks")]
-        protected int attackDamage = 1;
+        protected float attackDamage = 1;
         [SerializeField, Tooltip("The melee attack range")]
         protected float attackRange = 0.6f;
         [SerializeField, Tooltip("The time between attacks")]
         protected float attackCooldown = 0.75f;
+        [SerializeField, Tooltip("The throwable weapon to use")]
+        protected internal Throwable throwable;
 
         protected bool canAttack = true;
+        protected int throwAmmo = 0;
         protected internal float health;
         protected internal float currentHealth;
-
         public bool IsDead { get { return currentHealth <= 0f; } }
 
         //Input
@@ -69,12 +75,16 @@ namespace Game.Controller
                 ground = transform.GetChild(0);
             if (body == null)
                 body = GetComponent<Rigidbody2D>();
+
+            if (throwable != null)
+                throwAmmo = throwable.startAmount;
             //setup events
             GameManager.OnLevelStart    += OnLevelStart;
             GameManager.OnLevelFail     += OnLevelFail;
             GameManager.OnLevelComplete += OnLevelComplete;
         }
 
+        #region LevelEvents
         private void OnLevelStart()
         {
             active = true;
@@ -90,7 +100,9 @@ namespace Game.Controller
         {
             active = false;
         }
+        #endregion
 
+        #region FrameUpdates
         /// <summary>
         /// Input & mouse dependent stuff
         /// </summary>
@@ -121,6 +133,7 @@ namespace Game.Controller
         /// <summary>
         /// Gets relevant input
         /// </summary>
+        //TODO: check for more input if needed
         private void GetInput()
         {
             xMove = Input.GetAxis("Horizontal");
@@ -132,6 +145,7 @@ namespace Game.Controller
         /// <summary>
         /// Update the PlayerState
         /// </summary>
+        //TODO: constant WIP, 1. Add Attack state
         private void UpdateState()
         {
             if (isGrounded)
@@ -155,6 +169,7 @@ namespace Game.Controller
                 }
             }
         }
+        #endregion
 
         /// <summary>
         /// YEAH, SCIENCE, BITCH!
@@ -165,8 +180,11 @@ namespace Game.Controller
                 return;
             CheckGrounded();
             Move();
+            if (attack)
+                Attack();
         }
 
+        #region PhysicsAndMovement
         /// <summary>
         /// Does what the name says lol
         /// </summary>
@@ -247,13 +265,61 @@ namespace Game.Controller
             body.velocity = velocity;
             jump = false;
         }
+        //TODO: rework wall jumping (limited times?)
+        private void WallJump(Vector2 contactNormal)
+        {
+            body.velocity = Vector2.zero;
+            var jumpDir = (contactNormal + Vector2.up).normalized;
+            float g = 9.81f * body.gravityScale;
+            float v0 = Mathf.Sqrt((jumpHeight) * (2 * g));
+            var velocity = body.velocity + jumpDir * v0;
+            body.velocity = velocity;
+            jump = false;
+        }
+        //TODO: WIP wall check for walljump
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            if (isGrounded)
+                return;
+            if (collision.collider.CompareTag("Enemy"))
+                return;
+            var normal = collision.contacts[0].normal;
+            if (Mathf.Abs(normal.x) > 0.8)
+                if (Input.GetButtonDown("Jump"))
+                    WallJump(normal);
+        }
+        #endregion
 
+        #region CombatCode
+        /// <summary>
+        /// Temporary Attack Code
+        /// </summary>
         private void Attack()
         {
             canAttack = false;
             attack = false;
+
+            //TODO: better attack here
+            RaycastHit2D hit;
+            if(hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (playerWidth/2)))
+            {
+                if(hit.transform.CompareTag("Enemy"))
+                    hit.transform.GetComponent<EnemyBase>().ProcessHit(new AttackHitData(attackDamage, hit.point));
+            }
+
+            StartCoroutine(ResetAttack());
+        }
+        //TODO: make the throwable thing work
+        private IEnumerator ResetAttack()
+        {
+            yield return new WaitForSeconds(attackCooldown);
+            canAttack = true;
         }
 
+        /// <summary>
+        /// Process a hit
+        /// </summary>
+        /// <param name="hitData"></param>
         public void ProcessHit(AttackHitData hitData)
         {
             currentHealth -= hitData.Damage;
@@ -266,10 +332,17 @@ namespace Game.Controller
                 ProcessHit(hitData);
         }
 
+        #endregion
+
+        /// <summary>
+        /// Reset the Player to his start values.
+        /// </summary>
         internal void ResetEntity()
         {
             transform.position = startPos;
             body.velocity = Vector2.zero;
+            if (throwable != null)
+                throwAmmo = throwable.startAmount;
         }
     }
 }

@@ -106,6 +106,7 @@ namespace Game
         public virtual void ProcessHit(AttackHitData hitData)
         {
             Damage(Mathf.RoundToInt(hitData.Damage));
+            Debug.Log("Processing hit on enemy");
         }
 
         protected void Damage(int amount)
@@ -124,6 +125,7 @@ namespace Game
             {
                 col.enabled = false;
             }
+            Debug.Log(name + " died");
         }
 
         /// <summary>
@@ -267,7 +269,7 @@ namespace Game
         protected virtual void OnCollisionEnter2D(Collision2D col)
         {
             //TODO this does not account for new collisions with the same collider. Also make better tags for environment
-            if (settings.Movement != MovementPattern.EdgeToEdge)
+            if (settings.Movement != MovementPattern.EdgeToEdge || col.collider.CompareTag("Player"))
                 return;
             var xNormal = Mathf.Abs(col.contacts[0].normal.x);
             if (xNormal > 0.8f && !turningAround)

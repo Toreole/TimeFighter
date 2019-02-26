@@ -41,7 +41,7 @@ namespace Game
         private AttackHitData timerDamage = new AttackHitData();
 
         [Header("Level Settings")]
-        [SerializeField]
+        [SerializeField, Tooltip("The time/health limit for this level. 0 means infinite")]
         private float clearTime = 10.0f;
 
         //Might come in handy.
@@ -101,12 +101,21 @@ namespace Game
         /// </summary>
         private void SetupPlayer()
         {
-            controller.health = clearTime;
-            controller.currentHealth = clearTime;
+            if (clearTime > 0)
+            {
+                controller.health = clearTime;
+                controller.currentHealth = clearTime;
 
-            levelTimeSlider.maxValue = clearTime;
-            levelTimeSlider.value = clearTime;
-            sliderFill.color = sliderGradient.Evaluate(1);
+                levelTimeSlider.maxValue = clearTime;
+                levelTimeSlider.value = clearTime;
+                sliderFill.color = sliderGradient.Evaluate(1);
+            }
+            else
+            {
+                controller.health = 1;
+                controller.currentHealth = 1;
+                levelTimeSlider.gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -115,6 +124,8 @@ namespace Game
         private void LateUpdate()
         {
             if (!GameStarted)
+                return;
+            if (clearTime <= 0)
                 return;
             timerDamage.Damage = Time.deltaTime;
             controller.ProcessHit(timerDamage, true);

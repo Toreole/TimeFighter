@@ -284,7 +284,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 50
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
@@ -3926,7 +3926,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 50
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1
@@ -3973,7 +3973,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 8a51feb74a6a3004495bf153172007be, type: 3}
-  m_Color: {r: 0.9056604, g: 0.03844783, b: 0.03844783, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -4131,6 +4131,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: _Empty_Player
       objectReference: {fileID: 0}
+    - target: {fileID: 1427080473110227189, guid: f913a1e25c329be46a7bf523c660ae62,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     - target: {fileID: 1427080473110227188, guid: f913a1e25c329be46a7bf523c660ae62,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -4191,6 +4196,11 @@ PrefabInstance:
       propertyPath: camera
       value: 
       objectReference: {fileID: 286428334}
+    - target: {fileID: 1427080474565457121, guid: f913a1e25c329be46a7bf523c660ae62,
+        type: 3}
+      propertyPath: m_Layer
+      value: 9
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f913a1e25c329be46a7bf523c660ae62, type: 3}
 --- !u!1001 &4427948099043030791
@@ -4204,6 +4214,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4427948098087997938, guid: ce5c1c60894485b48b034ea231c69ec5,
         type: 3}
@@ -4310,16 +4330,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
-        type: 3}
-      propertyPath: m_havePropertiesChanged
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
-        type: 3}
-      propertyPath: m_isInputParsingRequired
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4427948097073642504, guid: ce5c1c60894485b48b034ea231c69ec5,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -4398,6 +4408,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5093169234145984749, guid: a877325f5bdb5914cbdfa4d40ca39fb9,
+        type: 3}
+      propertyPath: m_Mass
+      value: 50
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a877325f5bdb5914cbdfa4d40ca39fb9, type: 3}
@@ -4503,5 +4518,15 @@ PrefabInstance:
       propertyPath: sliderFill
       value: 
       objectReference: {fileID: 1990429456}
+    - target: {fileID: 8554592909317582583, guid: f39bc7361e5c60a45a38669039d8ebf7,
+        type: 3}
+      propertyPath: clearTime
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8554592909317582583, guid: f39bc7361e5c60a45a38669039d8ebf7,
+        type: 3}
+      propertyPath: countdownLength
+      value: 0.1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f39bc7361e5c60a45a38669039d8ebf7, type: 3}

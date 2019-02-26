@@ -9,12 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd3558a2f3c9a57438da81362b76828f, type: 3}
-  m_Name: Test
+  m_Script: {fileID: 11500000, guid: 04b88d544267733458648b3271f2f2c3, type: 3}
+  m_Name: Knife
   m_EditorClassIdentifier: 
-  timeGain: 0
-  hp: 1
-  turnSpeed: 1.65
-  movement: 2
-  movementSpeed: 1.27
-  wanderDistance: 1.5
+  prefab: {fileID: 0}
+  startAmount: 2
+  maxAmount: 3
