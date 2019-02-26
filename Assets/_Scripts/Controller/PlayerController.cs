@@ -17,7 +17,7 @@ namespace Game.Controller
         [SerializeField]
         protected new Camera camera = null;
         protected int facingDirection = 1;
-        protected Vector3 directionToMouse = Vector3.zero;
+        protected Vector2 directionToMouse = Vector2.zero;
 
         [Header("Physics And Movement")]
         [SerializeField, Tooltip("The empty transform child, will be automatically set in Start()")]
@@ -61,6 +61,7 @@ namespace Game.Controller
         protected int yMove = 0;
         protected bool jump;
         protected bool attack;
+        protected bool shouldThrow;
 
         /// <summary>
         /// Start!
@@ -116,13 +117,23 @@ namespace Game.Controller
         }
 
         /// <summary>
+        /// Basically everything that should run after Update
+        /// </summary>
+        private void LateUpdate()
+        {
+            if (!active)
+                return;
+            Debug.DrawLine(transform.position, transform.position + (Vector3)(directionToMouse * (attackRange + playerWidth /2f)), Color.blue);
+        }
+
+        /// <summary>
         /// Makes the player face towards the mouse
         /// </summary>
         private void FaceMouse()
         {
             var myX = transform.position.x;
-            var mousePos = camera.ScreenToWorldPoint(Input.mousePosition);
-            directionToMouse = (mousePos - transform.position).normalized;
+            var mousePos = (Vector2) camera.ScreenToWorldPoint(Input.mousePosition);
+            directionToMouse = (mousePos - (Vector2)transform.position).normalized;
             int newFacingDirection = (mousePos.x > myX) ? 1 : -1;
             if (newFacingDirection == facingDirection)
                 return;
@@ -140,6 +151,7 @@ namespace Game.Controller
             yMove = (int) Input.GetAxisRaw("Vertical");
             jump =  Input.GetButton("Jump");
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
+            shouldThrow = Input.GetButtonDown("RightClick") || shouldThrow;
         }
         
         /// <summary>
@@ -180,8 +192,7 @@ namespace Game.Controller
                 return;
             CheckGrounded();
             Move();
-            if (attack)
-                Attack();
+            PerformActions();
         }
 
         #region PhysicsAndMovement
@@ -271,7 +282,7 @@ namespace Game.Controller
             body.velocity = Vector2.zero;
             var jumpDir = (contactNormal + Vector2.up).normalized;
             float g = 9.81f * body.gravityScale;
-            float v0 = Mathf.Sqrt((jumpHeight) * (2 * g));
+            float v0 = Mathf.Sqrt((jumpHeight) * (1.5f * g));
             var velocity = body.velocity + jumpDir * v0;
             body.velocity = velocity;
             jump = false;
@@ -291,6 +302,14 @@ namespace Game.Controller
         #endregion
 
         #region CombatCode
+        private void PerformActions()
+        {
+            if (shouldThrow)
+                Throw();
+            if (attack && canAttack)
+                Attack();
+        }
+
         /// <summary>
         /// Temporary Attack Code
         /// </summary>
@@ -298,7 +317,7 @@ namespace Game.Controller
         {
             canAttack = false;
             attack = false;
-
+            Debug.Log("Attack!");
             //TODO: better attack here
             RaycastHit2D hit;
             if(hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (playerWidth/2)))
@@ -309,13 +328,31 @@ namespace Game.Controller
 
             StartCoroutine(ResetAttack());
         }
-        //TODO: make the throwable thing work
         private IEnumerator ResetAttack()
         {
+            //TODO: Make a Slider or some indicator for the attack cooldown (for-yield loop)
             yield return new WaitForSeconds(attackCooldown);
             canAttack = true;
         }
 
+        //TODO: Add Throwable Items
+        /// <summary>
+        /// Throw the equipped thing
+        /// </summary>
+        private void Throw()
+        {
+            if (throwAmmo <= 0)
+                return;
+            var velocity = throwable.startVelocity * directionToMouse;
+            var obj = Instantiate(throwable.prefab, transform.position, Quaternion.identity, null);
+            var throwBody = obj.GetComponent<Rigidbody2D>();
+            throwBody.velocity = velocity;
+            throwAmmo--;
+            shouldThrow = false;
+            state = EntityState.Throwing;
+        }
+
+        //TODO: process knockback and that kind of stuff.
         /// <summary>
         /// Process a hit
         /// </summary>

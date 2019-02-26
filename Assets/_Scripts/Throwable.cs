@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game
@@ -13,5 +12,7 @@ namespace Game
         protected internal int startAmount = 2;
         [SerializeField]
         protected internal int maxAmount = 3;
+        [SerializeField]
+        protected internal float startVelocity = 10f;
     }
 }
