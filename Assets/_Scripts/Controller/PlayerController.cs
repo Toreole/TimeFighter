@@ -34,8 +34,14 @@ namespace Game.Controller
         protected float movementSpeed = 1.0f;
         [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
         protected float airControlStrength = 0.25f;
+        [SerializeField, Tooltip("strength of wall jumps")]
+        protected float wallJumpStrength = 0.75f;
+        [SerializeField, Tooltip("the speed of the hook")]
+        protected float hookSpeed = 4.0f;
 
-        protected Vector3 startPos = Vector3.zero;
+        protected Vector3 startPos    = Vector3.zero;
+        protected Vector2 hookHit     = Vector2.positiveInfinity;
+        protected bool hooking        = false;
         protected bool  isGrounded    = false;
         protected EntityState state   = EntityState.Idle;
 
@@ -62,6 +68,7 @@ namespace Game.Controller
         protected bool jump;
         protected bool attack;
         protected bool shouldThrow;
+        protected bool shouldHook;
 
         /// <summary>
         /// Start!
@@ -149,9 +156,10 @@ namespace Game.Controller
         {
             xMove = Input.GetAxis("Horizontal");
             yMove = (int) Input.GetAxisRaw("Vertical");
-            jump =  Input.GetButton("Jump");
+            jump =  (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
             shouldThrow = Input.GetButtonDown("RightClick") || shouldThrow;
+            shouldHook  = Input.GetButton("MiddleClick");
         }
         
         /// <summary>
@@ -272,18 +280,18 @@ namespace Game.Controller
             var jumpDir = ((Vector2)ground.up + Vector2.up).normalized;
             float g = 9.81f * body.gravityScale;
             float v0 = Mathf.Sqrt((jumpHeight) * (2 * g));
-            var velocity = body.velocity + jumpDir * v0;
+            var velocity = jumpDir * v0;
+                velocity.x += body.velocity.x; //Test to see if this fixes some weird issues
             body.velocity = velocity;
             jump = false;
         }
         //TODO: rework wall jumping (limited times?)
         private void WallJump(Vector2 contactNormal)
         {
-            body.velocity = Vector2.zero;
             var jumpDir = (contactNormal + Vector2.up).normalized;
             float g = 9.81f * body.gravityScale;
-            float v0 = Mathf.Sqrt((jumpHeight) * (1.5f * g));
-            var velocity = body.velocity + jumpDir * v0;
+            float v0 = Mathf.Sqrt((jumpHeight) * (2 * g) * wallJumpStrength);
+            var velocity = jumpDir * v0;
             body.velocity = velocity;
             jump = false;
         }
@@ -308,6 +316,14 @@ namespace Game.Controller
                 Throw();
             if (attack && canAttack)
                 Attack();
+            if (shouldHook && hookHit != Vector2.positiveInfinity)
+                StartCoroutine(DoHook());
+        }
+
+        //TODO: THIS
+        private IEnumerator DoHook()
+        {
+            yield return null;
         }
 
         /// <summary>
