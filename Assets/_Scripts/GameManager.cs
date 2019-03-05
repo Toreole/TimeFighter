@@ -143,6 +143,7 @@ namespace Game
         /// </summary>
         private IEnumerator StartLevel()
         {
+            Debug.Log("Start...");
             countdownText.gameObject.SetActive(true);
             for(float t = countdownLength; t > 0f; t -= Time.deltaTime)
             {

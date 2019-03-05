@@ -36,13 +36,19 @@ namespace Game.Controller
         protected float airControlStrength = 0.25f;
         [SerializeField, Tooltip("strength of wall jumps")]
         protected float wallJumpStrength = 0.75f;
-        [SerializeField, Tooltip("the speed of the hook")]
-        protected float hookSpeed = 4.0f;
+        [SerializeField, Tooltip("the speed of the hook when it flies")]
+        protected float hookSpeed = 25.0f;
+        [SerializeField, Tooltip("the range of the hook")]
+        protected float hookRange = 10.0f;
+        [SerializeField, Tooltip("the strength at which the player is propelled towards the hook")]
+        protected float hookStrength = 10.0f;
+        [SerializeField, Tooltip("The hook object")]
+        protected SpriteRenderer hookChain;
 
         protected Vector3 startPos    = Vector3.zero;
         protected Vector2 hookHit     = Vector2.positiveInfinity;
         protected bool hooking        = false;
-        protected bool  isGrounded    = false;
+        protected bool isGrounded     = false;
         protected EntityState state   = EntityState.Idle;
 
         //This could depend on different weapons?
@@ -158,8 +164,8 @@ namespace Game.Controller
             yMove = (int) Input.GetAxisRaw("Vertical");
             jump =  (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
-            shouldThrow = Input.GetButtonDown("RightClick") || shouldThrow;
-            shouldHook  = Input.GetButton("MiddleClick");
+            shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
+            shouldHook  = Input.GetButton("RightClick");
         }
         
         /// <summary>
@@ -250,6 +256,7 @@ namespace Game.Controller
             isGrounded = true;
         }
 
+        //TODO: Better movement handling. Accelerate and decelerate instead of instant movement speed changes
         /// <summary>
         /// Use the input to move the player character.
         /// </summary>
@@ -316,14 +323,73 @@ namespace Game.Controller
                 Throw();
             if (attack && canAttack)
                 Attack();
-            if (shouldHook && hookHit != Vector2.positiveInfinity)
+            if (shouldHook && !hooking)
                 StartCoroutine(DoHook());
         }
 
         //TODO: THIS
         private IEnumerator DoHook()
         {
-            yield return null;
+            hooking = true;
+            //1. try to find location to hook to
+            RaycastHit2D hit;
+            if (hit = Physics2D.Raycast(transform.position, directionToMouse, hookRange, 1))
+            {
+                hookHit = hit.point;
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.2f);
+                hooking = false;
+                yield break; //STOP, THIS VIOLATES THE LAW
+            }
+            //2. fire hook
+            hookChain.gameObject.SetActive(true);
+            yield return ShootHook();
+            //3. apply force towards the hookHit position
+            while(shouldHook)
+            {
+                if((hookHit - (Vector2)transform.position).magnitude > hookRange)
+                {
+                    BreakChain();
+                    yield break;
+                }
+                var direction = (hookHit - (Vector2)transform.position).normalized;
+                body.AddForce(direction * hookSpeed * body.mass, ForceMode2D.Force);
+                UpdateChain();
+                yield return null;
+            }
+            BreakChain();
+        }
+
+        private IEnumerator ShootHook()
+        {
+            Vector2 ch = hookHit - (Vector2)transform.position;
+            float totalDist = ch.magnitude;
+            float reqTime = totalDist / hookSpeed;
+            for(float t = 0f; t < 1; t += Time.deltaTime / reqTime)
+            {
+                hookChain.transform.position = (Vector2)transform.position + ch * t / 2f;
+                hookChain.size = new Vector2(1f, t * totalDist);
+                hookChain.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
+                yield return null;
+            }
+        }
+
+        //Update the hooks size and that.
+        private void UpdateChain()
+        {
+            var ch = hookHit - (Vector2)transform.position;
+            hookChain.transform.position = Vector2.Lerp(transform.position, hookHit, 0.5f);
+            hookChain.size = new Vector2(1f, ch.magnitude );
+            hookChain.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
+        }
+
+        private void BreakChain()
+        {
+            hookHit = Vector2.positiveInfinity;
+            hooking = false;
+            hookChain.gameObject.SetActive(false);
         }
 
         /// <summary>

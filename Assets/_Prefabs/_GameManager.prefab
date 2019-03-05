@@ -49,7 +49,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   countdownText: {fileID: 0}
-  countdownLength: 3.5
+  countdownLength: 2
   levelTimeSlider: {fileID: 0}
   sliderFill: {fileID: 0}
   sliderGradient:
@@ -81,4 +81,4 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
-  clearTime: 20
+  clearTime: 15
