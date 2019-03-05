@@ -9,6 +9,9 @@ namespace Game
     [RequireComponent(typeof(Rigidbody2D))]
     public abstract class EnemyBase : MonoBehaviour
     {
+        [SerializeField]
+        protected float halfHeight = 0.5f;
+
         protected int currentHP = 1;
         protected int facingDirection = 1;
         protected bool active = false;
@@ -250,7 +253,7 @@ namespace Game
             }
             else
             {
-                hit = Physics2D.Raycast((Vector2)transform.position + new Vector2(facingDirection * 0.6f, 0), Vector2.down, 0.6f, 1);
+                hit = Physics2D.Raycast((Vector2)transform.position + new Vector2(facingDirection * 0.6f, 0), Vector2.down, halfHeight + 0.1f, 1);
                 if ( !hit )
                 {
                     //Theres a cliff here or something thats not ground
@@ -298,7 +301,7 @@ namespace Game
         /// </summary>
         protected void CheckGrounded()
         {
-            isGrounded = Physics2D.Raycast(transform.position, Vector2.down, 0.55f);
+            isGrounded = Physics2D.Raycast(transform.position, Vector2.down, halfHeight + 0.05f);
         }
 
         /// <summary>
