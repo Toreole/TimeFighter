@@ -69,7 +69,11 @@ namespace Game
 
         }
 
-        public override void ProcessHit(AttackHitData hitData)
+        internal override void ProcessHit(AttackHitData hitData)
+        {
+            //Apply forces if needed, otherwise this does not take damage.
+        }
+        internal override void ProcessHit(AttackHitData hitData, bool dmg)
         {
             //Apply forces if needed, otherwise this does not take damage.
         }

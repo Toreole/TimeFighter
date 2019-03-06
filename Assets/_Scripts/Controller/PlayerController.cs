@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Game.Controller
 {
     [RequireComponent(typeof(Rigidbody2D))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : Entity
     {
         [Header("Active Player Control")]
         [SerializeField]
@@ -439,11 +439,11 @@ namespace Game.Controller
         /// Process a hit
         /// </summary>
         /// <param name="hitData"></param>
-        public void ProcessHit(AttackHitData hitData)
+        internal override void ProcessHit(AttackHitData hitData)
         {
             currentHealth -= hitData.Damage;
         }
-        public void ProcessHit(AttackHitData hitData, bool isOnlyDamage)
+        internal override void ProcessHit(AttackHitData hitData, bool isOnlyDamage)
         {
             if (isOnlyDamage)
                 currentHealth -= hitData.Damage;
@@ -456,7 +456,7 @@ namespace Game.Controller
         /// <summary>
         /// Reset the Player to his start values.
         /// </summary>
-        internal void ResetEntity()
+        internal override void ResetEntity()
         {
             transform.position = startPos;
             body.velocity = Vector2.zero;

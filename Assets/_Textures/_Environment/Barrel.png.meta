@@ -1,11 +1,7 @@
 fileFormatVersion: 2
-guid: e8c7b3d0a4f692a43941ea80ad7926d3
+guid: 91267b1686a77b845a97db1f442a781b
 TextureImporter:
-  fileIDToRecycleName:
-    21300000: Shield_enemy_0
-    21300002: Shield_enemy_1
-    21300004: Shield_enemy_2
-    21300006: Shield_enemy_3
+  fileIDToRecycleName: {}
   externalObjects: {}
   serializedVersion: 9
   mipmaps:
@@ -44,7 +40,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -86,91 +82,11 @@ TextureImporter:
     androidETC2FallbackOverride: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: Shield_enemy_0
-      rect:
-        serializedVersion: 2
-        x: 3
-        y: 29
-        width: 10
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: eea9612f21dcd274dab797e60b0566b7
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shield_enemy_1
-      rect:
-        serializedVersion: 2
-        x: 22
-        y: 29
-        width: 4
-        height: 14
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 458700583069a2541bf2751b97fa5453
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shield_enemy_2
-      rect:
-        serializedVersion: 2
-        x: 4
-        y: 0
-        width: 10
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 4c8f82a209f1a3e4c8f34d5b57056367
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shield_enemy_3
-      rect:
-        serializedVersion: 2
-        x: 22
-        y: 0
-        width: 5
-        height: 24
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: ab16db0753d6fb74995df206aa7f269f
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     physicsShape: []
     bones: []
-    spriteID: add4e48582a6e5248bc62e7504e32856
+    spriteID: f2498fa9bff0b014c8951f253c83d2d8
     vertices: []
     indices: 
     edges: []

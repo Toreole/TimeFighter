@@ -7,12 +7,12 @@ namespace Game
     /// The base class for all enemies
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
-    public abstract class EnemyBase : MonoBehaviour
+    public abstract class EnemyBase : Entity
     {
         [SerializeField]
         protected float halfHeight = 0.5f;
 
-        protected int currentHP = 1;
+        protected float currentHP = 1;
         protected int facingDirection = 1;
         protected bool active = false;
         protected bool turningAround = false;
@@ -30,6 +30,8 @@ namespace Game
         protected internal EnemySettings settings;
 
         public EnemySettings Settings { get { return settings; } }
+
+        public new float Health { get { return currentHP; } set { currentHP = value; } }
 
         /// <summary>
         /// attention all gamers, this is basically FixedUpdate, but is only called when the enemy is active! double epic.
@@ -106,17 +108,23 @@ namespace Game
             }
         }
 
-        public virtual void ProcessHit(AttackHitData hitData)
+        internal override void ProcessHit(AttackHitData hitData)
         {
-            Damage(Mathf.RoundToInt(hitData.Damage));
-            Debug.Log("Processing hit on enemy");
-        }
-
-        protected void Damage(int amount)
-        {
-            currentHP -= amount;
+            currentHP -= hitData.Damage;
             if (currentHP <= 0)
                 Die();
+        }
+
+        internal override void ProcessHit(AttackHitData hitData, bool onlyDamage)
+        {
+            if (onlyDamage)
+            {
+                currentHP -= hitData.Damage;
+                if (currentHP <= 0)
+                    Die();
+                return;
+            }
+            ProcessHit(hitData);
         }
 
         protected virtual void Die()
@@ -307,7 +315,7 @@ namespace Game
         /// <summary>
         /// Reset this entity to the defaults
         /// </summary>
-        internal virtual void ResetEntity()
+        internal override void ResetEntity()
         {
             StopAllCoroutines();
             transform.position = startPos;

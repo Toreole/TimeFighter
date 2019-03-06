@@ -11,7 +11,7 @@ namespace Game
             //Uhhhh spaghet
         }
 
-        public override void ProcessHit(AttackHitData hitData)
+        internal override void ProcessHit(AttackHitData hitData)
         {
             //1. get the direction from the hit relative to this objects x position
             if(hitData.Position == Vector2.positiveInfinity)
@@ -25,7 +25,7 @@ namespace Game
             if (facingDirection == normalizedHitDirection)
             {
                 //The attack hits this enemy.
-                Damage(Mathf.RoundToInt(hitData.Damage));
+                ProcessHit(hitData, true);
             }
             else
             {
