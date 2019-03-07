@@ -22,7 +22,7 @@ namespace Game
 
             var relativeX = hitData.Position.x - transform.position.x;
             var normalizedHitDirection = (int) (relativeX / relativeX);
-            if (facingDirection == normalizedHitDirection)
+            if (facingDirection != normalizedHitDirection)
             {
                 //The attack hits this enemy.
                 ProcessHit(hitData, true);
