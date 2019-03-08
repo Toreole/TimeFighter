@@ -11,6 +11,8 @@ namespace Game.Menu
         [SerializeField]
         internal bool isUnlocked = false;
         [SerializeField]
+        internal bool isCompleted = false;
+        [SerializeField]
         internal string uselessText = "ur mum gae";
     }
 }
