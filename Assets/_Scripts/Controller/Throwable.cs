@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Game
+namespace Game.Controller
 {
     [CreateAssetMenu]
     public class Throwable : ScriptableObject

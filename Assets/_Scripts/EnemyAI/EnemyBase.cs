@@ -21,7 +21,7 @@ namespace Game
         protected Rigidbody2D body;
         protected bool isGrounded = false;
 
-        protected Transform Player { get { return GameManager.instance.PlayerTransform; } }
+        protected Transform Player { get { return LevelManager.instance.PlayerTransform; } }
         protected float RelativePlayerX { get { return Player.position.x - transform.position.x; } }
         protected int NormRelativeX { get { return (int) (RelativePlayerX / Mathf.Abs(RelativePlayerX)); } }
         protected bool LookingTowardsPlayer { get { return (facingDirection == NormRelativeX); } }
@@ -44,8 +44,8 @@ namespace Game
         /// </summary>
         protected virtual void Start()
         {
-            GameManager.OnLevelStart += OnLevelStart;
-            GameManager.OnLevelFail  += OnLevelFail;
+            LevelManager.OnLevelStart += OnLevelStart;
+            LevelManager.OnLevelFail  += OnLevelFail;
 
             startPos = transform.position;
             body = GetComponent<Rigidbody2D>();
@@ -130,7 +130,7 @@ namespace Game
         protected virtual void Die()
         {
             active = false;
-            GameManager.instance.RegisterDead(this);
+            LevelManager.instance.RegisterDead(this);
             body.Sleep();
             foreach( var col in GetComponentsInChildren<Collider2D>() )
             {

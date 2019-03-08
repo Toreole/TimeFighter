@@ -93,9 +93,9 @@ namespace Game.Controller
             if (throwable != null)
                 throwAmmo = throwable.startAmount;
             //setup events
-            GameManager.OnLevelStart    += OnLevelStart;
-            GameManager.OnLevelFail     += OnLevelFail;
-            GameManager.OnLevelComplete += OnLevelComplete;
+            LevelManager.OnLevelStart    += OnLevelStart;
+            LevelManager.OnLevelFail     += OnLevelFail;
+            LevelManager.OnLevelComplete += OnLevelComplete;
         }
 
         #region LevelEvents
