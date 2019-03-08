@@ -27,9 +27,10 @@ namespace Game.Menu
                 return;
             }
             if (activeNode != null)
+            {
                 InspectActiveNode();
-
-
+                MoveSelection();
+            }
         }
 
         private void InspectActiveNode()
@@ -40,8 +41,8 @@ namespace Game.Menu
             activeNode.Position = EditorGUILayout.Vector3Field("Position:", activeNode.Position);
             activeNode.depth = EditorGUILayout.IntField("Depth:", activeNode.depth);
             activeNode.TargetScene = EditorGUILayout.TextField("Target Scene:", activeNode.TargetScene);
-            activeNode.Unlocked = EditorGUILayout.Toggle("Is Unlocked:", activeNode.Unlocked);
             activeNode.BaseColor = EditorGUILayout.ColorField("Active Color:", activeNode.BaseColor);
+            activeNode.Unlocked = EditorGUILayout.Toggle("Unlocked:", activeNode.Unlocked);
 
             EditorGUILayout.BeginHorizontal();
             if(GUILayout.Button("Select As Node"))
@@ -137,6 +138,29 @@ namespace Game.Menu
             _target.levels.Remove(activeNode);
             activeNode.Remove();
             DestroyImmediate(activeNode.gameObject);
+        }
+
+        void MoveSelection()
+        {
+            Event e = Event.current;
+            if (e.type != EventType.KeyDown)
+                return;
+            if (e.keyCode == KeyCode.Keypad8)
+                Move(Connection.North);
+            else if (e.keyCode == KeyCode.Keypad6)
+                Move(Connection.East);
+            else if (e.keyCode == KeyCode.Keypad2)
+                Move(Connection.South);
+            else if (e.keyCode == KeyCode.Keypad4)
+                Move(Connection.West);
+        }
+
+        void Move(Connection dir)
+        {
+            var next = activeNode.GetConnection(dir);
+            if (next == null)
+                return;
+            activeNode = next.GetComponent<LevelNode>();
         }
 
         private void OnSceneGUI()

@@ -23,8 +23,8 @@ namespace Game.Menu
 
         public Vector3 Position { get { return transform.position; } set { transform.position = value; UpdateConnectors(true); } }
         public string TargetScene { get { return levelData.targetScene; } set { levelData.targetScene = value; gameObject.name = "Node:" + value; } }
-        public Color BaseColor { get => baseNodeColor; set { baseNodeColor = value; sprite.color = value; } }
-        public bool Unlocked { get => levelData.isUnlocked; set { levelData.isUnlocked = value; UpdateLockState(); } }
+        public Color BaseColor { get => baseNodeColor; set { baseNodeColor = value; } }
+        public bool Unlocked { get => levelData.isUnlocked; set { sprite.color = (value)? baseNodeColor : inactiveNodeColor; levelData.isUnlocked = value; } }
 
         private void Start()
         {
