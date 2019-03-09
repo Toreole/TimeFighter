@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 namespace Game.Menu
 {
@@ -45,6 +46,9 @@ namespace Game.Menu
         {
             if (moving)
                 return;
+            //Load the next level
+            if (Input.GetKeyDown(KeyCode.Return))
+                SceneManager.LoadScene(CurrentNode.levelData.targetScene);
             //Move inbetween nodes.
             if (Input.GetKey(KeyCode.W))
                 StartCoroutine(MoveDirection(Connection.North));

@@ -20,6 +20,7 @@ namespace Game
             }
             instance = this;
             DontDestroyOnLoad(gameObject);
+            //Load Save Data here, so we can actually use that garbage lmao
         }
     }
 }

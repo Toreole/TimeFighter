@@ -393,7 +393,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 777694002}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9c6cfac23649b79409a4387d3610f7fd, type: 3}
+  m_Script: {fileID: 11500000, guid: 00bd81eadf3ff34489052adf878858a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   halfHeight: 0.7
@@ -5138,9 +5138,9 @@ GameObject:
   - component: {fileID: 1150538835}
   - component: {fileID: 1150538834}
   - component: {fileID: 1150538833}
-  - component: {fileID: 1150538832}
   - component: {fileID: 1150538830}
   - component: {fileID: 1150538831}
+  - component: {fileID: 1150538832}
   m_Layer: 8
   m_Name: Shield_enemy_2
   m_TagString: Enemy
@@ -5189,7 +5189,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1150538829}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db137520108eb044688b84965abc000f, type: 3}
+  m_Script: {fileID: 11500000, guid: 12f5d29a8ada1b84e916c3bf4e91c953, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   halfHeight: 0.75
@@ -5740,9 +5740,9 @@ GameObject:
   - component: {fileID: 1530702572}
   - component: {fileID: 1530702571}
   - component: {fileID: 1530702570}
-  - component: {fileID: 1530702569}
   - component: {fileID: 1530702568}
   - component: {fileID: 1530702567}
+  - component: {fileID: 1530702569}
   m_Layer: 8
   m_Name: Shield_enemy_2 (1)
   m_TagString: Enemy
@@ -5791,7 +5791,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1530702566}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db137520108eb044688b84965abc000f, type: 3}
+  m_Script: {fileID: 11500000, guid: 12f5d29a8ada1b84e916c3bf4e91c953, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   halfHeight: 0.75
@@ -5943,7 +5943,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1574942553}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db137520108eb044688b84965abc000f, type: 3}
+  m_Script: {fileID: 11500000, guid: 12f5d29a8ada1b84e916c3bf4e91c953, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   halfHeight: 0.75
@@ -6712,6 +6712,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4427948098087997938, guid: ce5c1c60894485b48b034ea231c69ec5,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -6816,16 +6826,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
-        type: 3}
-      propertyPath: m_havePropertiesChanged
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4427948097601634502, guid: ce5c1c60894485b48b034ea231c69ec5,
-        type: 3}
-      propertyPath: m_isInputParsingRequired
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4427948098836568750, guid: ce5c1c60894485b48b034ea231c69ec5,
         type: 3}

@@ -127,6 +127,9 @@ namespace Game.Controller
             FaceMouse();
             GetInput();
             UpdateState();
+            //just for testing
+            if (Input.GetKeyDown(KeyCode.Escape))
+                UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         }
 
         /// <summary>

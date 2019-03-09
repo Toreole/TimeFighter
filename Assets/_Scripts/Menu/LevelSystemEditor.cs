@@ -29,7 +29,6 @@ namespace Game.Menu
             if (activeNode != null)
             {
                 InspectActiveNode();
-                MoveSelection();
             }
         }
 
@@ -153,10 +152,14 @@ namespace Game.Menu
                 Move(Connection.South);
             else if (e.keyCode == KeyCode.Keypad4)
                 Move(Connection.West);
+            else if (e.keyCode == KeyCode.Keypad5)
+                activeNode = _target.levels[0];
         }
 
         void Move(Connection dir)
         {
+            if (activeNode == null)
+                return;
             var next = activeNode.GetConnection(dir);
             if (next == null)
                 return;
@@ -165,6 +168,7 @@ namespace Game.Menu
 
         private void OnSceneGUI()
         {
+            MoveSelection();
             foreach (var node in _target.levels)
                 Handles.Label(node.Position, node.name);
             if (activeNode == null)

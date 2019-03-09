@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd3558a2f3c9a57438da81362b76828f, type: 3}
+  m_Script: {fileID: 11500000, guid: 191935db062d2fa44b3cb4a2da44a126, type: 3}
   m_Name: Dummy
   m_EditorClassIdentifier: 
   timeGain: 0
-  hp: 0
+  hp: 100000
   turnSpeed: 0
-  movement: 4
-  movementSpeed: 3
+  movement: 0
+  movementSpeed: 0
   wanderDistance: 0

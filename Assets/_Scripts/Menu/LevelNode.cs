@@ -50,6 +50,14 @@ namespace Game.Menu
             return neighbours[(int)dir];
         }
 
+        internal void SetCompleted()
+        {
+            levelData.isCompleted = true;
+            foreach (var other in neighbours)
+                if (other != null)
+                    other.GetComponent<LevelNode>().Unlocked = true;
+        }
+
         internal void Remove()
         {
             for (int i = 0; i < 4; i++)
