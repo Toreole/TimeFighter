@@ -151,10 +151,7 @@ namespace Game
             {
                 if (t < 0)
                     t = 0.000f;
-                string timeLeft = t.ToString();
-                if (timeLeft.Length > 4)
-                    timeLeft = timeLeft.Remove(4);
-                countdownText.text = timeLeft + "s";
+                countdownText.text = t.ToString("00.00") + "s";
                 yield return null;
             }
             countdownText.gameObject.SetActive(false);

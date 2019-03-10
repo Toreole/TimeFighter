@@ -27,6 +27,7 @@ namespace Game
 
         internal static void TrySave(SaveData data)
         {
+            Debug.Log(Application.persistentDataPath + "/" + fileName);
             FileStream file = File.Open(Application.persistentDataPath + "/" + fileName, FileMode.OpenOrCreate);
             BinaryFormatter formatter = new BinaryFormatter();
             formatter.Serialize(file, data);
@@ -38,9 +39,9 @@ namespace Game
     [Serializable]
     internal class SaveData
     {
-        internal Dictionary<string, bool> levelCompleted;
-        internal List<string> unlockedThrowables;
-        internal string equippedThrowable;
-        internal string lastLevel;
+        internal List<string> completedLevels = new List<string>();
+        internal List<string> unlockedThrowables = new List<string>();
+        internal string equippedThrowable = "";
+        internal string lastLevel = "";
     }
 }

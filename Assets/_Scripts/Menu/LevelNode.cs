@@ -22,7 +22,11 @@ namespace Game.Menu
         private SpriteRenderer sprite;
 
         public Vector3 Position { get { return transform.position; } set { transform.position = value; UpdateConnectors(true); } }
+#if UNITY_EDITOR
         public string TargetScene { get { return levelData.targetScene; } set { levelData.targetScene = value; gameObject.name = "Node:" + value; } }
+#else
+        public string TargetScene { get { return levelData.targetScene; } }
+#endif
         public Color BaseColor { get => baseNodeColor; set { baseNodeColor = value; } }
         public bool Unlocked { get => levelData.isUnlocked; set { sprite.color = (value)? baseNodeColor : inactiveNodeColor; levelData.isUnlocked = value; } }
 
@@ -50,12 +54,14 @@ namespace Game.Menu
             return neighbours[(int)dir];
         }
 
-        internal void SetCompleted()
+        internal void SetCompleted(bool writeToSaveData)
         {
             levelData.isCompleted = true;
             foreach (var other in neighbours)
                 if (other != null)
                     other.GetComponent<LevelNode>().Unlocked = true;
+            if (writeToSaveData)
+                GameManager.SetLevelComplete(TargetScene);
         }
 
         internal void Remove()

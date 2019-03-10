@@ -25,30 +25,70 @@ namespace Game.Menu
 
         protected Transform currentLevel;
         private LevelNode CurrentNode => currentLevel.GetComponent<LevelNode>();
-        
+
+#if UNITY_EDITOR
         internal LevelNode CreateNewLevel()
         {
             var temp = Instantiate(levelNodePrefab, this.transform);
             var l = temp.GetComponent<LevelNode>();
             l.TargetScene = "DefaultScene";
+            l.Unlocked = false;
+            l.levelData.isCompleted = false;
+            l.levelData.uselessText = "more information needed";
             levels.Add(l);
             return l;
         }
-
+#endif
         private void Start()
         {
             if (currentLevel == null)
                 currentLevel = defaultNode;
-            player.position = currentLevel.position;
+            RefreshMapFromSave();
+            PlacePlayerAtLastKnownNode();
+        }
+
+        private void PlacePlayerAtLastKnownNode()
+        {
+            var levelName = GameManager.GetLastLevel();
+            var level = levels.Find(x => x.TargetScene == levelName);
+            if (level == null)
+            {
+                player.position = levels[0].Position;
+                currentLevel = levels[0].transform;
+                return;
+            }
+            player.position = level.Position;
+            currentLevel = level.transform;
+        }
+
+        private void RefreshMapFromSave()
+        {
+            SaveData dat = GameManager.FetchSave();
+            foreach(var compLevel in dat.completedLevels)
+            {
+                var l = levels.Find(x => x.TargetScene == compLevel);
+                if (l == null)
+                    continue;
+                l.SetCompleted(false);
+            }
         }
 
         private void Update()
         {
             if (moving)
                 return;
+
             //Load the next level
             if (Input.GetKeyDown(KeyCode.Return))
                 SceneManager.LoadScene(CurrentNode.levelData.targetScene);
+            if (Input.GetKeyDown(KeyCode.KeypadEnter))
+                CurrentNode.SetCompleted(true);
+            if(Input.GetKeyDown(KeyCode.Alpha0))
+            {
+                Debug.Log("Trying to Save...");
+                GameManager.TrySave();
+            }
+
             //Move inbetween nodes.
             if (Input.GetKey(KeyCode.W))
                 StartCoroutine(MoveDirection(Connection.North));
@@ -84,6 +124,7 @@ namespace Game.Menu
             }
             player.position = nextTransform.position;
             currentLevel = nextTransform;
+            GameManager.SetLastLevel(CurrentNode.TargetScene);
             moving = false;
         }
 
