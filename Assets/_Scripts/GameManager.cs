@@ -12,7 +12,7 @@ namespace Game
         private SaveData save = null;
         private bool firstShutdown = true;
         [SerializeField]
-        AudioSource audio;
+        new AudioSource audio;
 
         private void Awake()
         {

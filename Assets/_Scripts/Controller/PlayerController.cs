@@ -270,6 +270,7 @@ namespace Game.Controller
                 if (jump)
                     Jump();
 
+                //Old movement logic
                 var velocity = xMove * movementSpeed * (Vector2)ground.right;
                 velocity.y = body.velocity.y;
                 body.velocity = velocity;
