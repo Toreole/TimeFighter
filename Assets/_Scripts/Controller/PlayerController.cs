@@ -31,7 +31,9 @@ namespace Game.Controller
         [SerializeField, Tooltip("The fixed height the player can jump (in Units).")]
         protected float jumpHeight = 1.0f;
         [SerializeField, Tooltip("how fast the player usually moves on the ground.")]
-        protected float movementSpeed = 1.0f;
+        protected float targetSpeed = 1.0f;
+        [SerializeField, Tooltip("how fast the speed of the player changes while on ground.")]
+        protected float acceleration = 2.0f;
         [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
         protected float airControlStrength = 0.25f;
         [SerializeField, Tooltip("strength of wall jumps")]
@@ -270,15 +272,15 @@ namespace Game.Controller
                 if (jump)
                     Jump();
 
-                //Old movement logic
-                var velocity = xMove * movementSpeed * (Vector2)ground.right;
+                //Old movement logic. instead accelerate and decellerate please.
+                var velocity = xMove * targetSpeed * (Vector2)ground.right;
                 velocity.y = body.velocity.y;
                 body.velocity = velocity;
             }
             else
             {
-                var airControl = xMove * movementSpeed * airControlStrength * Vector2.right;
-                body.AddForce(airControl);
+                var airControl = xMove * targetSpeed * airControlStrength * Vector2.right;
+                body.velocity += airControl * Time.deltaTime;
             }
         }
 
