@@ -8,7 +8,7 @@ namespace Game
     public class GameManager : MonoBehaviour
     {
         public static GameManager instance = null;
-
+        
         private SaveData save = null;
         private bool firstShutdown = true;
         [SerializeField]
@@ -23,7 +23,7 @@ namespace Game
             }
             instance = this;
             DontDestroyOnLoad(gameObject);
-
+            
             if (save == null)
             {
                 if (!SaveManager.TryLoad(out save))
@@ -32,6 +32,13 @@ namespace Game
                     Debug.Log("Creating New SaveData");
                 }
             }
+        }
+
+        private void Start()
+        {
+            if (instance != this)
+                return;
+            Debug.Log("hallo");
         }
 
         /// <summary>

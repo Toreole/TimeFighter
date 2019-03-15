@@ -64,6 +64,8 @@ namespace Game.Menu
         private void RefreshMapFromSave()
         {
             SaveData dat = GameManager.FetchSave();
+            if (dat == null)
+                return;
             foreach(var compLevel in dat.completedLevels)
             {
                 var l = levels.Find(x => x.TargetScene == compLevel);
