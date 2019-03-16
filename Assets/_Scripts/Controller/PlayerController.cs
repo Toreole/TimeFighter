@@ -4,6 +4,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
+using static Game.Util;
+
 namespace Game.Controller
 {
     [RequireComponent(typeof(Rigidbody2D))]
@@ -94,6 +96,7 @@ namespace Game.Controller
 
             if (throwable != null)
                 throwAmmo = throwable.startAmount;
+            Debug.Log("Player Setup Events");
             //setup events
             LevelManager.OnLevelStart    += OnLevelStart;
             LevelManager.OnLevelFail     += OnLevelFail;
@@ -103,17 +106,20 @@ namespace Game.Controller
         #region LevelEvents
         private void OnLevelStart()
         {
+            Debug.Log("Player Level Start");
             active = true;
         }
 
         private void OnLevelFail()
         {
+            Debug.Log("Player level Fail");
             active = false;
             state  = EntityState.Dead;
         }
 
         private void OnLevelComplete()
         {
+            Debug.Log("Player level Complete");
             active = false;
         }
         #endregion
@@ -122,6 +128,7 @@ namespace Game.Controller
         /// <summary>
         /// Input & mouse dependent stuff
         /// </summary>
+            //TODO: make a good system for figuring out which way to look. probably velocity and wall check.
         private void Update()
         {
             if (!active)
@@ -137,6 +144,7 @@ namespace Game.Controller
         /// <summary>
         /// Basically everything that should run after Update
         /// </summary>
+        //TODO: Send data to animator
         private void LateUpdate()
         {
             if (!active)
@@ -147,12 +155,13 @@ namespace Game.Controller
         /// <summary>
         /// Makes the player face towards the mouse
         /// </summary>
+        [System.Obsolete("This doesnt make sense in the long run. really. Use X-Velocity and wall-detection a factor in look direction.")]
         private void FaceMouse()
         {
             var myX = transform.position.x;
             var mousePos = (Vector2) camera.ScreenToWorldPoint(Input.mousePosition);
             directionToMouse = (mousePos - (Vector2)transform.position).normalized;
-            int newFacingDirection = (mousePos.x > myX) ? 1 : -1;
+            int newFacingDirection =  NormalizeInt(mousePos.x - myX);
             if (newFacingDirection == facingDirection)
                 return;
             facingDirection = newFacingDirection;
@@ -271,16 +280,35 @@ namespace Game.Controller
             {
                 if (jump)
                     Jump();
+                if (!Mathf.Approximately(xMove, 0f))
+                {
+                    //Accelerate in the correct direction
+                    var xVelocity  = body.velocity.x;
+                    var stepAccAbs = acceleration * Time.fixedDeltaTime * xMove;
 
-                //Old movement logic. instead accelerate and decellerate please.
-                var velocity = xMove * targetSpeed * (Vector2)ground.right;
-                velocity.y = body.velocity.y;
-                body.velocity = velocity;
+                    var nextXVel = xVelocity + stepAccAbs;
+
+                    ////positive movement
+                    //if(xMove > 0)
+                    //{
+                    //    nextXVel = (nextXVel > targetSpeed) ? targetSpeed : nextXVel;
+                    //}
+                    ////negative movement
+                    //else
+                    //{
+                    //    nextXVel = (nextXVel < -targetSpeed) ? -targetSpeed : nextXVel;
+                    //}
+                    body.velocity = new Vector2(nextXVel, body.velocity.y);
+                    //Old movement logic. instead accelerate and decellerate please.
+                    //var velocity = xMove * targetSpeed * (Vector2)ground.right;
+                    //velocity.y = body.velocity.y;
+                    //body.velocity = velocity;
+                }
             }
             else
             {
-                var airControl = xMove * targetSpeed * airControlStrength * Vector2.right;
-                body.velocity += airControl * Time.deltaTime;
+                var airControl = xMove * acceleration * airControlStrength * Vector2.right;
+                body.velocity += airControl * Time.fixedDeltaTime;
             }
         }
 
@@ -288,6 +316,7 @@ namespace Game.Controller
         /// physics fuck yeah. my brain hurts now.
         /// The player ALWAYS jumps jumpHeight units high no matter what.
         /// </summary>
+        //! this is like the only thing that works nicely.
         private void Jump()
         {
             var jumpDir = ((Vector2)ground.up + Vector2.up).normalized;
@@ -323,6 +352,7 @@ namespace Game.Controller
         #endregion
 
         #region CombatCode
+        //? improve?
         private void PerformActions()
         {
             if (shouldThrow)
@@ -333,7 +363,7 @@ namespace Game.Controller
                 StartCoroutine(DoHook());
         }
 
-        //TODO: THIS
+        //TODO: Hooking feels weird. Maybe (Distance) Physics Joints could be an answer?
         private IEnumerator DoHook()
         {
             hooking = true;
@@ -352,32 +382,44 @@ namespace Game.Controller
             //2. fire hook
             hookChain.gameObject.SetActive(true);
             yield return ShootHook();
-            //3. apply force towards the hookHit position
+            //3. move towards the hookHit position
+            //TODO: figure out a better solution to this garbage
+            var velocity = Vector2.zero;
             while(shouldHook)
             {
-                if((hookHit - (Vector2)transform.position).magnitude > hookRange)
+                if ((hookHit - (Vector2)transform.position).magnitude > hookRange)
                 {
                     BreakChain();
                     yield break;
                 }
                 var direction = (hookHit - (Vector2)transform.position).normalized;
-                body.AddForce(direction * hookSpeed * body.mass, ForceMode2D.Force);
+                //body.AddForce(direction * hookStrength * body.mass, ForceMode2D.Force);
+                velocity += direction * hookStrength * Time.fixedDeltaTime;
+                velocity = (velocity.magnitude > hookStrength) ? velocity.normalized * hookStrength : velocity;
+                body.velocity = velocity;
                 UpdateChain();
                 yield return null;
             }
             BreakChain();
         }
 
+        //TODO: this is fucking broken, i dont know how but it just fucks up.
         private IEnumerator ShootHook()
         {
             Vector2 ch = hookHit - (Vector2)transform.position;
             float totalDist = ch.magnitude;
             float reqTime = totalDist / hookSpeed;
-            for(float t = 0f; t < 1; t += Time.deltaTime / reqTime)
+            for (float t = 0f; t < 1; t += Time.deltaTime / reqTime)
             {
+                //now do the adjusting
                 hookChain.transform.position = (Vector2)transform.position + ch * t / 2f;
                 hookChain.size = new Vector2(1f, t * totalDist);
                 hookChain.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
+
+                //recalculate this shit every single time ugh
+                ch = hookHit - (Vector2)transform.position;
+                totalDist = ch.magnitude;
+                reqTime = totalDist / hookSpeed;
                 yield return null;
             }
         }
@@ -401,12 +443,12 @@ namespace Game.Controller
         /// <summary>
         /// Temporary Attack Code
         /// </summary>
+        //TODO: This way of attacking is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
         private void Attack()
         {
             canAttack = false;
             attack = false;
             Debug.Log("Attack!");
-            //TODO: better attack here
             RaycastHit2D hit;
             if(hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (playerWidth/2)))
             {
@@ -416,9 +458,9 @@ namespace Game.Controller
 
             StartCoroutine(ResetAttack());
         }
+        //TODO: Make a Slider or some indicator for the attack cooldown (for-yield loop)
         private IEnumerator ResetAttack()
         {
-            //TODO: Make a Slider or some indicator for the attack cooldown (for-yield loop)
             yield return new WaitForSeconds(attackCooldown);
             canAttack = true;
         }

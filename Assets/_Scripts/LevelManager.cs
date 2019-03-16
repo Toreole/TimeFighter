@@ -46,6 +46,7 @@ namespace Game
         private Gradient sliderGradient;
         private AttackHitData timerDamage = new AttackHitData();
 
+        private bool justCompleted = false;
 
         //Might come in handy.
         public delegate void GameEvent();
@@ -136,8 +137,11 @@ namespace Game
 
             if (controller.IsDead)
                 OnLevelFail?.Invoke();
-            if (deadEnemies >= enemyCount && !controller.IsDead)
+            if (deadEnemies >= enemyCount && !controller.IsDead && !justCompleted)
+            {
+                justCompleted = true;
                 OnLevelComplete?.Invoke();
+            }
         }
 
         /// <summary>
@@ -156,6 +160,7 @@ namespace Game
             }
             countdownText.gameObject.SetActive(false);
             OnLevelStart?.Invoke();
+            Debug.Log("Started");
             GameStarted = true;
         }
 
