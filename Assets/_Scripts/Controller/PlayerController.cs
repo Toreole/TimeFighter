@@ -24,6 +24,8 @@ namespace Game.Controller
         [Header("Physics And Movement")]
         [SerializeField, Tooltip("The empty transform child, will be automatically set in Start()")]
         protected Transform ground;
+        [SerializeField, Tooltip("Bruh")]
+        protected LayerMask groundLayer;
         [SerializeField, Tooltip("The Rigidbody component, will be automatically set in Start()")]
         protected Rigidbody2D body;
         [SerializeField, Tooltip("height of the players hitbox")]
@@ -46,8 +48,12 @@ namespace Game.Controller
         protected float hookRange = 10.0f;
         [SerializeField, Tooltip("the strength at which the player is propelled towards the hook")]
         protected float hookStrength = 10.0f;
-        [SerializeField, Tooltip("The hook object")]
+        [SerializeField, Tooltip("The visible hook object")]
         protected SpriteRenderer hookChain;
+        [SerializeField, Tooltip("the physics body to connect to")]
+        protected Transform hookEnd;
+        [SerializeField, Tooltip("The joint that handles hook swing")]
+        protected DistanceJoint2D hookJoint;
 
         protected Vector3 startPos    = Vector3.zero;
         protected Vector2 hookHit     = Vector2.positiveInfinity;
@@ -74,7 +80,7 @@ namespace Game.Controller
 
         //Input
         protected float xMove = 0f;
-        protected int yMove = 0;
+        protected float yMove = 0;
         protected bool jump;
         protected bool attack;
         protected bool shouldThrow;
@@ -133,7 +139,7 @@ namespace Game.Controller
         {
             if (!active)
                 return;
-            FaceMouse();
+            //FaceMouse();
             GetInput();
             UpdateState();
             //just for testing
@@ -175,11 +181,14 @@ namespace Game.Controller
         private void GetInput()
         {
             xMove = Input.GetAxis("Horizontal");
-            yMove = (int) Input.GetAxisRaw("Vertical");
-            jump =  (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
+            yMove = Input.GetAxis("Vertical");
+            jump = (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
             shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
             shouldHook  = Input.GetButton("RightClick");
+
+            var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
+            directionToMouse = (mousePos - (Vector2)transform.position).normalized;
         }
         
         /// <summary>
@@ -238,7 +247,7 @@ namespace Game.Controller
             var raycastPos = transform.position;
             var rayLength = playerHeight / 2f + 0.05f;
             Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-            if(hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, 1))
+            if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
             {
                 SetGround(hit);
             }
@@ -246,7 +255,7 @@ namespace Game.Controller
             {
                 raycastPos += Vector3.right * playerWidth / 3f;
                 Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-                if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, 1))
+                if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
                 {
                     SetGround(hit);
                 }
@@ -254,7 +263,7 @@ namespace Game.Controller
                 {
                     raycastPos -= Vector3.right * playerWidth / 3f * 2f;
                     Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-                    if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, 1))
+                    if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
                     {
                         SetGround(hit);
                     }
@@ -276,6 +285,9 @@ namespace Game.Controller
         /// </summary>
         private void Move()
         {
+            var xS = Normalized(body.velocity.x);
+            if(Mathf.Abs(xS) > 0.1f)
+                transform.localScale = new Vector3((xS == 0)? transform.localScale.x: xS, 1f, 1f);
             if (isGrounded)
             {
                 if (jump)
@@ -285,24 +297,11 @@ namespace Game.Controller
                     //Accelerate in the correct direction
                     var xVelocity  = body.velocity.x;
                     var stepAccAbs = acceleration * Time.fixedDeltaTime * xMove;
-
                     var nextXVel = xVelocity + stepAccAbs;
+                    if (Mathf.Abs(nextXVel) > targetSpeed && Mathf.Abs(nextXVel) > Mathf.Abs(xVelocity))
+                        nextXVel = xVelocity - stepAccAbs;
 
-                    ////positive movement
-                    //if(xMove > 0)
-                    //{
-                    //    nextXVel = (nextXVel > targetSpeed) ? targetSpeed : nextXVel;
-                    //}
-                    ////negative movement
-                    //else
-                    //{
-                    //    nextXVel = (nextXVel < -targetSpeed) ? -targetSpeed : nextXVel;
-                    //}
                     body.velocity = new Vector2(nextXVel, body.velocity.y);
-                    //Old movement logic. instead accelerate and decellerate please.
-                    //var velocity = xMove * targetSpeed * (Vector2)ground.right;
-                    //velocity.y = body.velocity.y;
-                    //body.velocity = velocity;
                 }
             }
             else
@@ -363,18 +362,22 @@ namespace Game.Controller
                 StartCoroutine(DoHook());
         }
 
-        //TODO: Hooking feels weird. Maybe (Distance) Physics Joints could be an answer?
+        /// <summary>
+        /// The actual hooking
+        /// </summary>
+        /// <returns>coroutine stuffs</returns>
         private IEnumerator DoHook()
         {
             hooking = true;
             //1. try to find location to hook to
             RaycastHit2D hit;
-            if (hit = Physics2D.Raycast(transform.position, directionToMouse, hookRange, 1))
+            if (hit = Physics2D.Raycast(transform.position, directionToMouse, hookRange, groundLayer))
             {
                 hookHit = hit.point;
             }
             else
             {
+                Debug.Log("nothing found");
                 yield return new WaitForSeconds(0.2f);
                 hooking = false;
                 yield break; //STOP, THIS VIOLATES THE LAW
@@ -382,24 +385,24 @@ namespace Game.Controller
             //2. fire hook
             hookChain.gameObject.SetActive(true);
             yield return ShootHook();
-            //3. move towards the hookHit position
-            //TODO: figure out a better solution to this garbage
-            var velocity = Vector2.zero;
+            //3. Do the hooking
+            hookJoint.enabled = true;
+            hookEnd.position = hit.point;
             while(shouldHook)
             {
-                if ((hookHit - (Vector2)transform.position).magnitude > hookRange)
+                if (Vector2.Distance(hookHit, transform.position) > hookRange)
                 {
+                    hookJoint.enabled = false;
                     BreakChain();
                     yield break;
                 }
-                var direction = (hookHit - (Vector2)transform.position).normalized;
-                //body.AddForce(direction * hookStrength * body.mass, ForceMode2D.Force);
-                velocity += direction * hookStrength * Time.fixedDeltaTime;
-                velocity = (velocity.magnitude > hookStrength) ? velocity.normalized * hookStrength : velocity;
-                body.velocity = velocity;
+                //TODO: optional: 1. break the hook when something gets in the way,
+                //TODO:           2. Jump from the hook and break it
+                //TODO:           3. Move up and down the hook while possible (using yMove)
                 UpdateChain();
                 yield return null;
             }
+            hookJoint.enabled = false;
             BreakChain();
         }
 
@@ -443,7 +446,7 @@ namespace Game.Controller
         /// <summary>
         /// Temporary Attack Code
         /// </summary>
-        //TODO: This way of attacking is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
+        //TODO: This is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
         private void Attack()
         {
             canAttack = false;
