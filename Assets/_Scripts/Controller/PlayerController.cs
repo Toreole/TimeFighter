@@ -55,12 +55,6 @@ namespace Game.Controller
         [SerializeField, Tooltip("The joint that handles hook swing")]
         protected DistanceJoint2D hookJoint;
 
-        protected Vector3 startPos    = Vector3.zero;
-        protected Vector2 hookHit     = Vector2.positiveInfinity;
-        protected bool hooking        = false;
-        protected bool isGrounded     = false;
-        protected EntityState state   = EntityState.Idle;
-
         //This could depend on different weapons?
         [Header("Combat Stats")]
         [SerializeField, Tooltip("The attack damage of normal attacks")]
@@ -86,6 +80,14 @@ namespace Game.Controller
         protected bool shouldThrow;
         protected bool shouldHook;
         protected bool frameHook;
+
+        //other runtime variables
+        protected Vector3 startPos = Vector3.zero;
+        protected Vector2 hookHit = Vector2.positiveInfinity;
+        protected bool hooking = false;
+        protected bool isGrounded = false;
+        protected EntityState state = EntityState.Idle;
+        protected bool canHookJump = true;
 
         /// <summary>
         /// Start!
@@ -277,12 +279,14 @@ namespace Game.Controller
         }
         private void SetGround(RaycastHit2D hit)
         {
+            canHookJump = true;
             Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
             ground.rotation = rot;
             isGrounded = true;
         }
 
         //! I fixed the movement partially. Further Improve this later on.
+        //TODO: fix slopes
         /// <summary>
         /// Use the input to move the player character.
         /// </summary>
@@ -299,13 +303,22 @@ namespace Game.Controller
                 if (!Mathf.Approximately(xMove, 0f))
                 {
                     //Accelerate in the correct direction
-                    var xVelocity  = body.velocity.x;
-                    var stepAccAbs = acceleration * Time.fixedDeltaTime * xMove;
-                    var nextXVel = xVelocity + stepAccAbs;
-                    if (Mathf.Abs(nextXVel) > targetSpeed && Mathf.Abs(nextXVel) > Mathf.Abs(xVelocity))
-                        nextXVel = xVelocity - stepAccAbs;
+                    //var xVelocity  = body.velocity.x;
+                    //var stepAccAbs = acceleration * Time.fixedDeltaTime * xMove;
+                    //var nextXVel = xVelocity + stepAccAbs;
+                    //if (Mathf.Abs(nextXVel) > targetSpeed && Mathf.Abs(nextXVel) > Mathf.Abs(xVelocity))
+                    //    nextXVel = xVelocity - stepAccAbs;
 
-                    body.velocity = new Vector2(nextXVel, body.velocity.y);
+                    //body.velocity = new Vector2(nextXVel, body.velocity.y);
+
+                    
+                    var vel = body.velocity;
+                    var stepAcc = acceleration * (Vector2)ground.right * Time.fixedDeltaTime * xMove;
+                    var nextVel = vel + stepAcc;
+                    if (nextVel.magnitude > targetSpeed && nextVel.magnitude > vel.magnitude)
+                        nextVel = vel - stepAcc;
+
+                    body.velocity = nextVel;
                 }
             }
             else
@@ -382,7 +395,6 @@ namespace Game.Controller
             }
             else
             {
-                Debug.Log("nothing found");
                 yield return new WaitForSeconds(0.2f);
                 hooking = false;
                 yield break; //STOP, THIS VIOLATES THE LAW
@@ -401,10 +413,10 @@ namespace Game.Controller
                     BreakChain();
                     yield break;
                 }
-                //TODO: This needs some additional condition to be met before you can jump. maybe swing for some distance or build up momentum.
-                //TODO: Basically, this gives you infinite air-jumps atm, which is really bad.
-                if(Input.GetButtonDown("Jump"))
+                //TODO: maybe make it momentum based whether you can jump or not. this is a temporary fix tho.
+                if(Input.GetButtonDown("Jump") && canHookJump)
                 {
+                    canHookJump = false;
                     Jump();
                     hookJoint.enabled = false;
                     BreakChain();

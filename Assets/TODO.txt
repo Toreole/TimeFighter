@@ -2,12 +2,12 @@ Notes with a > instead of a - as marker have a higher priority.
 an X or x marks a point as done.
 
 Player:
-> Jumping:
-	> Grounded check 
-	- Wall jumping (as seen in titles like Super meat Boy)
+x Jumping:
+	x Grounded check 
+	x Wall jumping (as seen in titles like Super meat Boy)
 - Movement:
-	> Consistent on slopes
-	- Dash (maybe towards cursor?)
+	x Consistent on slopes
+	> Dash (maybe towards cursor?)
 
 - Combat:
 	- Melee attacks
