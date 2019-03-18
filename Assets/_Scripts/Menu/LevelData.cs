@@ -7,12 +7,12 @@ namespace Game.Menu
     public class LevelData
     {
         [SerializeField]
-        internal string targetScene;
+        internal LevelInfo levelInfo;
         [SerializeField]
         internal bool isUnlocked = false;
         [SerializeField]
         internal bool isCompleted = false;
-        [SerializeField]
-        internal string uselessText = "ur mum gae";
+
+        internal string SceneName { get => (levelInfo == null)? "" : levelInfo.SceneName; }
     }
 }

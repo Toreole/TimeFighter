@@ -16,10 +16,8 @@ namespace Game
         public static LevelManager instance = null;
 
         [Header("Level Settings")]
-        [SerializeField, Tooltip("The time/health limit for this level. 0 means infinite")]
-        private float clearTime = 10.0f;
-        [SerializeField, Tooltip("The name of the level.")]
-        private string levelName = "0";
+        [SerializeField, Tooltip("All basic Info about this level")]
+        private LevelInfo info;
 
         [Header("Entities")]
         [SerializeField]
@@ -75,6 +73,8 @@ namespace Game
         //Entry point for StartLevel. nothing fancy.
         private void Start()
         {
+            if (RichPresenceManager.instance != null)
+                RichPresenceManager.instance.SetActiveLevel(info.DescriptiveName);
             if (player == null)
             {
                 var p = GameObject.FindWithTag("Player");
@@ -104,13 +104,13 @@ namespace Game
         /// </summary>
         private void SetupPlayer()
         {
-            if (clearTime > 0)
+            if (info.LevelTime > 0)
             {
-                controller.health = clearTime;
-                controller.currentHealth = clearTime;
+                controller.health = info.LevelTime;
+                controller.currentHealth = info.LevelTime;
 
-                levelTimeSlider.maxValue = clearTime;
-                levelTimeSlider.value = clearTime;
+                levelTimeSlider.maxValue = info.LevelTime;
+                levelTimeSlider.value = info.LevelTime;
                 sliderFill.color = sliderGradient.Evaluate(1);
             }
             else
@@ -128,7 +128,7 @@ namespace Game
         {
             if (!GameStarted)
                 return;
-            if (clearTime <= 0)
+            if (info.LevelTime <= 0)
                 return;
             timerDamage.Damage = Time.deltaTime;
             controller.ProcessHit(timerDamage, true);

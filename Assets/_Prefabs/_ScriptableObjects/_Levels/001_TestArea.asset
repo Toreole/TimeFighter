@@ -9,12 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 191935db062d2fa44b3cb4a2da44a126, type: 3}
-  m_Name: Dummy
+  m_Script: {fileID: 11500000, guid: 4ca4399b19a0ce6469990fafcc9e4b66, type: 3}
+  m_Name: 001_TestArea
   m_EditorClassIdentifier: 
-  timeGain: 0
-  hp: 2147483647
-  turnSpeed: 0
-  movement: 0
-  movementSpeed: 0
-  wanderDistance: 0
+  descriptiveName: Test Area
+  sceneName: 000_TestArea
+  time: 0
+  additionalInfo: This is just my debugging area for game mechanics.

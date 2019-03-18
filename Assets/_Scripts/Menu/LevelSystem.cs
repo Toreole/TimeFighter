@@ -31,10 +31,8 @@ namespace Game.Menu
         {
             var temp = Instantiate(levelNodePrefab, this.transform);
             var l = temp.GetComponent<LevelNode>();
-            l.TargetScene = "DefaultScene";
             l.Unlocked = false;
             l.levelData.isCompleted = false;
-            l.levelData.uselessText = "more information needed";
             levels.Add(l);
             return l;
         }
@@ -50,11 +48,11 @@ namespace Game.Menu
         private void PlacePlayerAtLastKnownNode()
         {
             var levelName = GameManager.GetLastLevel();
-            var level = levels.Find(x => x.TargetScene == levelName);
-            if (level == null)
+            var level = levels.Find(x => x.levelData.SceneName == levelName);
+            if (level == null || string.IsNullOrEmpty(levelName))
             {
-                player.position = levels[0].Position;
-                currentLevel = levels[0].transform;
+                player.position = defaultNode.position;
+                currentLevel = defaultNode;
                 return;
             }
             player.position = level.Position;
@@ -82,7 +80,7 @@ namespace Game.Menu
 
             //Load the next level
             if (Input.GetKeyDown(KeyCode.Return))
-                SceneManager.LoadScene(CurrentNode.levelData.targetScene);
+                SceneManager.LoadScene(CurrentNode.levelData.SceneName);
             if (Input.GetKeyDown(KeyCode.KeypadEnter))
                 CurrentNode.SetCompleted(true);
             if(Input.GetKeyDown(KeyCode.Alpha0))

@@ -22,10 +22,12 @@ namespace Game.Menu
         private SpriteRenderer sprite;
 
         public Vector3 Position { get { return transform.position; } set { transform.position = value; UpdateConnectors(true); } }
+        public string TargetScene { get { return (levelData == null) ? "" : levelData.SceneName; } }
+
 #if UNITY_EDITOR
-        public string TargetScene { get { return levelData.targetScene; } set { levelData.targetScene = value; gameObject.name = "Node:" + value; } }
+        public LevelInfo TargetLevelInfo { get { return levelData.levelInfo; } set { levelData.levelInfo = value;  gameObject.name = "Node:" + ((value == null)? "empty" : value.DescriptiveName); } }
 #else
-        public string TargetScene { get { return levelData.targetScene; } }
+        public LevelInfo TargetLevelInfo { get { return levelData.levelInfo; } }
 #endif
         public Color BaseColor { get => baseNodeColor; set { baseNodeColor = value; } }
         public bool Unlocked { get => levelData.isUnlocked; set { sprite.color = (value)? baseNodeColor : inactiveNodeColor; levelData.isUnlocked = value; } }

@@ -85,6 +85,7 @@ namespace Game.Controller
         protected bool attack;
         protected bool shouldThrow;
         protected bool shouldHook;
+        protected bool frameHook;
 
         /// <summary>
         /// Start!
@@ -186,7 +187,9 @@ namespace Game.Controller
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
             shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
             shouldHook  = Input.GetButton("RightClick");
-
+            frameHook   = Input.GetButtonDown("RightClick") || frameHook;
+            
+            //mouse position
             var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
             directionToMouse = (mousePos - (Vector2)transform.position).normalized;
         }
@@ -279,15 +282,16 @@ namespace Game.Controller
             isGrounded = true;
         }
 
-        //TODO: Better movement handling. Accelerate and decelerate instead of instant movement speed changes
+        //! I fixed the movement partially. Further Improve this later on.
         /// <summary>
         /// Use the input to move the player character.
         /// </summary>
         private void Move()
         {
-            var xS = Normalized(body.velocity.x);
-            if(Mathf.Abs(xS) > 0.1f)
-                transform.localScale = new Vector3((xS == 0)? transform.localScale.x: xS, 1f, 1f);
+            //adjust the curent "look direction"
+            var xS = (Mathf.Abs(body.velocity.x) < 0.1f)? transform.localScale.x : Normalized(body.velocity.x);
+                transform.localScale = new Vector3(xS, 1f, 1f);
+
             if (isGrounded)
             {
                 if (jump)
@@ -351,14 +355,14 @@ namespace Game.Controller
         #endregion
 
         #region CombatCode
-        //? improve?
+        // improve?
         private void PerformActions()
         {
             if (shouldThrow)
                 Throw();
             if (attack && canAttack)
                 Attack();
-            if (shouldHook && !hooking)
+            if (frameHook && !hooking)
                 StartCoroutine(DoHook());
         }
 
@@ -368,6 +372,7 @@ namespace Game.Controller
         /// <returns>coroutine stuffs</returns>
         private IEnumerator DoHook()
         {
+            frameHook = false;
             hooking = true;
             //1. try to find location to hook to
             RaycastHit2D hit;
@@ -392,6 +397,15 @@ namespace Game.Controller
             {
                 if (Vector2.Distance(hookHit, transform.position) > hookRange)
                 {
+                    hookJoint.enabled = false;
+                    BreakChain();
+                    yield break;
+                }
+                //TODO: This needs some additional condition to be met before you can jump. maybe swing for some distance or build up momentum.
+                //TODO: Basically, this gives you infinite air-jumps atm, which is really bad.
+                if(Input.GetButtonDown("Jump"))
+                {
+                    Jump();
                     hookJoint.enabled = false;
                     BreakChain();
                     yield break;

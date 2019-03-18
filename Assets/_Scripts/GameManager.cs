@@ -13,7 +13,7 @@ namespace Game
         private bool firstShutdown = true;
         [SerializeField]
         new AudioSource audio;
-
+        
         private void Awake()
         {
             if (instance != null)
@@ -38,7 +38,7 @@ namespace Game
         {
             if (instance != this)
                 return;
-            Debug.Log("hallo");
+            //Debug.Log("hallo");
         }
 
         /// <summary>
@@ -99,6 +99,14 @@ namespace Game
         {
             if(!instance.save.completedLevels.Exists(x => x == level))
                 instance.save.completedLevels.Add(level);
+        }
+
+        internal static GameManager CreateNewInstance()
+        {
+            GameObject obj = new GameObject();
+            instance = null;
+            var manager = obj.AddComponent<GameManager>();
+            return manager;
         }
     }
 }

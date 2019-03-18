@@ -39,7 +39,7 @@ namespace Game.Menu
             EditorGUILayout.LabelField("Active Node:", bold);
             activeNode.Position = EditorGUILayout.Vector3Field("Position:", activeNode.Position);
             activeNode.depth = EditorGUILayout.IntField("Depth:", activeNode.depth);
-            activeNode.TargetScene = EditorGUILayout.TextField("Target Scene:", activeNode.TargetScene);
+            activeNode.TargetLevelInfo = EditorGUILayout.ObjectField("Target level:", activeNode.TargetLevelInfo, typeof(LevelInfo), false) as LevelInfo;
             activeNode.BaseColor = EditorGUILayout.ColorField("Active Color:", activeNode.BaseColor);
             activeNode.Unlocked = EditorGUILayout.Toggle("Unlocked:", activeNode.Unlocked);
 

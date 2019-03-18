@@ -142,5 +142,12 @@ namespace Game
             onJoinRequest.Invoke(request);
         }
         #endregion
+
+        internal void SetActiveLevel(string levelName)
+        {
+            presence.details = "Slaying evil";
+            presence.state = "In: " + levelName;
+            DiscordRpc.UpdatePresence(presence);
+        }
     }
 }
