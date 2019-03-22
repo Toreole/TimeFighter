@@ -308,10 +308,8 @@ namespace Game.Controller
                     //var nextXVel = xVelocity + stepAccAbs;
                     //if (Mathf.Abs(nextXVel) > targetSpeed && Mathf.Abs(nextXVel) > Mathf.Abs(xVelocity))
                     //    nextXVel = xVelocity - stepAccAbs;
-
                     //body.velocity = new Vector2(nextXVel, body.velocity.y);
-
-                    
+                    //TODO: Fix movement on slopes
                     var vel = body.velocity;
                     var stepAcc = acceleration * (Vector2)ground.right * Time.fixedDeltaTime * xMove;
                     var nextVel = vel + stepAcc;
