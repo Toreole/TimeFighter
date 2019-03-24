@@ -11,10 +11,8 @@ namespace Game
     {
         [SerializeField]
         protected float halfHeight = 0.5f;
-
-        protected float currentHP = 1;
+        
         protected int facingDirection = 1;
-        protected bool active = false;
         protected bool turningAround = false;
         protected bool playerIsNear = false;
         protected Vector2 startPos = Vector2.zero;
@@ -29,9 +27,7 @@ namespace Game
         protected internal EnemySettings settings;
 
         public EnemySettings Settings { get { return settings; } }
-
-        public new float Health { get { return currentHP; } set { currentHP = value; } }
-
+        
         /// <summary>
         /// attention all gamers, this is basically FixedUpdate, but is only called when the enemy is active! double epic.
         /// </summary>
@@ -41,7 +37,7 @@ namespace Game
         /// <summary>
         /// One time initial update
         /// </summary>
-        protected virtual void Start()
+        protected override void Start()
         {
             LevelManager.OnLevelStart += OnLevelStart;
             LevelManager.OnLevelFail  += OnLevelFail;
@@ -66,14 +62,14 @@ namespace Game
         /// <summary>
         /// Do this when the level is started or re-started.
         /// </summary>
-        protected virtual void OnLevelStart()
+        protected override void OnLevelStart()
         {
             active = true;
             if (settings.Movement == MovementPattern.ShortDistance)
                 StartCoroutine(WanderAround());
 
             transform.position = startPos;
-            currentHP = settings.HP;
+            currentHealth = settings.HP;
             body.WakeUp();
             foreach (var col in GetComponentsInChildren<Collider2D>())
             {
@@ -81,10 +77,15 @@ namespace Game
             }
         }
 
-        protected virtual void OnLevelFail()
+        protected override void OnLevelFail()
         {
             active = false;
             //reset enemy? idk lol
+        }
+
+        protected override void OnLevelComplete()
+        {
+            active = false;
         }
 
         /// <summary>
@@ -109,8 +110,8 @@ namespace Game
 
         public override void ProcessHit(AttackHitData hitData)
         {
-            currentHP -= hitData.Damage;
-            if (currentHP <= 0)
+            currentHealth -= hitData.Damage;
+            if (currentHealth <= 0)
                 Die();
         }
 
@@ -118,8 +119,8 @@ namespace Game
         {
             if (onlyDamage)
             {
-                currentHP -= hitData.Damage;
-                if (currentHP <= 0)
+                currentHealth -= hitData.Damage;
+                if (currentHealth <= 0)
                     Die();
                 return;
             }
@@ -320,7 +321,7 @@ namespace Game
             transform.position = startPos;
             transform.localScale = Vector3.one;
             active = false;
-            currentHP = settings.HP;
+            currentHealth = settings.HP;
             facingDirection = 1;
             active = false;
             turningAround = false;

@@ -11,10 +11,6 @@ namespace Game.Controller
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : Entity
     {
-        [Header("Active Player Control")]
-        [SerializeField]
-        protected bool active = false;
-
         [Header("Camera Stuff")]
         [SerializeField]
         protected new Camera camera = null;
@@ -47,12 +43,9 @@ namespace Game.Controller
         protected float attackRange = 0.6f;
         [SerializeField, Tooltip("The time between attacks")]
         protected float attackCooldown = 0.75f;
-        [SerializeField, Tooltip("The actions boiii")]
-        protected List<BaseAction> actions;
 
         protected bool canAttack = true;
         protected internal float maxHealth; //TODO: make this actual health.
-        protected internal float currentHealth;
         public bool IsDead { get { return currentHealth <= 0f; } }
 
         //Input
@@ -75,8 +68,9 @@ namespace Game.Controller
         /// <summary>
         /// Start!
         /// </summary>
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             startPos = transform.position;
 
             if (camera == null)
@@ -85,7 +79,7 @@ namespace Game.Controller
                 ground = transform.GetChild(0);
             if (body == null)
                 body = GetComponent<Rigidbody2D>();
-
+            actions = new List<BaseAction>(GetComponents<BaseAction>());
             //if (throwable != null)
             //    throwAmmo = throwable.startAmount;
             //Debug.Log("Player Setup Events");
@@ -96,20 +90,20 @@ namespace Game.Controller
         }
 
         #region LevelEvents
-        private void OnLevelStart()
+        protected override void OnLevelStart()
         {
             Debug.Log("Player Level Start");
             active = true;
         }
 
-        private void OnLevelFail()
+        protected override void OnLevelFail()
         {
             Debug.Log("Player level Fail");
             active = false;
             state  = EntityState.Dead;
         }
 
-        private void OnLevelComplete()
+        protected override void OnLevelComplete()
         {
             Debug.Log("Player level Complete");
             active = false;
@@ -277,32 +271,45 @@ namespace Game.Controller
 
             if (isGrounded)
             {
+                //Prevent slopes from interfering with movement.
+                body.AddForce(-GetGroundForce());
                 if (jump)
                     Jump();
                 if (!Mathf.Approximately(xMove, 0f))
                 {
-                    //Accelerate in the correct direction
-                    //var xVelocity  = body.velocity.x;
-                    //var stepAccAbs = acceleration * Time.fixedDeltaTime * xMove;
-                    //var nextXVel = xVelocity + stepAccAbs;
-                    //if (Mathf.Abs(nextXVel) > targetSpeed && Mathf.Abs(nextXVel) > Mathf.Abs(xVelocity))
-                    //    nextXVel = xVelocity - stepAccAbs;
-                    //body.velocity = new Vector2(nextXVel, body.velocity.y);
-                    //TODO: Fix movement on slopes
+                    //move left/right
                     var vel = body.velocity;
                     var stepAcc = Acceleration * (Vector2)ground.right * Time.fixedDeltaTime * xMove;
                     var nextVel = vel + stepAcc;
                     if (nextVel.magnitude > TargetSpeed && nextVel.magnitude > vel.magnitude)
                         nextVel = vel - stepAcc;
-
+                    Debug.Log(nextVel.x);
                     body.velocity = nextVel;
                 }
             }
             else
             {
+                //air movement
                 var airControl = xMove * Acceleration * AirControlStrength * Vector2.right;
                 body.velocity += airControl * Time.fixedDeltaTime;
             }
+        }
+
+        /// <summary>
+        /// The resulting force of the (sloped) ground and gravity, that accelerates the body towards the lower ground.
+        /// </summary>
+        protected Vector2 GetGroundForce()
+        {
+            if (ground.up.y > 0.95)
+                return Vector2.zero;
+            var Fg = body.gravityScale * body.mass * Physics2D.gravity;
+            var groundNormal = ground.up;
+            var alpha = Vector2.Angle(groundNormal, -Fg);
+            var sinAlpha = Mathf.Sin(alpha * Mathf.Deg2Rad);
+                //Debug.Log(alpha + "-- sin: " + sinAlpha);
+            var groundOffsetDirection = (groundNormal.x >= 0) ? ground.right: -ground.right;
+            var Fh = groundOffsetDirection * sinAlpha * Fg.magnitude;
+            return Fh;
         }
 
         /// <summary>

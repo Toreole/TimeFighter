@@ -2914,25 +2914,6 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 3
     m_NumAlphaKeys: 2
---- !u!232 &4297318604965588164
-DistanceJoint2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6447042201828189508}
-  m_Enabled: 0
-  serializedVersion: 4
-  m_EnableCollision: 0
-  m_ConnectedRigidBody: {fileID: 1232832394}
-  m_BreakForce: Infinity
-  m_BreakTorque: Infinity
-  m_AutoConfigureConnectedAnchor: 0
-  m_Anchor: {x: 0, y: 0}
-  m_ConnectedAnchor: {x: 0, y: 0}
-  m_AutoConfigureDistance: 1
-  m_Distance: 2.202385
-  m_MaxDistanceOnly: 1
 --- !u!1 &5093169235643680104
 GameObject:
   m_ObjectHideFlags: 0
@@ -2966,7 +2947,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1efedddb11702c549ad25278b46ec8e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  active: 0
   body: {fileID: 0}
+  actions: []
   halfHeight: 0.5
   settings: {fileID: 11400000, guid: 9d5cbb72184221148b3c32007c5ae39f, type: 2}
   railSystem: []
@@ -3115,10 +3098,10 @@ GameObject:
   m_Component:
   - component: {fileID: 6447042201828189509}
   - component: {fileID: 6447042201828189514}
+  - component: {fileID: 6447042201828189510}
   - component: {fileID: 6447042201828189512}
   - component: {fileID: 6447042201828189515}
   - component: {fileID: 6447042201828189513}
-  - component: {fileID: 4297318604965588164}
   m_Layer: 9
   m_Name: _Empty_Player
   m_TagString: Player
@@ -3141,6 +3124,29 @@ Transform:
   m_Father: {fileID: 259364715}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6447042201828189510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6447042201828189508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6c6eb754b033b24987ec83263ed8172, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cooldown: 1
+  entity: {fileID: 6447042201828189514}
+  uiSprite: {fileID: 0}
+  swingVisualPrefab: {fileID: 0}
+  swingAnchorPrefab: {fileID: 0}
+  maxDistance: 10
+  tossSpeed: 15
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  targetTag: 
 --- !u!50 &6447042201828189512
 Rigidbody2D:
   serializedVersion: 4
@@ -3222,8 +3228,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f814471261eeb6141b0d3341f628f33e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 6447042201828189512}
   active: 1
+  body: {fileID: 6447042201828189512}
+  actions: []
   camera: {fileID: 7762223513022645797}
   ground: {fileID: 6447042203542157649}
   groundLayer:
@@ -3232,21 +3239,14 @@ MonoBehaviour:
   controllerSettings:
     playerHeight: 0.8
     playerWidth: 0.8
-    jumpHeight: 1
-    targetSpeed: 1
-    acceleration: 2
+    jumpHeight: 2
+    targetSpeed: 6
+    acceleration: 3
     airControlStrength: 0.25
     wallJumpStrength: 0.75
-  hookSpeed: 20
-  hookRange: 10
-  hookStrength: 9
-  hookChain: {fileID: 16523129}
-  hookEnd: {fileID: 1232832392}
-  hookJoint: {fileID: 4297318604965588164}
   attackDamage: 1
   attackRange: 0.6
   attackCooldown: 1.2
-  throwable: {fileID: 0}
 --- !u!58 &6447042201828189515
 CircleCollider2D:
   m_ObjectHideFlags: 0

@@ -9,6 +9,7 @@ namespace Game.Controller
     /// </summary>
     public class SwingHookController : BaseAction
     {
+        [Header("Swing Hoook Fields")]
         //Serialized fields
         [SerializeField]
         protected GameObject swingVisualPrefab;
@@ -20,6 +21,8 @@ namespace Game.Controller
         protected float tossSpeed;
         [SerializeField]
         protected LayerMask targetLayer;
+        [SerializeField]
+        protected string targetTag;
 
         //Runtime vars
         protected SpriteRenderer ropeRenderer;
@@ -45,7 +48,6 @@ namespace Game.Controller
         /// <summary>
         /// The actual hooking
         /// </summary>
-        /// <returns>coroutine stuffs</returns>
         private IEnumerator DoHook()
         {
             hooking = true;
