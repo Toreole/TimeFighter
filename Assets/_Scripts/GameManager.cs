@@ -1,188 +1,112 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using TMPro;
 using Game.Controller;
 
 namespace Game
 {
-    /// <summary>
-    /// Manages the Game. Starts the game after some delay in the scene.
-    /// </summary>
     public class GameManager : MonoBehaviour
     {
         public static GameManager instance = null;
-
-        [Header("Entities")]
+        
+        private SaveData save = null;
+        private bool firstShutdown = true;
         [SerializeField]
-        private GameObject player;
-        private PlayerController controller;
-
-        [SerializeField]
-        private List<EnemyBase> enemies;
-        private int enemyCount;
-        private int deadEnemies;
-
-        [Header("Countdown")]
-        [SerializeField]
-        private TextMeshProUGUI countdownText;
-        [SerializeField]
-        private float countdownLength = 3.5f;
-
-        [Header("Timer")]
-        [SerializeField]
-        private Slider levelTimeSlider;
-        [SerializeField]
-        private Image sliderFill;
-        [SerializeField]
-        private Gradient sliderGradient;
-        private AttackHitData timerDamage = new AttackHitData();
-
-        [Header("Level Settings")]
-        [SerializeField]
-        private float clearTime = 10.0f;
-
-        //Might come in handy.
-        public delegate void GameEvent();
-        public static GameEvent OnLevelStart    { get { return instance.LevelStartEvent;    } set { instance.LevelStartEvent = value; } }
-        public static GameEvent OnLevelFail     { get { return instance.LevelFailEvent;     } set { instance.LevelFailEvent = value; } }
-        public static GameEvent OnLevelComplete { get { return instance.LevelCompleteEvent; } set { instance.LevelCompleteEvent = value; } }
-
-        protected event GameEvent LevelStartEvent = null;
-        protected event GameEvent LevelFailEvent = null;
-        protected event GameEvent LevelCompleteEvent = null;
-
-        public static bool GameStarted { get; private set; } = false;
-
-        public Transform PlayerTransform { get { return player.transform; } }
-
-        //Set the instance boiii
+        new AudioSource audio;
+        
         private void Awake()
         {
             if (instance != null)
             {
-                Destroy(instance.gameObject);
-                instance = null;
+                Destroy(this.gameObject);
+                return;
             }
             instance = this;
+            DontDestroyOnLoad(gameObject);
+            
+            if (save == null)
+            {
+                if (!SaveManager.TryLoad(out save))
+                {   //try to load, if it cant load, create a new save
+                    save = new SaveData();
+                    //Debug.Log("Creating New SaveData");
+                }
+            }
         }
 
-        //Entry point for StartLevel. nothing fancy.
         private void Start()
         {
-            if (player == null)
-            {
-                var p = GameObject.FindWithTag("Player");
-                if (p == null)
-                    Debug.LogError("Could not find GameObject with tag Player");
-                else
-                {
-                    player = p;
-                }
-            }
-            if (player == null)
+            if (instance != this)
                 return;
-            controller = player.GetComponent<PlayerController>();
-            if (enemies.Count == 0)
+            //Debug.Log("hallo");
+        }
+
+        /// <summary>
+        /// forcefully save before quitting.
+        /// </summary>
+        private void OnApplicationQuit()
+        {
+            if (firstShutdown)
             {
-                Debug.Log("Trying to find enemies in scene...");
-                enemies = new List<EnemyBase>(FindObjectsOfType<EnemyBase>());
-            }
-            enemyCount = enemies.Count;
-            SetupPlayer();
-            StartCoroutine(StartLevel());
-            OnLevelFail += LevelFailed;
-        }
-
-        /// <summary>
-        /// Initial setup for the player health
-        /// </summary>
-        private void SetupPlayer()
-        {
-            controller.health = clearTime;
-            controller.currentHealth = clearTime;
-
-            levelTimeSlider.maxValue = clearTime;
-            levelTimeSlider.value = clearTime;
-            sliderFill.color = sliderGradient.Evaluate(1);
-        }
-
-        /// <summary>
-        /// Update player health every frame and also check stuff
-        /// </summary>
-        private void LateUpdate()
-        {
-            if (!GameStarted)
+                firstShutdown = false;
+                Application.CancelQuit();
+                audio.Play();
+                StartCoroutine(DelayedShutdown());
                 return;
-            timerDamage.Damage = Time.deltaTime;
-            controller.ProcessHit(timerDamage, true);
-            levelTimeSlider.value = controller.currentHealth;
-            sliderFill.color = sliderGradient.Evaluate(controller.currentHealth / controller.health);
+            }
+            TrySave();
+        }
 
-            if (controller.IsDead)
-                OnLevelFail?.Invoke();
-            if (deadEnemies >= enemyCount && !controller.IsDead)
-                OnLevelComplete?.Invoke();
+        private System.Collections.IEnumerator DelayedShutdown()
+        {
+            yield return new WaitForSeconds(2.0f);
+            Application.Quit();
         }
 
         /// <summary>
-        /// Start the game after counting down some time.
+        /// Try to fetch the SaveData
         /// </summary>
-        private IEnumerator StartLevel()
+        /// <returns></returns>
+        internal static SaveData FetchSave()
         {
-            countdownText.gameObject.SetActive(true);
-            for(float t = countdownLength; t > 0f; t -= Time.deltaTime)
-            {
-                if (t < 0)
-                    t = 0.000f;
-                string timeLeft = t.ToString();
-                if (timeLeft.Length > 4)
-                    timeLeft = timeLeft.Remove(4);
-                countdownText.text = timeLeft + "s";
-                yield return null;
-            }
-            countdownText.gameObject.SetActive(false);
-            OnLevelStart?.Invoke();
-            GameStarted = true;
+            if (instance == null)
+                return null;
+            return instance.save;
         }
 
-        //If this doesnt exist, update the instance just in case.
-        private void OnDestroy()
+        internal static bool TrySave()
         {
+            if (instance == null)
+                return false;
+            SaveManager.TrySave(instance.save);
+            return true;
+        }
+
+        internal static void SetLastLevel(string level)
+        {
+            if (instance == null)
+                return;
+            instance.save.lastLevel = level;
+        }
+
+        internal static string GetLastLevel() => (instance != null)? instance.save.lastLevel : "";
+
+        /// <summary>
+        /// Add a level to the completed ones.
+        /// </summary>
+        /// <param name="level"></param>
+        internal static void SetLevelComplete(string level)
+        {
+            if(!instance.save.completedLevels.Exists(x => x == level))
+                instance.save.completedLevels.Add(level);
+        }
+
+        internal static GameManager CreateNewInstance()
+        {
+            GameObject obj = new GameObject();
             instance = null;
-        }
-
-        public void RegisterDead(EnemyBase deadEnemy)
-        {
-            if(enemies.Contains(deadEnemy))
-            {
-                enemies.Remove(deadEnemy);
-                deadEnemies++;
-
-                if(deadEnemies >= enemyCount && GameStarted)
-                {
-                    OnLevelComplete?.Invoke();
-                }
-            }
-        }
-
-        private void LevelFailed()
-        {
-            ResetLevel();
-            GameStarted = false;
-        }
-
-        public void ResetLevel()
-        {
-            //instead of just reloading the scene, actually Reset all values of the entities n shit
-            //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-            foreach (var entity in enemies)
-                entity.ResetEntity();
-            controller.ResetEntity();
-            SetupPlayer();
-            StartCoroutine(StartLevel());
+            var manager = obj.AddComponent<GameManager>();
+            return manager;
         }
     }
 }

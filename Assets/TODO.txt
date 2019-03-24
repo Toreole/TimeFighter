@@ -2,12 +2,18 @@ Notes with a > instead of a - as marker have a higher priority.
 an X or x marks a point as done.
 
 Player:
-> Jumping:
-	> Grounded check 
-	- Wall jumping (as seen in titles like Super meat Boy)
+x Jumping:
+	x Grounded check 
+	x Wall jumping (as seen in titles like Super meat Boy)
 - Movement:
 	> Consistent on slopes
-	- Dash (maybe towards cursor?)
+	> Dash (maybe towards cursor?)
+
+- Rework:
+	> Scroll through abilities (add as new mechanic)
+		- Swing Hook / Lasso (only on specific objects)
+		- Pull Hook / Actual grapling
+		- Throw equipped item
 
 - Combat:
 	- Melee attacks
@@ -19,6 +25,13 @@ Player:
 	- Limited projectile based attacks (1-3 uses per level)
 	- Two effect / ring slots (not visualized) depending on gameplay.
 		- e.g. +1 attack, but -2 seconds time
+
+
+
+
+
+
+
 
 Enemies:
 > Different Behaviour based on settings

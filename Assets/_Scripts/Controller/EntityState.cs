@@ -7,6 +7,7 @@
         Jump = 2,
         Fall,
         Attack,
+        Throwing,
         Dead
     }
 }
