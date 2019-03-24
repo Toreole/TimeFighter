@@ -18,7 +18,6 @@ namespace Game
         protected bool turningAround = false;
         protected bool playerIsNear = false;
         protected Vector2 startPos = Vector2.zero;
-        protected Rigidbody2D body;
         protected bool isGrounded = false;
 
         protected Transform Player { get { return LevelManager.instance.PlayerTransform; } }
@@ -108,14 +107,14 @@ namespace Game
             }
         }
 
-        internal override void ProcessHit(AttackHitData hitData)
+        public override void ProcessHit(AttackHitData hitData)
         {
             currentHP -= hitData.Damage;
             if (currentHP <= 0)
                 Die();
         }
 
-        internal override void ProcessHit(AttackHitData hitData, bool onlyDamage)
+        public override void ProcessHit(AttackHitData hitData, bool onlyDamage)
         {
             if (onlyDamage)
             {

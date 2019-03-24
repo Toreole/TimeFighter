@@ -21,40 +21,24 @@ namespace Game.Controller
         protected int facingDirection = 1;
         protected Vector2 directionToMouse = Vector2.zero;
 
+        //TODO: bruh. make a setting struct or something. this looks like ass.
         [Header("Physics And Movement")]
         [SerializeField, Tooltip("The empty transform child, will be automatically set in Start()")]
         protected Transform ground;
         [SerializeField, Tooltip("Bruh")]
         protected LayerMask groundLayer;
-        [SerializeField, Tooltip("The Rigidbody component, will be automatically set in Start()")]
-        protected Rigidbody2D body;
-        [SerializeField, Tooltip("height of the players hitbox")]
-        protected float playerHeight  = 1.0f;
-        [SerializeField, Tooltip("width of the players hitbox")]
-        protected float playerWidth = 1.0f;
-        [SerializeField, Tooltip("The fixed height the player can jump (in Units).")]
-        protected float jumpHeight = 1.0f;
-        [SerializeField, Tooltip("how fast the player usually moves on the ground.")]
-        protected float targetSpeed = 1.0f;
-        [SerializeField, Tooltip("how fast the speed of the player changes while on ground.")]
-        protected float acceleration = 2.0f;
-        [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
-        protected float airControlStrength = 0.25f;
-        [SerializeField, Tooltip("strength of wall jumps")]
-        protected float wallJumpStrength = 0.75f;
-        [SerializeField, Tooltip("the speed of the hook when it flies")]
-        protected float hookSpeed = 25.0f;
-        [SerializeField, Tooltip("the range of the hook")]
-        protected float hookRange = 10.0f;
-        [SerializeField, Tooltip("the strength at which the player is propelled towards the hook")]
-        protected float hookStrength = 10.0f;
-        [SerializeField, Tooltip("The visible hook object")]
-        protected SpriteRenderer hookChain;
-        [SerializeField, Tooltip("the physics body to connect to")]
-        protected Transform hookEnd;
-        [SerializeField, Tooltip("The joint that handles hook swing")]
-        protected DistanceJoint2D hookJoint;
-
+        [SerializeField, Tooltip("Settings for movement and that")]
+        protected PlayerControllerSettings controllerSettings = PlayerControllerSettings.DefaultSettings;
+        #region setting_properties
+            float PlayerWidth  => controllerSettings.playerWidth;
+            float Acceleration => controllerSettings.acceleration;
+            float PlayerHeight => controllerSettings.playerHeight;
+            float JumpHeight   => controllerSettings.jumpHeight;
+            float TargetSpeed  => controllerSettings.targetSpeed;
+            float WallJumpStrength   => controllerSettings.wallJumpStrength;
+            float AirControlStrength => controllerSettings.airControlStrength;
+        #endregion
+        
         //This could depend on different weapons?
         [Header("Combat Stats")]
         [SerializeField, Tooltip("The attack damage of normal attacks")]
@@ -63,12 +47,11 @@ namespace Game.Controller
         protected float attackRange = 0.6f;
         [SerializeField, Tooltip("The time between attacks")]
         protected float attackCooldown = 0.75f;
-        [SerializeField, Tooltip("The throwable weapon to use")]
-        protected internal Throwable throwable;
+        [SerializeField, Tooltip("The actions boiii")]
+        protected List<BaseAction> actions;
 
         protected bool canAttack = true;
-        protected int throwAmmo = 0;
-        protected internal float health;
+        protected internal float maxHealth; //TODO: make this actual health.
         protected internal float currentHealth;
         public bool IsDead { get { return currentHealth <= 0f; } }
 
@@ -78,16 +61,16 @@ namespace Game.Controller
         protected bool jump;
         protected bool attack;
         protected bool shouldThrow;
-        protected bool shouldHook;
-        protected bool frameHook;
+
+        //TODO: actions!
+        protected bool actionPersist;
+        protected bool frameAction;
+        protected int selectedAction;
 
         //other runtime variables
         protected Vector3 startPos = Vector3.zero;
-        protected Vector2 hookHit = Vector2.positiveInfinity;
-        protected bool hooking = false;
         protected bool isGrounded = false;
         protected EntityState state = EntityState.Idle;
-        protected bool canHookJump = true;
 
         /// <summary>
         /// Start!
@@ -103,9 +86,9 @@ namespace Game.Controller
             if (body == null)
                 body = GetComponent<Rigidbody2D>();
 
-            if (throwable != null)
-                throwAmmo = throwable.startAmount;
-            Debug.Log("Player Setup Events");
+            //if (throwable != null)
+            //    throwAmmo = throwable.startAmount;
+            //Debug.Log("Player Setup Events");
             //setup events
             LevelManager.OnLevelStart    += OnLevelStart;
             LevelManager.OnLevelFail     += OnLevelFail;
@@ -145,9 +128,6 @@ namespace Game.Controller
             //FaceMouse();
             GetInput();
             UpdateState();
-            //just for testing
-            if (Input.GetKeyDown(KeyCode.Escape))
-                UnityEngine.SceneManagement.SceneManager.LoadScene(0);
         }
 
         /// <summary>
@@ -158,7 +138,7 @@ namespace Game.Controller
         {
             if (!active)
                 return;
-            Debug.DrawLine(transform.position, transform.position + (Vector3)(directionToMouse * (attackRange + playerWidth /2f)), Color.blue);
+            Debug.DrawLine(transform.position, transform.position + (Vector3)(directionToMouse * (attackRange + PlayerWidth /2f)), Color.blue);
         }
 
         /// <summary>
@@ -188,8 +168,8 @@ namespace Game.Controller
             jump = (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
             shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
-            shouldHook  = Input.GetButton("RightClick");
-            frameHook   = Input.GetButtonDown("RightClick") || frameHook;
+            actionPersist  = Input.GetButton("RightClick");
+            frameAction   = Input.GetButtonDown("RightClick") || frameAction;
             
             //mouse position
             var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
@@ -250,7 +230,7 @@ namespace Game.Controller
             }
             RaycastHit2D hit;
             var raycastPos = transform.position;
-            var rayLength = playerHeight / 2f + 0.05f;
+            var rayLength = PlayerHeight / 2f + 0.05f;
             Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
             if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
             {
@@ -258,7 +238,7 @@ namespace Game.Controller
             }
             else
             {
-                raycastPos += Vector3.right * playerWidth / 3f;
+                raycastPos += Vector3.right * PlayerWidth / 3f;
                 Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
                 if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
                 {
@@ -266,7 +246,7 @@ namespace Game.Controller
                 }
                 else
                 {
-                    raycastPos -= Vector3.right * playerWidth / 3f * 2f;
+                    raycastPos -= Vector3.right * PlayerWidth / 3f * 2f;
                     Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
                     if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
                     {
@@ -279,7 +259,6 @@ namespace Game.Controller
         }
         private void SetGround(RaycastHit2D hit)
         {
-            canHookJump = true;
             Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
             ground.rotation = rot;
             isGrounded = true;
@@ -311,9 +290,9 @@ namespace Game.Controller
                     //body.velocity = new Vector2(nextXVel, body.velocity.y);
                     //TODO: Fix movement on slopes
                     var vel = body.velocity;
-                    var stepAcc = acceleration * (Vector2)ground.right * Time.fixedDeltaTime * xMove;
+                    var stepAcc = Acceleration * (Vector2)ground.right * Time.fixedDeltaTime * xMove;
                     var nextVel = vel + stepAcc;
-                    if (nextVel.magnitude > targetSpeed && nextVel.magnitude > vel.magnitude)
+                    if (nextVel.magnitude > TargetSpeed && nextVel.magnitude > vel.magnitude)
                         nextVel = vel - stepAcc;
 
                     body.velocity = nextVel;
@@ -321,7 +300,7 @@ namespace Game.Controller
             }
             else
             {
-                var airControl = xMove * acceleration * airControlStrength * Vector2.right;
+                var airControl = xMove * Acceleration * AirControlStrength * Vector2.right;
                 body.velocity += airControl * Time.fixedDeltaTime;
             }
         }
@@ -335,7 +314,7 @@ namespace Game.Controller
         {
             var jumpDir = ((Vector2)ground.up + Vector2.up).normalized;
             float g = 9.81f * body.gravityScale;
-            float v0 = Mathf.Sqrt((jumpHeight) * (2 * g));
+            float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
             var velocity = jumpDir * v0;
                 velocity.x += body.velocity.x; //Test to see if this fixes some weird issues
             body.velocity = velocity;
@@ -346,7 +325,7 @@ namespace Game.Controller
         {
             var jumpDir = (contactNormal + Vector2.up).normalized;
             float g = 9.81f * body.gravityScale;
-            float v0 = Mathf.Sqrt((jumpHeight) * (2 * g) * wallJumpStrength);
+            float v0 = Mathf.Sqrt((JumpHeight) * (2 * g) * WallJumpStrength);
             var velocity = jumpDir * v0;
             body.velocity = velocity;
             jump = false;
@@ -366,105 +345,15 @@ namespace Game.Controller
         #endregion
 
         #region CombatCode
-        // improve?
+        //TODO: fix actions
         private void PerformActions()
         {
             if (shouldThrow)
                 Throw();
             if (attack && canAttack)
                 Attack();
-            if (frameHook && !hooking)
-                StartCoroutine(DoHook());
-        }
-
-        /// <summary>
-        /// The actual hooking
-        /// </summary>
-        /// <returns>coroutine stuffs</returns>
-        private IEnumerator DoHook()
-        {
-            frameHook = false;
-            hooking = true;
-            //1. try to find location to hook to
-            RaycastHit2D hit;
-            if (hit = Physics2D.Raycast(transform.position, directionToMouse, hookRange, groundLayer))
-            {
-                hookHit = hit.point;
-            }
-            else
-            {
-                yield return new WaitForSeconds(0.2f);
-                hooking = false;
-                yield break; //STOP, THIS VIOLATES THE LAW
-            }
-            //2. fire hook
-            hookChain.gameObject.SetActive(true);
-            yield return ShootHook();
-            //3. Do the hooking
-            hookJoint.enabled = true;
-            hookEnd.position = hit.point;
-            while(shouldHook)
-            {
-                if (Vector2.Distance(hookHit, transform.position) > hookRange)
-                {
-                    hookJoint.enabled = false;
-                    BreakChain();
-                    yield break;
-                }
-                //TODO: maybe make it momentum based whether you can jump or not. this is a temporary fix tho.
-                if(Input.GetButtonDown("Jump") && canHookJump)
-                {
-                    canHookJump = false;
-                    Jump();
-                    hookJoint.enabled = false;
-                    BreakChain();
-                    yield break;
-                }
-                //TODO: optional: 1. break the hook when something gets in the way,
-                //TODO:           2. Jump from the hook and break it
-                //TODO:           3. Move up and down the hook while possible (using yMove)
-                UpdateChain();
-                yield return null;
-            }
-            hookJoint.enabled = false;
-            BreakChain();
-        }
-
-        //TODO: this is fucking broken, i dont know how but it just fucks up.
-        private IEnumerator ShootHook()
-        {
-            Vector2 ch = hookHit - (Vector2)transform.position;
-            float totalDist = ch.magnitude;
-            float reqTime = totalDist / hookSpeed;
-            for (float t = 0f; t < 1; t += Time.deltaTime / reqTime)
-            {
-                //now do the adjusting
-                hookChain.transform.position = (Vector2)transform.position + ch * t / 2f;
-                hookChain.size = new Vector2(1f, t * totalDist);
-                hookChain.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
-
-                //recalculate this shit every single time ugh
-                ch = hookHit - (Vector2)transform.position;
-                totalDist = ch.magnitude;
-                reqTime = totalDist / hookSpeed;
-                yield return null;
-            }
-        }
-
-        //Update the hooks size and that.
-        private void UpdateChain()
-        {
-            var ch = hookHit - (Vector2)transform.position;
-            hookChain.transform.position = Vector2.Lerp(transform.position, hookHit, 0.5f);
-            hookChain.size = new Vector2(1f, ch.magnitude );
-            hookChain.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
-        }
-
-        private void BreakChain()
-        {
-            hookHit = Vector2.positiveInfinity;
-            hooking = false;
-            hookChain.gameObject.SetActive(false);
+           // if (frameAction && !hooking) 
+           //    StartCoroutine(DoHook());
         }
 
         /// <summary>
@@ -477,10 +366,11 @@ namespace Game.Controller
             attack = false;
             Debug.Log("Attack!");
             RaycastHit2D hit;
-            if(hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (playerWidth/2)))
+            if(hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (PlayerWidth/2)))
             {
-                if(hit.transform.CompareTag("Enemy"))
-                    hit.transform.GetComponent<EnemyBase>().ProcessHit(new AttackHitData(attackDamage, hit.point));
+                var damageable = hit.transform.GetComponent<IDamageable>();
+                if(damageable != null)
+                    damageable.ProcessHit(new AttackHitData(attackDamage, hit.point));
             }
 
             StartCoroutine(ResetAttack());
@@ -493,20 +383,21 @@ namespace Game.Controller
         }
 
         //TODO: Add Throwable Items
+        //TODO: also make this an action instead of this lol.
         /// <summary>
         /// Throw the equipped thing
         /// </summary>
         private void Throw()
         {
-            if (throwAmmo <= 0)
-                return;
-            var velocity = throwable.startVelocity * directionToMouse;
-            var obj = Instantiate(throwable.prefab, transform.position, Quaternion.identity, null);
-            var throwBody = obj.GetComponent<Rigidbody2D>();
-            throwBody.velocity = velocity;
-            throwAmmo--;
-            shouldThrow = false;
-            state = EntityState.Throwing;
+            //if (throwAmmo <= 0)
+            //    return;
+            //var velocity = throwable.startVelocity * directionToMouse;
+            //var obj = Instantiate(throwable.prefab, transform.position, Quaternion.identity, null);
+            //var throwBody = obj.GetComponent<Rigidbody2D>();
+            //throwBody.velocity = velocity;
+            //throwAmmo--;
+            //shouldThrow = false;
+            //state = EntityState.Throwing;
         }
 
         //TODO: process knockback and that kind of stuff.
@@ -514,11 +405,11 @@ namespace Game.Controller
         /// Process a hit
         /// </summary>
         /// <param name="hitData"></param>
-        internal override void ProcessHit(AttackHitData hitData)
+        public override void ProcessHit(AttackHitData hitData)
         {
             currentHealth -= hitData.Damage;
         }
-        internal override void ProcessHit(AttackHitData hitData, bool isOnlyDamage)
+        public override void ProcessHit(AttackHitData hitData, bool isOnlyDamage)
         {
             if (isOnlyDamage)
                 currentHealth -= hitData.Damage;
@@ -535,8 +426,38 @@ namespace Game.Controller
         {
             transform.position = startPos;
             body.velocity = Vector2.zero;
-            if (throwable != null)
-                throwAmmo = throwable.startAmount;
         }
+    }
+
+    [System.Serializable]
+    public struct PlayerControllerSettings
+    {
+        [SerializeField, Tooltip("height of the players hitbox")]
+        internal float playerHeight;
+        [SerializeField, Tooltip("width of the players hitbox")]
+        internal float playerWidth;
+        [SerializeField, Tooltip("The fixed height the player can jump (in Units).")]
+        internal float jumpHeight;
+        [SerializeField, Tooltip("how fast the player usually moves on the ground.")]
+        internal float targetSpeed;
+        [SerializeField, Tooltip("how fast the speed of the player changes while on ground.")]
+        internal float acceleration;
+        [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
+        internal float airControlStrength;
+        [SerializeField, Tooltip("strength of wall jumps")]
+        internal float wallJumpStrength;
+
+        public static PlayerControllerSettings DefaultSettings 
+            => new PlayerControllerSettings()
+            {
+                playerHeight = 0.8f,
+                playerWidth = 0.8f,
+                jumpHeight = 1.0f,
+                targetSpeed = 1.0f,
+                acceleration = 2.0f,
+                airControlStrength = 0.25f,
+                wallJumpStrength = 0.75f,
+            };
+        
     }
 }

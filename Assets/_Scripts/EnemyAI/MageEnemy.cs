@@ -32,7 +32,7 @@ namespace Game
             canTeleport = true;
         }
 
-        internal override void ProcessHit(AttackHitData hitData)
+        public override void ProcessHit(AttackHitData hitData)
         {
             Debug.Log("Mage");
             if(canTeleport)
@@ -42,7 +42,7 @@ namespace Game
             }
             base.ProcessHit(hitData);
         }
-        internal override void ProcessHit(AttackHitData hitData, bool onlyDamage)
+        public override void ProcessHit(AttackHitData hitData, bool onlyDamage)
         {
             if (canTeleport)
             {

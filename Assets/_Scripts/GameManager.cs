@@ -29,7 +29,7 @@ namespace Game
                 if (!SaveManager.TryLoad(out save))
                 {   //try to load, if it cant load, create a new save
                     save = new SaveData();
-                    Debug.Log("Creating New SaveData");
+                    //Debug.Log("Creating New SaveData");
                 }
             }
         }

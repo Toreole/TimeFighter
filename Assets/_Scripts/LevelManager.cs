@@ -99,6 +99,7 @@ namespace Game
             OnLevelFail += LevelFailed;
         }
 
+        //TODO: player time and health should be seperated
         /// <summary>
         /// Initial setup for the player health
         /// </summary>
@@ -106,7 +107,7 @@ namespace Game
         {
             if (info.LevelTime > 0)
             {
-                controller.health = info.LevelTime;
+                controller.maxHealth = info.LevelTime;
                 controller.currentHealth = info.LevelTime;
 
                 levelTimeSlider.maxValue = info.LevelTime;
@@ -115,7 +116,7 @@ namespace Game
             }
             else
             {
-                controller.health = 1;
+                controller.maxHealth = 1;
                 controller.currentHealth = 1;
                 levelTimeSlider.gameObject.SetActive(false);
             }
@@ -133,7 +134,7 @@ namespace Game
             timerDamage.Damage = Time.deltaTime;
             controller.ProcessHit(timerDamage, true);
             levelTimeSlider.value = controller.currentHealth;
-            sliderFill.color = sliderGradient.Evaluate(controller.currentHealth / controller.health);
+            sliderFill.color = sliderGradient.Evaluate(controller.currentHealth / controller.maxHealth);
 
             if (controller.IsDead)
                 OnLevelFail?.Invoke();
@@ -149,7 +150,7 @@ namespace Game
         /// </summary>
         private IEnumerator StartLevel()
         {
-            Debug.Log("Start...");
+            //Debug.Log("Start...");
             countdownText.gameObject.SetActive(true);
             for(float t = countdownLength; t > 0f; t -= Time.deltaTime)
             {
@@ -160,7 +161,7 @@ namespace Game
             }
             countdownText.gameObject.SetActive(false);
             OnLevelStart?.Invoke();
-            Debug.Log("Started");
+            //Debug.Log("Started");
             GameStarted = true;
         }
 

@@ -2966,6 +2966,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1efedddb11702c549ad25278b46ec8e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  body: {fileID: 0}
   halfHeight: 0.5
   settings: {fileID: 11400000, guid: 9d5cbb72184221148b3c32007c5ae39f, type: 2}
   railSystem: []
@@ -3221,20 +3222,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f814471261eeb6141b0d3341f628f33e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  body: {fileID: 6447042201828189512}
   active: 1
   camera: {fileID: 7762223513022645797}
   ground: {fileID: 6447042203542157649}
   groundLayer:
     serializedVersion: 2
     m_Bits: 1
-  body: {fileID: 6447042201828189512}
-  playerHeight: 0.8
-  playerWidth: 0.8
-  jumpHeight: 2
-  targetSpeed: 3
-  acceleration: 6.62
-  airControlStrength: 0.2
-  wallJumpStrength: 0.75
+  controllerSettings:
+    playerHeight: 0.8
+    playerWidth: 0.8
+    jumpHeight: 1
+    targetSpeed: 1
+    acceleration: 2
+    airControlStrength: 0.25
+    wallJumpStrength: 0.75
   hookSpeed: 20
   hookRange: 10
   hookStrength: 9

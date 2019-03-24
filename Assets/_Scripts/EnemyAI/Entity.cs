@@ -5,12 +5,19 @@ using UnityEngine;
 
 namespace Game
 {
-    public abstract class Entity : MonoBehaviour
+    /// <summary>
+    /// The base class for all moving entities
+    /// </summary>
+    public abstract class Entity : MonoBehaviour, IDamageable
     {
-        internal abstract void ProcessHit(AttackHitData data);
-        internal abstract void ProcessHit(AttackHitData data, bool onlyDamage);
+        public abstract void ProcessHit(AttackHitData data);
+        public abstract void ProcessHit(AttackHitData data, bool onlyDamage);
         internal abstract void ResetEntity();
 
+        [SerializeField, Tooltip("The Rigidbody component, will be automatically set in Start()")]
+        protected Rigidbody2D body;
+
         internal float Health { get; set; }
+        public Rigidbody2D Body => body;
     }
 }
