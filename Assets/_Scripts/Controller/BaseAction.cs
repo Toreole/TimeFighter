@@ -23,6 +23,7 @@ namespace Game.Controller
         public bool CanPerform   { get; protected set; } = true;
         public bool ShouldPerform { get; set; } = false;
         public float RemainingCooldown { get; protected set; } = 0f;
+        public float RelativeCooldown => RemainingCooldown / cooldown;
         public Sprite UISprite => uiSprite;
         protected Vector2 DirToMouse => (Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position).normalized;
 

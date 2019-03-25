@@ -44,6 +44,10 @@ namespace Game.Controller
         [SerializeField, Tooltip("The time between attacks")]
         protected float attackCooldown = 0.75f;
 
+        [Header("UI")]
+        [SerializeField]
+        protected PlayerUIManager uIManager;
+
         protected bool canAttack = true;
         protected internal float maxHealth; //TODO: make this actual health.
         public bool IsDead { get { return currentHealth <= 0f; } }
@@ -82,9 +86,8 @@ namespace Game.Controller
             if (body == null)
                 body = GetComponent<Rigidbody2D>();
             actions = new List<BaseAction>(GetComponents<BaseAction>());
-            //if (throwable != null)
-            //    throwAmmo = throwable.startAmount;
-            //Debug.Log("Player Setup Events");
+            if (actions.Count > 0)
+                uIManager.SetAction(actions[0]);
             //setup events
             LevelManager.OnLevelStart    += OnLevelStart;
             LevelManager.OnLevelFail     += OnLevelFail;
@@ -168,8 +171,14 @@ namespace Game.Controller
             actionPersist  = Input.GetButton("RightClick");
             frameAction   = Input.GetButtonDown("RightClick");
             mouseScroll = Input.GetAxisRaw("MouseScroll");
-            actionOffset += mouseScroll;
-            selectedAction = Mathf.Clamp((int)actionOffset % actions.Count, 0, actions.Count);
+
+            //TODO: Fix "scrolling" through the actions.
+            var newAction = Mathf.Clamp(selectedAction + NormalizeInt(mouseScroll), 0, actions.Count-1);
+            if(newAction != selectedAction && !actions[selectedAction].IsPerforming)
+            {
+                uIManager.SetAction(actions[newAction]);
+                selectedAction = newAction;
+            }
 
             //mouse position
             var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
