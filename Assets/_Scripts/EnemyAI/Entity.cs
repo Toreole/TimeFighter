@@ -29,6 +29,7 @@ namespace Game
         protected internal float currentHealth;
         internal float Health { get => currentHealth; set => currentHealth = value; }
         public Rigidbody2D Body => body;
+        public Vector2 Position => transform.position;
 
         internal void AddAction(BaseAction action) { if(!actions.Exists(x => action)) actions.Add(action); }
         protected virtual void Start()

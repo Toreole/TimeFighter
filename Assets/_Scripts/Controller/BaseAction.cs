@@ -21,6 +21,7 @@ namespace Game.Controller
         public bool HasOwner { get; protected set; } = false;
         public bool IsPerforming { get; protected set; } = false;
         public bool CanPerform   { get; protected set; } = true;
+        public bool ShouldPerform { get; set; } = false;
         public float RemainingCooldown { get; protected set; } = 0f;
         public Sprite UISprite => uiSprite;
         protected Vector2 DirToMouse => (Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position).normalized;

@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - Environment
+  - SwingTarget
   layers:
   - Default
   - TransparentFX

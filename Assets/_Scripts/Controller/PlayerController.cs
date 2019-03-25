@@ -54,11 +54,13 @@ namespace Game.Controller
         protected bool jump;
         protected bool attack;
         protected bool shouldThrow;
+        protected float mouseScroll;
 
         //TODO: actions!
         protected bool actionPersist;
         protected bool frameAction;
         protected int selectedAction;
+        protected float actionOffset;
 
         //other runtime variables
         protected Vector3 startPos = Vector3.zero;
@@ -164,7 +166,10 @@ namespace Game.Controller
             shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
             actionPersist  = Input.GetButton("RightClick");
             frameAction   = Input.GetButtonDown("RightClick") || frameAction;
-            
+            mouseScroll = Input.GetAxis("MouseScroll");
+            actionOffset += mouseScroll;
+            selectedAction = (int)actionOffset % actions.Count;
+
             //mouse position
             var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
             directionToMouse = (mousePos - (Vector2)transform.position).normalized;
@@ -283,7 +288,6 @@ namespace Game.Controller
                     var nextVel = vel + stepAcc;
                     if (nextVel.magnitude > TargetSpeed && nextVel.magnitude > vel.magnitude)
                         nextVel = vel - stepAcc;
-                    Debug.Log(nextVel.x);
                     body.velocity = nextVel;
                 }
             }
@@ -355,12 +359,14 @@ namespace Game.Controller
         //TODO: fix actions
         private void PerformActions()
         {
-            if (shouldThrow)
-                Throw();
             if (attack && canAttack)
                 Attack();
-           // if (frameAction && !hooking) 
-           //    StartCoroutine(DoHook());
+            if (frameAction && actions[selectedAction].CanPerform)
+            {
+                frameAction = false;
+                actions[selectedAction].PerformAction();
+            }
+            actions[selectedAction].ShouldPerform = actionPersist;
         }
 
         /// <summary>

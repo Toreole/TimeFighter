@@ -34,14 +34,39 @@ namespace Game.Controller
         //Properties
         public new bool IsPerforming { get => hooking; protected set => hooking = value; }
 
-        public override void CancelAction()
+        //Setup if needed
+        private void Start()
         {
-            throw new NotImplementedException();
+            if (entity == null)
+                entity = GetComponent<Entity>();
+            if (swingAnchorPrefab == null)
+            {
+                var tempGO = new GameObject();
+                var tempBody = tempGO.AddComponent<Rigidbody2D>();
+                tempBody.bodyType = RigidbodyType2D.Static;
+                joint = tempGO.AddComponent<DistanceJoint2D>();
+                joint.autoConfigureDistance = false;
+                tempGO.SetActive(false);
+            }
+            else
+                joint = Instantiate(swingAnchorPrefab).GetComponent<DistanceJoint2D>();
+            joint.connectedBody = entity.Body;
+            joint.maxDistanceOnly = true;
+            joint.autoConfigureDistance = false;
+            joint.enabled = false;
+            ropeRenderer = Instantiate(swingVisualPrefab).GetComponent<SpriteRenderer>();
         }
 
+        //STOP RIGHT THERE
+        public override void CancelAction()
+        {
+            StopAllCoroutines();
+        }
+
+        //Perform
         public override void PerformAction()
         {
-            throw new NotImplementedException();
+            StartCoroutine(DoHook());
         }
         
         //TODO: fix
@@ -50,37 +75,44 @@ namespace Game.Controller
         /// </summary>
         private IEnumerator DoHook()
         {
-            hooking = true;
+            CanPerform = false;
+            IsPerforming = true;
             //1. try to find location to hook to
             RaycastHit2D hit;
-            if (hit = Physics2D.Raycast(transform.position, DirToMouse, maxDistance, targetLayer))
+            if (hit = Physics2D.Raycast(entity.Position, DirToMouse, maxDistance, targetLayer))
             {
                 hookHit = hit.point;
             }
             else
             {
-                yield return new WaitForSeconds(0.2f);
-                hooking = false;
+                //the raycast doesnt hit anything
+                yield return new WaitForSeconds(cooldown);
+                IsPerforming = false;
+                CanPerform = true;
                 yield break; //STOP, THIS VIOLATES THE LAW
             }
+            if(!hit.collider.CompareTag(targetTag))
+            {
+                //Not the correct tag.
+                yield return new WaitForSeconds(cooldown);
+                IsPerforming = false;
+                CanPerform = true;
+                yield break;
+            }
             //2. fire hook
+            IsPerforming = true;
             ropeRenderer.gameObject.SetActive(true);
             yield return ShootHook();
+
             //3. Do the hooking
             joint.enabled = true;
             joint.transform.position = hit.point;
-            while (IsPerforming)
+            joint.distance = Vector2.Distance(hit.point, entity.Position);
+            while (ShouldPerform)
             {
-                if (Vector2.Distance(hookHit, transform.position) > maxDistance)
+                if (Vector2.Distance(hookHit, entity.Position) > maxDistance)
                 {
-                    joint.enabled = false;
-                    BreakChain();
-                    yield break;
-                }
-                //TODO: maybe make it momentum based whether you can jump or not. this is a temporary fix tho.
-                if (Input.GetButtonDown("Jump") && canHookJump)
-                {
-                    canHookJump = false;
+                    CanPerform = false;
                     joint.enabled = false;
                     BreakChain();
                     yield break;
@@ -92,13 +124,15 @@ namespace Game.Controller
                 yield return null;
             }
             joint.enabled = false;
+            IsPerforming = false;
+            CanPerform = true;
             BreakChain();
         }
 
         //TODO: this is fucking broken, i dont know how but it just fucks up.
         private IEnumerator ShootHook()
         {
-            Vector2 ch = hookHit - (Vector2)transform.position;
+            Vector2 ch = hookHit - entity.Position;
             float totalDist = ch.magnitude;
             float reqTime = totalDist / tossSpeed;
             for (float t = 0f; t < 1; t += Time.deltaTime / reqTime)
@@ -109,7 +143,7 @@ namespace Game.Controller
                 ropeRenderer.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
 
                 //recalculate this shit every single time ugh
-                ch = hookHit - (Vector2)transform.position;
+                ch = hookHit - entity.Position;
                 totalDist = ch.magnitude;
                 reqTime = totalDist / tossSpeed;
                 yield return null;
@@ -119,7 +153,7 @@ namespace Game.Controller
         //Update the hooks size and that.
         private void UpdateChain()
         {
-            var ch = hookHit - (Vector2)transform.position;
+            var ch = hookHit - entity.Position;
             ropeRenderer.transform.position = Vector2.Lerp(transform.position, hookHit, 0.5f);
             ropeRenderer.size = new Vector2(1f, ch.magnitude);
             ropeRenderer.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
@@ -127,6 +161,7 @@ namespace Game.Controller
 
         private void BreakChain()
         {
+            IsPerforming = false;
             hookHit = Vector2.positiveInfinity;
             hooking = false;
             ropeRenderer.gameObject.SetActive(false);
