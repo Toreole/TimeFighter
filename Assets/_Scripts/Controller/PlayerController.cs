@@ -55,10 +55,10 @@ namespace Game.Controller
         protected bool attack;
         protected bool shouldThrow;
         protected float mouseScroll;
-
-        //TODO: actions!
         protected bool actionPersist;
         protected bool frameAction;
+
+        //Actions
         protected int selectedAction;
         protected float actionOffset;
 
@@ -124,6 +124,7 @@ namespace Game.Controller
             //FaceMouse();
             GetInput();
             UpdateState();
+            PerformActions();
         }
 
         /// <summary>
@@ -165,16 +166,30 @@ namespace Game.Controller
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
             shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
             actionPersist  = Input.GetButton("RightClick");
-            frameAction   = Input.GetButtonDown("RightClick") || frameAction;
-            mouseScroll = Input.GetAxis("MouseScroll");
+            frameAction   = Input.GetButtonDown("RightClick");
+            mouseScroll = Input.GetAxisRaw("MouseScroll");
             actionOffset += mouseScroll;
-            selectedAction = (int)actionOffset % actions.Count;
+            selectedAction = Mathf.Clamp((int)actionOffset % actions.Count, 0, actions.Count);
 
             //mouse position
             var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
             directionToMouse = (mousePos - (Vector2)transform.position).normalized;
         }
-        
+
+        //TODO: fix actions
+        private void PerformActions()
+        {
+            if (attack && canAttack)
+                Attack();
+            var act = actions[selectedAction];
+            if (frameAction && act.CanPerform)
+            {
+                frameAction = false;
+                act.PerformAction();
+            }
+            act.ShouldPerform = actionPersist;
+        }
+
         /// <summary>
         /// Update the PlayerState
         /// </summary>
@@ -213,7 +228,6 @@ namespace Game.Controller
                 return;
             CheckGrounded();
             Move();
-            PerformActions();
         }
 
         #region PhysicsAndMovement
@@ -356,18 +370,6 @@ namespace Game.Controller
         #endregion
 
         #region CombatCode
-        //TODO: fix actions
-        private void PerformActions()
-        {
-            if (attack && canAttack)
-                Attack();
-            if (frameAction && actions[selectedAction].CanPerform)
-            {
-                frameAction = false;
-                actions[selectedAction].PerformAction();
-            }
-            actions[selectedAction].ShouldPerform = actionPersist;
-        }
 
         /// <summary>
         /// Temporary Attack Code

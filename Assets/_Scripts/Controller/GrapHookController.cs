@@ -1,47 +1,14 @@
-﻿using System;
+﻿using UnityEngine;
 using System.Collections;
-using UnityEngine;
 
 namespace Game.Controller
 {
-    /// <summary>
-    /// This controlls the swinging-style hook.
-    /// </summary>
-    public class SwingHookController : GenericHook
+    public class GrapHookController : GenericHook 
     {
-        [Header("Swing Hoook Fields")]
+        [Header("Grapling Hook Fields")]
         [SerializeField]
-        protected GameObject swingAnchorPrefab;
+        protected float pullStrength;
         
-        //Runtime vars
-        protected DistanceJoint2D joint; //this is both the DistanceJoint2D, aswell as the static Rigidbody/transform end point of the hook.
-        protected bool canHookJump = false;
-        
-        //Setup if needed
-        protected override void Start()
-        {
-            base.Start();
-            if (swingAnchorPrefab == null)
-            {
-                var tempGO = new GameObject();
-                var tempBody = tempGO.AddComponent<Rigidbody2D>();
-                tempBody.bodyType = RigidbodyType2D.Static;
-                joint = tempGO.AddComponent<DistanceJoint2D>();
-                joint.autoConfigureDistance = false;
-                tempGO.SetActive(false);
-            }
-            else
-                joint = Instantiate(swingAnchorPrefab).GetComponent<DistanceJoint2D>();
-            joint.connectedBody = entity.Body;
-            joint.maxDistanceOnly = true;
-            joint.autoConfigureDistance = false;
-            joint.enabled = false;
-        }
-        
-        //TODO: fix
-        /// <summary>
-        /// The actual hooking
-        /// </summary>
         protected override IEnumerator DoHook()
         {
             CanPerform = false;
@@ -72,9 +39,6 @@ namespace Game.Controller
             yield return ShootHook();
 
             //3. Do the hooking
-            joint.enabled = true;
-            joint.transform.position = hit.point;
-            joint.distance = Vector2.Distance(hit.point, entity.Position);
             while (ShouldPerform)
             {
                 if (Vector2.Distance(hookHit, entity.Position) > maxDistance)
@@ -83,6 +47,7 @@ namespace Game.Controller
                     yield return DoCooldown();
                     yield break;
                 }
+                entity.Body.AddForce((hookHit - entity.Position).normalized * pullStrength);
                 //TODO: optional: 1. break the hook when something gets in the way,
                 //TODO:           2. Jump from the hook and break it
                 //TODO:           3. Move up and down the hook while possible (using yMove)
@@ -91,17 +56,6 @@ namespace Game.Controller
             }
             BreakChain();
             yield return DoCooldown();
-        }
-
-        protected override void UpdateChain()
-        {
-            base.UpdateChain();
-        }
-
-        protected override void BreakChain()
-        {
-            base.BreakChain();
-            joint.enabled = false;
         }
     }
 }
