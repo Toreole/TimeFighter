@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using Game;
 
@@ -36,6 +36,18 @@ namespace Game.Controller
                 return;
             HasOwner = true;
             entity = owner;
+        }
+
+        protected virtual IEnumerator DoCooldown()
+        {
+            RemainingCooldown = cooldown;
+            for(float t = 0; t <= cooldown; t += Time.deltaTime)
+            {
+                RemainingCooldown = cooldown - t;
+                yield return null;
+            }
+            RemainingCooldown = 0f;
+            CanPerform = true;
         }
     }
 }

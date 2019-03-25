@@ -82,22 +82,20 @@ namespace Game.Controller
             if (hit = Physics2D.Raycast(entity.Position, DirToMouse, maxDistance, targetLayer))
             {
                 hookHit = hit.point;
+                if (!hit.collider.CompareTag(targetTag))
+                {
+                    //Not the correct tag.
+                    IsPerforming = false;
+                    CanPerform = true;
+                    yield break;
+                }
             }
             else
             {
                 //the raycast doesnt hit anything
-                yield return new WaitForSeconds(cooldown);
                 IsPerforming = false;
                 CanPerform = true;
                 yield break; //STOP, THIS VIOLATES THE LAW
-            }
-            if(!hit.collider.CompareTag(targetTag))
-            {
-                //Not the correct tag.
-                yield return new WaitForSeconds(cooldown);
-                IsPerforming = false;
-                CanPerform = true;
-                yield break;
             }
             //2. fire hook
             IsPerforming = true;
@@ -112,9 +110,8 @@ namespace Game.Controller
             {
                 if (Vector2.Distance(hookHit, entity.Position) > maxDistance)
                 {
-                    CanPerform = false;
-                    joint.enabled = false;
                     BreakChain();
+                    yield return DoCooldown();
                     yield break;
                 }
                 //TODO: optional: 1. break the hook when something gets in the way,
@@ -123,10 +120,8 @@ namespace Game.Controller
                 UpdateChain();
                 yield return null;
             }
-            joint.enabled = false;
-            IsPerforming = false;
-            CanPerform = true;
             BreakChain();
+            yield return DoCooldown();
         }
 
         //TODO: this is fucking broken, i dont know how but it just fucks up.
@@ -161,6 +156,7 @@ namespace Game.Controller
 
         private void BreakChain()
         {
+            joint.enabled = false;
             IsPerforming = false;
             hookHit = Vector2.positiveInfinity;
             hooking = false;

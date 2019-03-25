@@ -17,17 +17,17 @@ namespace Game
 
         [Header("Level Settings")]
         [SerializeField, Tooltip("All basic Info about this level")]
-        private LevelInfo info;
+        protected LevelInfo info;
 
         [Header("Entities")]
         [SerializeField]
-        private GameObject player;
-        private PlayerController controller;
+        protected GameObject player;
+        protected PlayerController controller;
 
         [SerializeField]
-        private List<EnemyBase> enemies;
-        private int enemyCount;
-        private int deadEnemies;
+        protected List<EnemyBase> enemies;
+        protected int enemyCount;
+        protected int deadEnemies;
 
         [Header("Countdown")]
         [SerializeField]
@@ -37,14 +37,15 @@ namespace Game
 
         [Header("Timer")]
         [SerializeField]
-        private Slider levelTimeSlider;
+        protected Slider levelTimeSlider;
         [SerializeField]
-        private Image sliderFill;
+        protected Image sliderFill;
         [SerializeField]
-        private Gradient sliderGradient;
-        private AttackHitData timerDamage = new AttackHitData();
+        protected Gradient sliderGradient;
+        protected AttackHitData timerDamage = new AttackHitData();
 
-        private bool justCompleted = false;
+        protected bool justCompleted = false;
+        protected float timeLeft = 10f;
 
         //Might come in handy.
         public delegate void GameEvent();
@@ -61,7 +62,7 @@ namespace Game
         public Transform PlayerTransform { get { return player.transform; } }
 
         //Set the instance boiii
-        private void Awake()
+        protected void Awake()
         {
             if (instance != null)
             {
@@ -71,7 +72,7 @@ namespace Game
         }
 
         //Entry point for StartLevel. nothing fancy.
-        private void Start()
+        protected void Start()
         {
             if (RichPresenceManager.instance != null)
                 RichPresenceManager.instance.SetActiveLevel(info.DescriptiveName);
@@ -103,12 +104,11 @@ namespace Game
         /// <summary>
         /// Initial setup for the player health
         /// </summary>
-        private void SetupPlayer()
+        protected void SetupPlayer()
         {
             if (info.LevelTime > 0)
             {
-                controller.maxHealth = info.LevelTime;
-                controller.currentHealth = info.LevelTime;
+                timeLeft = info.LevelTime;
 
                 levelTimeSlider.maxValue = info.LevelTime;
                 levelTimeSlider.value = info.LevelTime;
@@ -116,8 +116,6 @@ namespace Game
             }
             else
             {
-                controller.maxHealth = 1;
-                controller.currentHealth = 1;
                 levelTimeSlider.gameObject.SetActive(false);
             }
         }
@@ -125,18 +123,17 @@ namespace Game
         /// <summary>
         /// Update player health every frame and also check stuff
         /// </summary>
-        private void LateUpdate()
+        protected void LateUpdate()
         {
             if (!GameStarted)
                 return;
             if (info.LevelTime <= 0)
                 return;
-            timerDamage.Damage = Time.deltaTime;
-            controller.ProcessHit(timerDamage, true);
-            levelTimeSlider.value = controller.currentHealth;
-            sliderFill.color = sliderGradient.Evaluate(controller.currentHealth / controller.maxHealth);
+            timeLeft -= Time.deltaTime;
+            levelTimeSlider.value = timeLeft;
+            sliderFill.color = sliderGradient.Evaluate(timeLeft / info.LevelTime);
 
-            if (controller.IsDead)
+            if (controller.IsDead || timeLeft <= 0f)
                 OnLevelFail?.Invoke();
             if (deadEnemies >= enemyCount && !controller.IsDead && !justCompleted)
             {
@@ -148,7 +145,7 @@ namespace Game
         /// <summary>
         /// Start the game after counting down some time.
         /// </summary>
-        private IEnumerator StartLevel()
+        protected IEnumerator StartLevel()
         {
             //Debug.Log("Start...");
             countdownText.gameObject.SetActive(true);
@@ -166,7 +163,7 @@ namespace Game
         }
 
         //If this doesnt exist, update the instance just in case.
-        private void OnDestroy()
+        protected void OnDestroy()
         {
             instance = null;
         }
@@ -185,7 +182,7 @@ namespace Game
             }
         }
 
-        private void LevelFailed()
+        protected void LevelFailed()
         {
             ResetLevel();
             GameStarted = false;
