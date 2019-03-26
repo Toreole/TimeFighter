@@ -15,7 +15,6 @@ namespace Game.Controller
         
         //Runtime vars
         protected DistanceJoint2D joint; //this is both the DistanceJoint2D, aswell as the static Rigidbody/transform end point of the hook.
-        protected bool canHookJump = false;
         
         //Setup if needed
         protected override void Start()
