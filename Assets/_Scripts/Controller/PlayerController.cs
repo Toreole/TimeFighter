@@ -170,14 +170,14 @@ namespace Game.Controller
             shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
             actionPersist  = Input.GetButton("RightClick");
             frameAction   = Input.GetButtonDown("RightClick");
-            mouseScroll = Input.GetAxisRaw("MouseScroll");
-
-            //TODO: Fix "scrolling" through the actions.
-            var newAction = Mathf.Clamp(selectedAction + NormalizeInt(mouseScroll), 0, actions.Count-1);
-            if(newAction != selectedAction && !actions[selectedAction].IsPerforming)
+            
+            //Swap actions
+            //TODO: have all actions displayed at once, animate the swapping on the UI
+            if(Input.GetButtonDown("ActionSwap"))
             {
-                uIManager.SetAction(actions[newAction]);
-                selectedAction = newAction;
+                selectedAction += (int)Input.GetAxisRaw("ActionSwap");
+                selectedAction = (selectedAction < 0) ? actions.Count - 1: (selectedAction >= actions.Count)? 0 : selectedAction;
+                uIManager.SetAction(actions[selectedAction]);
             }
 
             //mouse position
