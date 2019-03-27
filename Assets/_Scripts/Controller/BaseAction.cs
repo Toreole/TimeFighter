@@ -8,7 +8,7 @@ namespace Game.Controller
     /// <summary>
     /// The base class for all actions.
     /// </summary>
-    public abstract class BaseAction : MonoBehaviour
+    public abstract class BaseAction : MonoBehaviour, ICooldown
     {
         [Header("Base Action Fields")]
         [SerializeField, Range(0.0f, 512), Tooltip("The cooldown for this action in seconds.")]
@@ -31,7 +31,7 @@ namespace Game.Controller
 
         public abstract void PerformAction();
         
-        public void ClaimOwnership(Entity owner)
+        public virtual void ClaimOwnership(Entity owner)
         {
             if (HasOwner)
                 return;
@@ -39,7 +39,7 @@ namespace Game.Controller
             entity = owner;
         }
 
-        protected virtual IEnumerator DoCooldown()
+        public virtual IEnumerator DoCooldown()
         {
             RemainingCooldown = cooldown;
             for(float t = 0; t <= cooldown; t += Time.deltaTime)

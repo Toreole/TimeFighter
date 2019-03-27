@@ -48,9 +48,6 @@ namespace Game.Controller
                     yield break;
                 }
                 entity.Body.AddForce((hookHit - entity.Position).normalized * pullStrength);
-                //TODO: optional: 1. break the hook when something gets in the way,
-                //TODO:           2. Jump from the hook and break it
-                //TODO:           3. Move up and down the hook while possible (using yMove)
                 UpdateChain();
                 yield return null;
             }

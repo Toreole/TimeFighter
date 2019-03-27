@@ -17,9 +17,9 @@ namespace Game.Controller
         protected DistanceJoint2D joint; //this is both the DistanceJoint2D, aswell as the static Rigidbody/transform end point of the hook.
         
         //Setup if needed
-        protected override void Start()
+        public override void ClaimOwnership(Entity entity)
         {
-            base.Start();
+            base.ClaimOwnership(entity);
             if (swingAnchorPrefab == null)
             {
                 var tempGO = new GameObject();
@@ -37,7 +37,6 @@ namespace Game.Controller
             joint.enabled = false;
         }
         
-        //TODO: fix
         /// <summary>
         /// The actual hooking
         /// </summary>

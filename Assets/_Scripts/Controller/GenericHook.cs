@@ -24,10 +24,9 @@ namespace Game.Controller
         //Properties
         public new bool IsPerforming { get => hooking; protected set => hooking = value; }
 
-        protected virtual void Start()
+        public override void ClaimOwnership(Entity entity)
         {
-            if (entity == null)
-                entity = GetComponent<Entity>();
+            base.ClaimOwnership(entity);
             if(swingVisualPrefab != null)
                 ropeRenderer = Instantiate(swingVisualPrefab).GetComponent<SpriteRenderer>();
         }
