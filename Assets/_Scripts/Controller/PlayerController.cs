@@ -70,13 +70,14 @@ namespace Game.Controller
         protected Vector3 startPos = Vector3.zero;
         protected bool isGrounded = false;
         protected EntityState state = EntityState.Idle;
-
+        
         /// <summary>
         /// Start!
         /// </summary>
         protected override void Start()
         {
             base.Start();
+            IsPlayer = true;
             startPos = transform.position;
 
             if (camera == null)

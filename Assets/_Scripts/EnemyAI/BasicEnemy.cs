@@ -3,6 +3,7 @@ using System.Collections;
 
 namespace Game
 {
+    [System.Obsolete]
     public class BasicEnemy : EnemyBase
     {
         [System.Obsolete]

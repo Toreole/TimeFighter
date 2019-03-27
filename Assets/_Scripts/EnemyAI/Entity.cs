@@ -28,10 +28,12 @@ namespace Game
         
         protected internal float currentHealth;
         internal float Health { get => currentHealth; set => currentHealth = value; }
+        public bool IsPlayer { get; protected set; } = false;
         public Rigidbody2D Body => body;
         public Vector2 Position => transform.position;
 
         internal void AddAction(BaseAction action) { if(!actions.Exists(x => action)) actions.Add(action); }
+        internal void RemoveAction(BaseAction action) { if (!actions.Exists(x => action)) actions.Remove(action); }
         protected virtual void Start()
         {
             actions = new List<BaseAction>(GetComponents<BaseAction>());

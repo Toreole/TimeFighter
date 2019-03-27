@@ -3,6 +3,7 @@ using System.Collections;
 
 namespace Game
 {
+    [System.Obsolete]
     public class MageEnemy : EnemyBase
     {
         [SerializeField, Tooltip("The positions this mage can teleport inbetween")]

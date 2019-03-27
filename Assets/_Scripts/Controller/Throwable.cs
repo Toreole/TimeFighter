@@ -7,12 +7,17 @@ namespace Game.Controller
     public class Throwable : ScriptableObject
     {
         [SerializeField]
-        protected internal GameObject prefab;
+        protected GameObject prefab;
         [SerializeField]
-        protected internal int startAmount = 2;
+        protected int startAmount = 2;
         [SerializeField]
-        protected internal int maxAmount = 3;
+        protected int maxAmount = 3;
         [SerializeField]
-        protected internal float startVelocity = 10f;
+        protected float startVelocity = 10f;
+
+        public GameObject Prefab => prefab;
+        public int StartAmount => startAmount;
+        public int MaxAmount => maxAmount;
+        public float StartVelocity => startVelocity;
     }
 }

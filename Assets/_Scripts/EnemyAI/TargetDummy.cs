@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace Game
 {
+    [System.Obsolete]
     public class TargetDummy : EnemyBase
     {
         [SerializeField]
