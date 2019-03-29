@@ -12,7 +12,7 @@ namespace Game.Controller
         [Header("Swing Hoook Fields")]
         [SerializeField]
         protected GameObject swingAnchorPrefab;
-        
+
         //Runtime vars
         protected DistanceJoint2D joint; //this is both the DistanceJoint2D, aswell as the static Rigidbody/transform end point of the hook.
         
@@ -44,38 +44,29 @@ namespace Game.Controller
         {
             CanPerform = false;
             IsPerforming = true;
+
             //1. try to find location to hook to
-            RaycastHit2D hit;
-            if (hit = Physics2D.Raycast(entity.Position, DirToMouse, maxDistance, targetLayer))
+            if (!TestForTarget(out IHookable hookable))
             {
-                hookHit = hit.point;
-                if (!hit.collider.CompareTag(targetTag))
-                {
-                    //Not the correct tag.
-                    IsPerforming = false;
-                    CanPerform = true;
-                    yield break;
-                }
-            }
-            else
-            {
-                //the raycast doesnt hit anything
-                IsPerforming = false;
                 CanPerform = true;
-                yield break; //STOP, THIS VIOLATES THE LAW
+                IsPerforming = false;
+                yield break;
             }
             //2. fire hook
-            IsPerforming = true;
             ropeRenderer.gameObject.SetActive(true);
             yield return ShootHook();
 
             //3. Do the hooking
             joint.enabled = true;
-            joint.transform.position = hit.point;
-            joint.distance = Vector2.Distance(hit.point, entity.Position);
+            joint.transform.position = hookHit;
+            if (hookable.HasFlag(HookInteraction.DynamicBody))
+                joint.transform.parent = hookable.M_Transform;
+            else
+                joint.transform.parent = null;
+            joint.distance = Vector2.Distance(hookHit, entity.Position);
             while (ShouldPerform)
             {
-                if (Vector2.Distance(hookHit, entity.Position) > maxDistance)
+                if (Vector2.Distance(joint.transform.position, entity.Position) > maxDistance)
                 {
                     BreakChain();
                     yield return DoCooldown();

@@ -86,7 +86,7 @@ namespace Game.Controller
                 ground = transform.GetChild(0);
             if (body == null)
                 body = GetComponent<Rigidbody2D>();
-            actions = new List<BaseAction>(GetComponents<BaseAction>());
+            actions = new List<BaseAction>(GetComponents<GenericHook>());
             if (actions.Count > 0)
                 uIManager.SetAction(actions[0]);
             //setup events

@@ -16,6 +16,8 @@ namespace Game.Controller
         protected LayerMask targetLayer;
         [SerializeField]
         protected string targetTag;
+        [SerializeField, Tooltip("Grapling or Swing?")]
+        protected HookInteraction hookType;
 
         protected SpriteRenderer ropeRenderer;
         protected Vector2 hookHit = Vector2.positiveInfinity;
@@ -62,6 +64,21 @@ namespace Game.Controller
                 reqTime = totalDist / tossSpeed;
                 yield return null;
             }
+        }
+
+        protected virtual bool TestForTarget(out IHookable hookable)
+        {
+            RaycastHit2D hit = Physics2D.Raycast(entity.Position, DirToMouse, maxDistance, targetLayer);
+            if (!hit)
+            {
+                hookable = null;
+                return false;
+            }
+            hookHit = hit.point;
+            hookable = hit.collider.gameObject.GetComponent<IHookable>();
+            if (hookable == null)
+                return false;
+            return hookable.HookInteract.HasFlag(hookType);
         }
 
         //Update the hooks size and that.

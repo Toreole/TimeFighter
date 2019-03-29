@@ -8,7 +8,7 @@ namespace Game
     /// <summary>
     /// The base class for all moving entities
     /// </summary>
-    public abstract class Entity : MonoBehaviour, IDamageable
+    public abstract class Entity : MonoBehaviour, IDamageable, IPhysicsObject
     {
         public abstract void ProcessHit(AttackHitData data);
         public abstract void ProcessHit(AttackHitData data, bool onlyDamage);

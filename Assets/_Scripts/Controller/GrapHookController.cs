@@ -8,33 +8,20 @@ namespace Game.Controller
         [Header("Grapling Hook Fields")]
         [SerializeField]
         protected float pullStrength;
-        
+
         protected override IEnumerator DoHook()
         {
             CanPerform = false;
             IsPerforming = true;
             //1. try to find location to hook to
-            RaycastHit2D hit;
-            if (hit = Physics2D.Raycast(entity.Position, DirToMouse, maxDistance, targetLayer))
+            if (!TestForTarget(out IHookable hookable))
             {
-                hookHit = hit.point;
-                if (!hit.collider.CompareTag(targetTag))
-                {
-                    //Not the correct tag.
-                    IsPerforming = false;
-                    CanPerform = true;
-                    yield break;
-                }
-            }
-            else
-            {
-                //the raycast doesnt hit anything
-                IsPerforming = false;
                 CanPerform = true;
-                yield break; //STOP, THIS VIOLATES THE LAW
+                IsPerforming = false;
+                yield break;
             }
+
             //2. fire hook
-            IsPerforming = true;
             ropeRenderer.gameObject.SetActive(true);
             yield return ShootHook();
 
