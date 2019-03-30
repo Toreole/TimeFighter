@@ -21,11 +21,7 @@ namespace Game.Controller
 
         protected SpriteRenderer ropeRenderer;
         protected Vector2 hookHit = Vector2.positiveInfinity;
-        protected bool hooking = false;
-
-        //Properties
-        public new bool IsPerforming { get => hooking; protected set => hooking = value; }
-
+        
         public override void ClaimOwnership(Entity entity)
         {
             base.ClaimOwnership(entity);

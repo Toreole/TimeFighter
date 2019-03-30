@@ -66,6 +66,7 @@ namespace Game.Controller
             joint.distance = Vector2.Distance(hookHit, entity.Position);
             while (ShouldPerform)
             {
+                IsPerforming = true;
                 if (Vector2.Distance(joint.transform.position, entity.Position) > maxDistance)
                 {
                     BreakChain();
@@ -80,11 +81,6 @@ namespace Game.Controller
             }
             BreakChain();
             yield return DoCooldown();
-        }
-
-        protected override void UpdateChain()
-        {
-            base.UpdateChain();
         }
 
         protected override void BreakChain()

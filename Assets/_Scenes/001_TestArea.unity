@@ -4056,6 +4056,10 @@ MonoBehaviour:
     acceleration: 9
     airControlStrength: 0.25
     wallJumpStrength: 0.75
+    dashLength: 1.5
+    dashCooldown: 2.5
+    dashCharges: 2
+  throwController: {fileID: 0}
   attackDamage: 1
   attackRange: 0.6
   attackCooldown: 1.2

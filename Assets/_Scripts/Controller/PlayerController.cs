@@ -16,12 +16,11 @@ namespace Game.Controller
         protected new Camera camera = null;
         protected int facingDirection = 1;
         protected Vector2 directionToMouse = Vector2.zero;
-
-        //TODO: bruh. make a setting struct or something. this looks like ass.
+        
         [Header("Physics And Movement")]
         [SerializeField, Tooltip("The empty transform child, will be automatically set in Start()")]
         protected Transform ground;
-        [SerializeField, Tooltip("Bruh")]
+        [SerializeField, Tooltip("The collision layer used to check for ground")]
         protected LayerMask groundLayer;
         [SerializeField, Tooltip("Settings for movement and that")]
         protected PlayerControllerSettings controllerSettings = PlayerControllerSettings.DefaultSettings;
@@ -33,10 +32,15 @@ namespace Game.Controller
             float TargetSpeed  => controllerSettings.targetSpeed;
             float WallJumpStrength   => controllerSettings.wallJumpStrength;
             float AirControlStrength => controllerSettings.airControlStrength;
+            int   MaxDashCharges => controllerSettings.dashCharges;
+            float DashCooldown => controllerSettings.dashCooldown;
+            float DashLength => controllerSettings.dashLength;
         #endregion
-        
+
         //This could depend on different weapons?
         [Header("Combat Stats")]
+        [SerializeField, Tooltip("Throw controller")]
+        protected ThrowController throwController;
         [SerializeField, Tooltip("The attack damage of normal attacks")]
         protected float attackDamage = 1;
         [SerializeField, Tooltip("The melee attack range")]
@@ -61,10 +65,14 @@ namespace Game.Controller
         protected float mouseScroll;
         protected bool actionPersist;
         protected bool frameAction;
+        protected bool dash;
 
         //Actions
         protected int selectedAction;
         protected float actionOffset;
+        protected int dashCharges;
+        protected bool dashing = false;
+        protected bool isRecharging = false;
 
         //other runtime variables
         protected Vector3 startPos = Vector3.zero;
@@ -79,6 +87,7 @@ namespace Game.Controller
             base.Start();
             IsPlayer = true;
             startPos = transform.position;
+            dashCharges = MaxDashCharges;
 
             if (camera == null)
                 camera = FindObjectOfType<Camera>();
@@ -86,6 +95,8 @@ namespace Game.Controller
                 ground = transform.GetChild(0);
             if (body == null)
                 body = GetComponent<Rigidbody2D>();
+            if (uIManager == null)
+                uIManager = FindObjectOfType<PlayerUIManager>();
             actions = new List<BaseAction>(GetComponents<GenericHook>());
             if (actions.Count > 0)
                 uIManager.SetAction(actions[0]);
@@ -143,38 +154,23 @@ namespace Game.Controller
         }
 
         /// <summary>
-        /// Makes the player face towards the mouse
-        /// </summary>
-        [System.Obsolete("This doesnt make sense in the long run. really. Use X-Velocity and wall-detection a factor in look direction.")]
-        private void FaceMouse()
-        {
-            var myX = transform.position.x;
-            var mousePos = (Vector2) camera.ScreenToWorldPoint(Input.mousePosition);
-            directionToMouse = (mousePos - (Vector2)transform.position).normalized;
-            int newFacingDirection =  NormalizeInt(mousePos.x - myX);
-            if (newFacingDirection == facingDirection)
-                return;
-            facingDirection = newFacingDirection;
-            transform.localScale = new Vector3(facingDirection, 1.0f, 1.0f);
-        }
-
-        /// <summary>
         /// Gets relevant input
         /// </summary>
         //TODO: check for more input if needed
         private void GetInput()
         {
-            xMove = Input.GetAxis("Horizontal");
-            yMove = Input.GetAxis("Vertical");
-            jump = (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
+            xMove  = Input.GetAxis("Horizontal");
+            yMove  = Input.GetAxis("Vertical");
+            jump   = (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
-            shouldThrow = Input.GetButtonDown("MiddleClick") || shouldThrow;
-            actionPersist  = Input.GetButton("RightClick");
+            shouldThrow   = Input.GetButtonDown("MiddleClick") || shouldThrow;
+            actionPersist = Input.GetButton("RightClick");
             frameAction   = Input.GetButtonDown("RightClick");
-            
+            dash = Input.GetButtonDown("Dash");
+
             //Swap actions
             //TODO: have all actions displayed at once, animate the swapping on the UI
-            if(Input.GetButtonDown("ActionSwap"))
+            if(Input.GetButtonDown("ActionSwap") && !actions[selectedAction].IsPerforming)
             {
                 selectedAction += (int)Input.GetAxisRaw("ActionSwap");
                 selectedAction = (selectedAction < 0) ? actions.Count - 1: (selectedAction >= actions.Count)? 0 : selectedAction;
@@ -186,7 +182,7 @@ namespace Game.Controller
             directionToMouse = (mousePos - (Vector2)transform.position).normalized;
         }
 
-        //TODO: fix actions
+        //TODO: rework attacking
         private void PerformActions()
         {
             if (attack && canAttack)
@@ -297,7 +293,14 @@ namespace Game.Controller
             //adjust the curent "look direction"
             var xS = (Mathf.Abs(body.velocity.x) < 0.1f)? transform.localScale.x : Normalized(body.velocity.x);
                 transform.localScale = new Vector3(xS, 1f, 1f);
-
+            if (dashing)
+                return;
+            if(dash && dashCharges > 0)
+            {
+                dashCharges--;
+                dash = false;
+                StartCoroutine(DoDash());
+            }
             if (isGrounded)
             {
                 //Prevent slopes from interfering with movement.
@@ -321,6 +324,39 @@ namespace Game.Controller
                 var airControl = xMove * Acceleration * AirControlStrength * Vector2.right;
                 body.velocity += airControl * Time.fixedDeltaTime;
             }
+        }
+
+        //todo: night note: maybe make this a seperate monobehaviour?
+        protected IEnumerator DoDash()
+        {
+            dashing = true;
+            var dashTime = 0.2f;
+            var oldVelocity = body.velocity;
+            body.velocity = directionToMouse * (DashLength / dashTime);
+            var oldGravity = body.gravityScale;
+            body.gravityScale = 0f;
+            yield return new WaitForSeconds(dashTime);
+            body.gravityScale = oldGravity;
+            body.velocity = new Vector2(0f, 0f);
+            dashing = false;
+
+            if(!isRecharging)
+                StartCoroutine(RechargeDash());
+        }
+
+        //TODO: visualize this + charge count using the playerui thingy.
+        protected IEnumerator RechargeDash()
+        {
+            if (isRecharging)
+                yield break;
+            isRecharging = true;
+            while( dashCharges < MaxDashCharges )
+            {
+                //TODO: make this a for(time -> dashcooldown)
+                yield return new WaitForSeconds(DashCooldown);
+                dashCharges++;
+            }
+            isRecharging = false;
         }
 
         /// <summary>
@@ -381,50 +417,6 @@ namespace Game.Controller
 
         #region CombatCode
 
-        /// <summary>
-        /// Temporary Attack Code
-        /// </summary>
-        //TODO: This is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
-        private void Attack()
-        {
-            canAttack = false;
-            attack = false;
-            Debug.Log("Attack!");
-            RaycastHit2D hit;
-            if(hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (PlayerWidth/2)))
-            {
-                var damageable = hit.transform.GetComponent<IDamageable>();
-                if(damageable != null)
-                    damageable.ProcessHit(new AttackHitData(attackDamage, hit.point));
-            }
-
-            StartCoroutine(ResetAttack());
-        }
-        //TODO: Make a Slider or some indicator for the attack cooldown (for-yield loop)
-        private IEnumerator ResetAttack()
-        {
-            yield return new WaitForSeconds(attackCooldown);
-            canAttack = true;
-        }
-
-        //TODO: Add Throwable Items
-        //TODO: also make this an action instead of this lol.
-        /// <summary>
-        /// Throw the equipped thing
-        /// </summary>
-        private void Throw()
-        {
-            //if (throwAmmo <= 0)
-            //    return;
-            //var velocity = throwable.startVelocity * directionToMouse;
-            //var obj = Instantiate(throwable.prefab, transform.position, Quaternion.identity, null);
-            //var throwBody = obj.GetComponent<Rigidbody2D>();
-            //throwBody.velocity = velocity;
-            //throwAmmo--;
-            //shouldThrow = false;
-            //state = EntityState.Throwing;
-        }
-
         //TODO: process knockback and that kind of stuff.
         /// <summary>
         /// Process a hit
@@ -452,6 +444,72 @@ namespace Game.Controller
             transform.position = startPos;
             body.velocity = Vector2.zero;
         }
+
+        #region ObsoleteCode
+
+        //TODO: Add Throwable Items
+        //TODO: also make this an action instead of this lol.
+        /// <summary>
+        /// Throw the equipped thing
+        /// </summary>
+        private void Throw()
+        {
+            //if (throwAmmo <= 0)
+            //    return;
+            //var velocity = throwable.startVelocity * directionToMouse;
+            //var obj = Instantiate(throwable.prefab, transform.position, Quaternion.identity, null);
+            //var throwBody = obj.GetComponent<Rigidbody2D>();
+            //throwBody.velocity = velocity;
+            //throwAmmo--;
+            //shouldThrow = false;
+            //state = EntityState.Throwing;
+        }
+
+        /// <summary>
+        /// Temporary Attack Code
+        /// </summary>
+        //TODO: This is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
+        [System.Obsolete("This is garbage lol")]
+        private void Attack()
+        {
+            canAttack = false;
+            attack = false;
+            Debug.Log("Attack!");
+            RaycastHit2D hit;
+            if (hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (PlayerWidth / 2)))
+            {
+                var damageable = hit.transform.GetComponent<IDamageable>();
+                if (damageable != null)
+                    damageable.ProcessHit(new AttackHitData(attackDamage, hit.point));
+            }
+
+            StartCoroutine(ResetAttack());
+        }
+
+        //TODO: Make a Slider or some indicator for the attack cooldown (for-yield loop)
+        private IEnumerator ResetAttack()
+        {
+            yield return new WaitForSeconds(attackCooldown);
+            canAttack = true;
+        }
+
+        /// <summary>
+        /// Makes the player face towards the mouse
+        /// </summary>
+        [System.Obsolete("This doesnt make sense in the long run. really. Use X-Velocity and wall-detection a factor in look direction.")]
+        private void FaceMouse()
+        {
+            var myX = transform.position.x;
+            var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
+            directionToMouse = (mousePos - (Vector2)transform.position).normalized;
+            int newFacingDirection = NormalizeInt(mousePos.x - myX);
+            if (newFacingDirection == facingDirection)
+                return;
+            facingDirection = newFacingDirection;
+            transform.localScale = new Vector3(facingDirection, 1.0f, 1.0f);
+        }
+
+        #endregion
     }
 
     [System.Serializable]
@@ -471,6 +529,12 @@ namespace Game.Controller
         internal float airControlStrength;
         [SerializeField, Tooltip("strength of wall jumps")]
         internal float wallJumpStrength;
+        [SerializeField, Tooltip("length of the dash")]
+        internal float dashLength;
+        [SerializeField, Tooltip("dash cooldown")]
+        internal float dashCooldown;
+        [SerializeField, Tooltip("amount of max charges")]
+        internal int dashCharges;
 
         public static PlayerControllerSettings DefaultSettings 
             => new PlayerControllerSettings()
@@ -482,6 +546,9 @@ namespace Game.Controller
                 acceleration = 2.0f,
                 airControlStrength = 0.25f,
                 wallJumpStrength = 0.75f,
+                dashLength = 3.5f,
+                dashCooldown = 2.5f,
+                dashCharges = 2,
             };
         
     }
