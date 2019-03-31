@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 namespace Game.Controller
 {
@@ -13,8 +14,21 @@ namespace Game.Controller
         protected Image actionDisplay;
         [SerializeField]
         protected Image filler;
+        [SerializeField]
+        protected Image dashCooldown;
+        [SerializeField]
+        protected TextMeshProUGUI dashCount;
 
+        [SerializeField]
+        protected PlayerController player;
+        
         protected BaseAction currentAction;
+
+        private void Start()
+        {
+            if (!player)
+                player = FindObjectOfType<PlayerController>(); 
+        }
 
         public void SetAction(BaseAction action)
         {
@@ -25,6 +39,9 @@ namespace Game.Controller
         protected void Update()
         {
             filler.fillAmount = currentAction.RelativeCooldown;
+
+            dashCooldown.fillAmount = player.RelativeDashCD;
+            dashCount.text = player.AvailableDashes.ToString();
         }
     }
 }

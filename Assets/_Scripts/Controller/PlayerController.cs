@@ -73,6 +73,10 @@ namespace Game.Controller
         protected int dashCharges;
         protected bool dashing = false;
         protected bool isRecharging = false;
+        protected float remainDashCd = 0f;
+
+        public float RelativeDashCD => remainDashCd / DashCooldown;
+        public int AvailableDashes => dashCharges;
 
         //other runtime variables
         protected Vector3 startPos = Vector3.zero;
@@ -284,7 +288,6 @@ namespace Game.Controller
         }
 
         //! I fixed the movement partially. Further Improve this later on.
-        //TODO: fix slopes
         /// <summary>
         /// Use the input to move the player character.
         /// </summary>
@@ -325,26 +328,25 @@ namespace Game.Controller
                 body.velocity += airControl * Time.fixedDeltaTime;
             }
         }
-
-        //todo: night note: maybe make this a seperate monobehaviour?
+        
         protected IEnumerator DoDash()
         {
             dashing = true;
             var dashTime = 0.2f;
             var oldVelocity = body.velocity;
-            body.velocity = directionToMouse * (DashLength / dashTime);
+            var newVel = directionToMouse * (DashLength / dashTime);
+            body.velocity = newVel;
             var oldGravity = body.gravityScale;
             body.gravityScale = 0f;
             yield return new WaitForSeconds(dashTime);
             body.gravityScale = oldGravity;
-            body.velocity = new Vector2(0f, 0f);
+            body.velocity = newVel / 2f;
             dashing = false;
 
             if(!isRecharging)
                 StartCoroutine(RechargeDash());
         }
-
-        //TODO: visualize this + charge count using the playerui thingy.
+        
         protected IEnumerator RechargeDash()
         {
             if (isRecharging)
@@ -352,8 +354,10 @@ namespace Game.Controller
             isRecharging = true;
             while( dashCharges < MaxDashCharges )
             {
-                //TODO: make this a for(time -> dashcooldown)
-                yield return new WaitForSeconds(DashCooldown);
+                for(remainDashCd = DashCooldown; remainDashCd > 0f; remainDashCd -= Time.deltaTime)
+                {
+                    yield return null;
+                }
                 dashCharges++;
             }
             isRecharging = false;
