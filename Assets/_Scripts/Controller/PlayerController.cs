@@ -194,6 +194,7 @@ namespace Game.Controller
                 dashCharges--;
                 dash = false;
                 StartCoroutine(DoDash());
+                return;
             }
             if (attack && canAttack)
                 Attack();
