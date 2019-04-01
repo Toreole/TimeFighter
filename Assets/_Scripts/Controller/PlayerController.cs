@@ -189,7 +189,7 @@ namespace Game.Controller
         //TODO: rework attacking
         private void PerformActions()
         {
-            if (dash && dashCharges > 0)
+            if (dash && dashCharges > 0 && !dashing)
             {
                 dashCharges--;
                 dash = false;
