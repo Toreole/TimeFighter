@@ -83,6 +83,12 @@ namespace Game.Controller
             yield return DoCooldown();
         }
 
+        protected override void UpdateChain()
+        {
+            hookHit = joint.transform.position;
+            base.UpdateChain();
+        }
+
         protected override void BreakChain()
         {
             base.BreakChain();

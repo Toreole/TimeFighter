@@ -33,6 +33,8 @@ namespace Game.Controller
         public override void CancelAction()
         {
             StopAllCoroutines();
+            BreakChain();
+            StartCoroutine(DoCooldown());
         }
 
         //Perform
@@ -64,7 +66,7 @@ namespace Game.Controller
 
         protected virtual bool TestForTarget(out IHookable hookable)
         {
-            RaycastHit2D hit = Physics2D.Raycast(entity.Position, DirToMouse, maxDistance, targetLayer);
+            RaycastHit2D hit = Physics2D.Raycast(entity.Position, TargetDirection, maxDistance, targetLayer);
             if (!hit)
             {
                 hookable = null;

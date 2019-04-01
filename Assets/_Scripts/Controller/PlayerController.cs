@@ -135,7 +135,7 @@ namespace Game.Controller
         /// <summary>
         /// Input & mouse dependent stuff
         /// </summary>
-            //TODO: make a good system for figuring out which way to look. probably velocity and wall check.
+        //TODO: make a good system for figuring out which way to look. probably velocity and wall check.
         private void Update()
         {
             if (!active)
@@ -189,11 +189,19 @@ namespace Game.Controller
         //TODO: rework attacking
         private void PerformActions()
         {
+            if (dash && dashCharges > 0)
+            {
+                dashCharges--;
+                dash = false;
+                StartCoroutine(DoDash());
+            }
             if (attack && canAttack)
                 Attack();
+
             var act = actions[selectedAction];
             if (frameAction && act.CanPerform)
             {
+                act.TargetDirection = directionToMouse;
                 frameAction = false;
                 act.PerformAction();
             }
@@ -298,12 +306,6 @@ namespace Game.Controller
                 transform.localScale = new Vector3(xS, 1f, 1f);
             if (dashing)
                 return;
-            if(dash && dashCharges > 0)
-            {
-                dashCharges--;
-                dash = false;
-                StartCoroutine(DoDash());
-            }
             if (isGrounded)
             {
                 //Prevent slopes from interfering with movement.
@@ -328,9 +330,14 @@ namespace Game.Controller
                 body.velocity += airControl * Time.fixedDeltaTime;
             }
         }
-        
+
+        /// <summary>
+        /// Do a dash lol
+        /// </summary>
         protected IEnumerator DoDash()
         {
+            if (actions[selectedAction].IsPerforming)
+                actions[selectedAction].CancelAction();
             dashing = true;
             var dashTime = 0.2f;
             var oldVelocity = body.velocity;
@@ -347,6 +354,9 @@ namespace Game.Controller
                 StartCoroutine(RechargeDash());
         }
         
+        /// <summary>
+        /// recharge dashes if needed
+        /// </summary>
         protected IEnumerator RechargeDash()
         {
             if (isRecharging)
