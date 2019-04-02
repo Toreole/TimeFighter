@@ -73,7 +73,13 @@ namespace Game.Controller
 
         void DragOther()
         {
-            //TODO: this
+            //TODO: this is shit again lmao should NOT cause the player to fly xD
+            hookHit = hookable.Position + hookOffset;
+            (hookable as DraggableItem).Body.AddForce((entity.Position - hookHit).normalized * pullStrength);
+            if (Vector2.Distance(hookHit, entity.Position) > maxDistance || hookable == null)
+            {
+                CancelAction();
+            }
         }
     }
 }

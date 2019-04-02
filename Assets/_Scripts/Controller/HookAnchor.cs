@@ -14,10 +14,10 @@ namespace Game.Controller
         protected HookInteraction hookInteraction = HookInteraction.AnyStatic;
 
         public HookInteraction HookInteract => hookInteraction;
-        public Transform M_Transform => this.transform;
-        public bool CanBeDragged => false;
-        public Rigidbody2D Body => null;
-        public Vector2 Position => this.transform.position;
+        public Transform M_Transform { get => transform; }
+        public bool CanBeDragged { get; }
+        public Rigidbody2D Body { get; }
+        public Vector2 Position { get => transform.position; }
 
         public bool HasFlag(HookInteraction interaction)
         {
