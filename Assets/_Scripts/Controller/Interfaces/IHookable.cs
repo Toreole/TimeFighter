@@ -6,5 +6,6 @@
         UnityEngine.Transform M_Transform { get; }
         bool HasFlag(HookInteraction interaction);
         bool CanBeDragged { get; }
+        bool UseCenterPoint { get; }
     }
 }

@@ -12,12 +12,18 @@ namespace Game.Controller
     {
         [SerializeField]
         protected HookInteraction hookInteraction = HookInteraction.AnyStatic;
+        [SerializeField]
+        protected Transform hookCenter;
+        [SerializeField]
+        protected bool useCenterPoint = false;
 
         public HookInteraction HookInteract => hookInteraction;
         public Transform M_Transform { get => transform; }
         public bool CanBeDragged { get; }
         public Rigidbody2D Body { get; }
-        public Vector2 Position { get => transform.position; }
+        public Vector2 Position { get => (useCenterPoint)? hookCenter.position :  transform.position; }
+
+        public bool UseCenterPoint => useCenterPoint;
 
         public bool HasFlag(HookInteraction interaction)
         {

@@ -76,6 +76,8 @@ namespace Game.Controller
             hookable = hit.collider.gameObject.GetComponent<IHookable>();
             if (hookable == null)
                 return false;
+            if (hookable.UseCenterPoint)
+                hookHit = hookable.Position;
             return hookable.HookInteract.HasFlag(hookType);
         }
 
