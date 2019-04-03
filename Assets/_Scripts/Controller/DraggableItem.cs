@@ -4,6 +4,7 @@ using Game.Controller;
 
 namespace Game
 {
+    [AddComponentMenu("Hookables/Draggabe Item")]
     public class DraggableItem : MonoBehaviour, IHookable
     {
         [SerializeField]

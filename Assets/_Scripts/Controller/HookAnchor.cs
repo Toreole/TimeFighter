@@ -8,6 +8,7 @@ namespace Game.Controller
     /// <summary>
     /// most basic hook target.
     /// </summary>
+    [AddComponentMenu("Hookables/Basic Anchor")]
     public class HookAnchor : MonoBehaviour, IHookable
     {
         [SerializeField]

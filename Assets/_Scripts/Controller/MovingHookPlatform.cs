@@ -4,6 +4,7 @@ using Game.Controller;
 
 namespace Game
 {
+    [AddComponentMenu("Hookables/Moving Anchor")]
     public class MovingHookPlatform : HookAnchor
     {
         float xOffset = 0;
