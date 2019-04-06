@@ -82,6 +82,7 @@ namespace Game.Controller
         protected Vector3 startPos = Vector3.zero;
         protected bool isGrounded = false;
         protected EntityState state = EntityState.Idle;
+        protected bool isOnWall = false;
         
         /// <summary>
         /// Start!
@@ -308,6 +309,7 @@ namespace Game.Controller
                 transform.localScale = new Vector3(xS, 1f, 1f);
             if (dashing)
                 return;
+            body.gravityScale = (isOnWall) ? 0.5f : 1f;
             if (isGrounded)
             {
                 //Prevent slopes from interfering with movement.
@@ -341,18 +343,18 @@ namespace Game.Controller
             if (actions[selectedAction].IsPerforming)
                 actions[selectedAction].CancelAction();
             dashing = true;
+            isInvincible = true;
             var dashTime = 0.2f;
-            var oldVelocity = body.velocity;
             var newVel = directionToMouse * (DashLength / dashTime);
             body.velocity = newVel;
-            var oldGravity = body.gravityScale;
             body.gravityScale = 0f;
             yield return new WaitForSeconds(dashTime);
-            body.gravityScale = oldGravity;
+            body.gravityScale = 1f;
             body.velocity = newVel / 2f;
             dashing = false;
+            isInvincible = false;
 
-            if(!isRecharging)
+            if (!isRecharging)
                 StartCoroutine(RechargeDash());
         }
         
@@ -400,34 +402,45 @@ namespace Game.Controller
         private void Jump()
         {
             var jumpDir = ((Vector2)ground.up + Vector2.up).normalized;
-            float g = 9.81f * body.gravityScale;
+            float g = 9.81f;
             float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
             var velocity = jumpDir * v0;
                 velocity.x += body.velocity.x; //Test to see if this fixes some weird issues
             body.velocity = velocity;
             jump = false;
         }
-        //TODO: rework wall jumping (limited times?)
         private void WallJump(Vector2 contactNormal)
         {
             var jumpDir = (contactNormal + Vector2.up).normalized;
-            float g = 9.81f * body.gravityScale;
+            float g = 9.81f;
             float v0 = Mathf.Sqrt((JumpHeight) * (2 * g) * WallJumpStrength);
             var velocity = jumpDir * v0;
             body.velocity = velocity;
             jump = false;
         }
-        //TODO: WIP wall check for walljump
+
+        //TODO: this is extremely inconsistent and weird
         private void OnCollisionStay2D(Collision2D collision)
         {
             if (isGrounded)
                 return;
             if (collision.collider.CompareTag("Enemy"))
                 return;
-            var normal = collision.contacts[0].normal;
+            var normal = collision.GetContact(0).normal;
             if (Mathf.Abs(normal.x) > 0.8)
+            {
+                isOnWall = true;
                 if (Input.GetButtonDown("Jump"))
                     WallJump(normal);
+            }
+        }
+        private void OnCollisionExit2D(Collision2D collision)
+        {
+            if (isGrounded)
+                return;
+            if (collision.collider.CompareTag("Enemy"))
+                return;
+            isOnWall = false;
         }
         #endregion
 

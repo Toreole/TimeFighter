@@ -22,6 +22,7 @@ namespace Game
         public Vector2 Position => transform.position;
 
         public bool UseCenterPoint => false;
+        public bool IsPlatform => false;
 
         public bool HasFlag(HookInteraction interact)
         {

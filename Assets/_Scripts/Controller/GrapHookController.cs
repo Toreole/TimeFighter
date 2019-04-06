@@ -31,7 +31,7 @@ namespace Game.Controller
             yield return ShootHook();
             hookOffset = hookHit - hookable.Position;
             //Set up the hook loop
-            Hook hook = StaticHook; //static by default.
+            Hook hook = HookForce; //static by default.
             if (hookable.HasFlag(HookInteraction.DynamicBody))
             {
                 //is lightweight and should be dragged
@@ -46,37 +46,36 @@ namespace Game.Controller
             {
                 UpdateChain();
                 hook?.Invoke();
+                if (Vector2.Distance(hookHit, entity.Position) > maxDistance)
+                {
+                    CancelAction();
+                }
                 yield return null;
             }
             BreakChain();
             yield return DoCooldown();
         }
 
-        private void StaticHook()
+        /// <summary>
+        /// default hooking behaviour.
+        /// </summary>
+        private void HookForce()
         {
             entity.Body.AddForce((hookHit - entity.Position).normalized * pullStrength);
-            if (Vector2.Distance(hookHit, entity.Position) > maxDistance)
-            {
-                CancelAction();
-            }
         }
 
         void DynamicHook()
         {
             hookHit = hookable.Position + hookOffset;
-            entity.Body.AddForce((hookHit - entity.Position).normalized * pullStrength);
-            if (Vector2.Distance(hookHit, entity.Position) > maxDistance)
-            {
-                CancelAction();
-            }
+            HookForce();
         }
 
         void DragOther()
         {
             //TODO: this is shit again lmao should NOT cause the player to fly xD
             hookHit = hookable.Position + hookOffset;
-            (hookable as DraggableItem).Body.AddForce((entity.Position - hookHit).normalized * pullStrength);
-            if (Vector2.Distance(hookHit, entity.Position) > maxDistance || hookable == null)
+            hookable.Body.AddForce((entity.Position - hookHit).normalized * pullStrength);
+            if (hookable is null)
             {
                 CancelAction();
             }

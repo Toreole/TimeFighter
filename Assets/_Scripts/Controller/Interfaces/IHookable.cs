@@ -7,5 +7,6 @@
         bool HasFlag(HookInteraction interaction);
         bool CanBeDragged { get; }
         bool UseCenterPoint { get; }
+        bool IsPlatform { get; }
     }
 }

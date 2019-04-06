@@ -26,11 +26,14 @@ namespace Game
         [SerializeField, Tooltip("The actions this entity can perform")]
         protected List<BaseAction> actions;
         
-        protected internal float currentHealth;
+        protected float currentHealth;
+        protected bool isInvincible = false;
+
         internal float Health { get => currentHealth; set => currentHealth = value; }
         public bool IsPlayer { get; protected set; } = false;
         public Rigidbody2D Body => body;
         public Vector2 Position => transform.position;
+        public bool IsInvincible => isInvincible;
 
         internal void AddAction(BaseAction action) { if(!actions.Exists(x => action)) actions.Add(action); }
         internal void RemoveAction(BaseAction action) { if (!actions.Exists(x => action)) actions.Remove(action); }

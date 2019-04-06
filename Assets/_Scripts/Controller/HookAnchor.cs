@@ -25,6 +25,7 @@ namespace Game.Controller
         public Vector2 Position { get => (useCenterPoint)? hookCenter.position :  transform.position; }
 
         public bool UseCenterPoint => useCenterPoint;
+        public bool IsPlatform => CompareTag("Platform");
 
         public bool HasFlag(HookInteraction interaction)
         {
