@@ -59,7 +59,7 @@ namespace Game.Controller
         //Input
         protected float xMove = 0f;
         protected float yMove = 0;
-        protected bool jump;
+        public bool jump;
         protected bool attack;
         protected bool shouldThrow;
         protected float mouseScroll;
@@ -82,10 +82,16 @@ namespace Game.Controller
         protected Vector3 startPos = Vector3.zero;
         protected bool isGrounded = false;
         protected EntityState state = EntityState.Idle;
-        protected bool isOnWall = false;
-        
+        public bool isOnWall  = false;
+        protected Vector2 wallNormal = Vector2.right;
+        protected bool isOnLedge = false;
+        protected Vector2 ledgePosition = Vector2.zero;
+
+        private const float raycastError = 0.05f;
+        private const float g = 9.81f;
+
         /// <summary>
-        /// Start!
+        /// Start! bruh unity gae
         /// </summary>
         protected override void Start()
         {
@@ -166,7 +172,7 @@ namespace Game.Controller
         {
             xMove  = Input.GetAxis("Horizontal");
             yMove  = Input.GetAxis("Vertical");
-            jump   = (Input.GetButtonDown("Jump") || jump) && isGrounded; //include grounded check lmao idk, kind redundant but it works
+            jump   = (Input.GetButtonDown("Jump") || jump) && (isGrounded || isOnWall || isOnLedge); //include grounded check lmao idk, kind redundant but it works
             attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
             shouldThrow   = Input.GetButtonDown("MiddleClick") || shouldThrow;
             actionPersist = Input.GetButton("RightClick");
@@ -248,6 +254,8 @@ namespace Game.Controller
             if (!active)
                 return;
             CheckGrounded();
+            CheckWall();
+            CheckLedge();
             Move();
         }
 
@@ -264,7 +272,7 @@ namespace Game.Controller
             }
             RaycastHit2D hit;
             var raycastPos = transform.position;
-            var rayLength = PlayerHeight / 2f + 0.05f;
+            var rayLength = PlayerHeight / 2f + raycastError;
             Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
             if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
             {
@@ -298,6 +306,65 @@ namespace Game.Controller
             isGrounded = true;
         }
 
+        /// <summary>
+        /// Check for a wall for walljumps.
+        /// </summary>
+        private void CheckWall()
+        {
+            if (isGrounded)
+            {
+                isOnWall = false;
+                return;
+            }
+            var dist = PlayerWidth / 2f + raycastError;
+            Debug.DrawRay(transform.position, Vector3.right * dist, Color.blue);
+            Debug.DrawRay(transform.position, -Vector3.right * dist, Color.blue);
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, dist, groundLayer);
+            if (hit)
+            {
+                //bruh
+                wallNormal = hit.normal;
+                isOnWall = true;
+            }
+            else if(hit = Physics2D.Raycast(transform.position, -Vector2.right, dist, groundLayer))
+            {
+                wallNormal = hit.normal;
+                isOnWall = true;
+            }
+            else
+            {
+                isOnWall = false;
+            }
+        }
+
+        /// <summary>
+        /// check for a ledge to hang onto. presumably only in the direction the player is facing.
+        /// </summary>
+        private void CheckLedge()
+        {
+            if (isGrounded)
+                return;
+            Vector2 topCornerOffset = new Vector2(PlayerWidth / 2f * transform.localScale.x, PlayerHeight / 2f);
+            Vector2 rayOffset = Vector2.right * (PlayerWidth / 4f * transform.localScale.x) + Vector2.up * (PlayerHeight / 4f);
+            Vector2 rayOrigin = this.Position + rayOffset + topCornerOffset;
+            float rayDistance = PlayerHeight / 4f;
+
+            Debug.DrawRay(rayOrigin, Vector3.down * rayDistance, Color.red);
+            RaycastHit2D hit;
+            if(hit= Physics2D.Raycast(rayOrigin, Vector2.down, rayDistance, groundLayer))
+            {
+                isOnLedge = true;
+                ledgePosition = hit.point;
+                //Try to move closer to the ledge: 
+                //1. towards "wall"
+                //2. allign top of the player with detected edge.
+            }
+            else
+            {
+                isOnLedge = false;
+            }
+        }
+
         //! I fixed the movement partially. Further Improve this later on.
         /// <summary>
         /// Use the input to move the player character.
@@ -309,13 +376,26 @@ namespace Game.Controller
                 transform.localScale = new Vector3(xS, 1f, 1f);
             if (dashing)
                 return;
-            body.gravityScale = (isOnWall) ? 0.5f : 1f;
+            if(isOnLedge)
+            {
+                body.gravityScale = 0f;
+                if(body.velocity.y <= 0.1f && body.velocity.magnitude < 1f)
+                    body.velocity = Vector2.zero;
+            }
+            else
+                body.gravityScale = (isOnWall && body.velocity.y <= 0f) ? 0.3f : 1f;
+            //TODO: this part of the code is pretty dang ugly, fix that please!
+            if (jump)
+            {
+                if (isOnLedge)
+                    ClimbLedge();
+                else
+                    Jump();
+            }
             if (isGrounded)
             {
                 //Prevent slopes from interfering with movement.
                 body.AddForce(-GetGroundForce());
-                if (jump)
-                    Jump();
                 if (!Mathf.Approximately(xMove, 0f))
                 {
                     //move left/right
@@ -401,46 +481,22 @@ namespace Game.Controller
         //! this is like the only thing that works nicely.
         private void Jump()
         {
-            var jumpDir = ((Vector2)ground.up + Vector2.up).normalized;
-            float g = 9.81f;
-            float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
+            jump = false;
+            var jumpDir = isOnWall? (wallNormal + Vector2.up).normalized : ((Vector2)ground.up + Vector2.up).normalized;
+            float v0 = Mathf.Sqrt((JumpHeight) * (2 * g) * (isOnWall? WallJumpStrength : 1f));
             var velocity = jumpDir * v0;
                 velocity.x += body.velocity.x; //Test to see if this fixes some weird issues
             body.velocity = velocity;
-            jump = false;
-        }
-        private void WallJump(Vector2 contactNormal)
-        {
-            var jumpDir = (contactNormal + Vector2.up).normalized;
-            float g = 9.81f;
-            float v0 = Mathf.Sqrt((JumpHeight) * (2 * g) * WallJumpStrength);
-            var velocity = jumpDir * v0;
-            body.velocity = velocity;
-            jump = false;
         }
 
-        //TODO: this is extremely inconsistent and weird
-        private void OnCollisionStay2D(Collision2D collision)
+        /// <summary>
+        /// Climb the ledge youre holding onto
+        /// </summary>
+        private void ClimbLedge()
         {
-            if (isGrounded)
-                return;
-            if (collision.collider.CompareTag("Enemy"))
-                return;
-            var normal = collision.GetContact(0).normal;
-            if (Mathf.Abs(normal.x) > 0.8)
-            {
-                isOnWall = true;
-                if (Input.GetButtonDown("Jump"))
-                    WallJump(normal);
-            }
-        }
-        private void OnCollisionExit2D(Collision2D collision)
-        {
-            if (isGrounded)
-                return;
-            if (collision.collider.CompareTag("Enemy"))
-                return;
-            isOnWall = false;
+            jump = false;
+            float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
+            body.velocity = new Vector2(0, v0);
         }
         #endregion
 
@@ -448,16 +504,17 @@ namespace Game.Controller
 
         //TODO: process knockback and that kind of stuff.
         /// <summary>
-        /// Process a hit
+        /// Process a hit.
         /// </summary>
         /// <param name="hitData"></param>
         public override void ProcessHit(AttackHitData hitData)
         {
-            currentHealth -= hitData.Damage;
+            if(!isInvincible)
+                currentHealth -= hitData.Damage;
         }
         public override void ProcessHit(AttackHitData hitData, bool isOnlyDamage)
         {
-            if (isOnlyDamage)
+            if (isOnlyDamage && !isInvincible)
                 currentHealth -= hitData.Damage;
             else
                 ProcessHit(hitData);

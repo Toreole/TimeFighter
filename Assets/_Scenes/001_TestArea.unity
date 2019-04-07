@@ -1292,12 +1292,12 @@ GameObject:
   - component: {fileID: 150627781}
   - component: {fileID: 150627780}
   m_Layer: 0
-  m_Name: Square (35)
+  m_Name: Drag Item
   m_TagString: Environment
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &150627780
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5768,7 +5768,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 746616855}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -17.75, y: 7.8, z: 0}
+  m_LocalPosition: {x: -17.75, y: 7.24, z: 0}
   m_LocalScale: {x: 0.72325504, y: 6.238056, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -8845,8 +8845,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1314810674}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -25.425, y: 4.995, z: 0}
-  m_LocalScale: {x: -6.1108403, y: 7.789957, z: 1}
+  m_LocalPosition: {x: -25.474, y: 4.995, z: 0}
+  m_LocalScale: {x: -6.0130672, y: 7.789957, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 25
@@ -9163,7 +9163,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1332309310}
   m_LocalRotation: {x: -0, y: -0, z: -0.16944507, w: 0.9855397}
-  m_LocalPosition: {x: -16.99, y: 8.76, z: 0}
+  m_LocalPosition: {x: -16.99, y: 8.2, z: 0}
   m_LocalScale: {x: 0.3660698, y: 3.699569, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -11550,8 +11550,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1659084749}
   m_LocalRotation: {x: -0, y: -0, z: 0.086750545, w: 0.9962301}
-  m_LocalPosition: {x: -18.69, y: 13.69, z: 0}
-  m_LocalScale: {x: 11.266821, y: 8.832015, z: 0.48124}
+  m_LocalPosition: {x: -17.02, y: 13.1, z: 0}
+  m_LocalScale: {x: 13.306115, y: 8.832015, z: 0.48124}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 27
@@ -15321,6 +15321,8 @@ MonoBehaviour:
   attackRange: 0.6
   attackCooldown: 1.2
   uIManager: {fileID: 1599325741}
+  jump: 0
+  isOnWall: 0
 --- !u!58 &6447042201828189515
 CircleCollider2D:
   m_ObjectHideFlags: 0
