@@ -59,7 +59,7 @@ namespace Game.Controller
         //Input
         protected float xMove = 0f;
         protected float yMove = 0;
-        public bool jump;
+        protected bool jump;
         protected bool attack;
         protected bool shouldThrow;
         protected float mouseScroll;
@@ -82,7 +82,7 @@ namespace Game.Controller
         protected Vector3 startPos = Vector3.zero;
         protected bool isGrounded = false;
         protected EntityState state = EntityState.Idle;
-        public bool isOnWall  = false;
+        protected bool isOnWall  = false;
         protected Vector2 wallNormal = Vector2.right;
         protected bool isOnLedge = false;
         protected Vector2 ledgePosition = Vector2.zero;

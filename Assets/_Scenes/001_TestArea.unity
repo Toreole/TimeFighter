@@ -15321,8 +15321,6 @@ MonoBehaviour:
   attackRange: 0.6
   attackCooldown: 1.2
   uIManager: {fileID: 1599325741}
-  jump: 0
-  isOnWall: 0
 --- !u!58 &6447042201828189515
 CircleCollider2D:
   m_ObjectHideFlags: 0
