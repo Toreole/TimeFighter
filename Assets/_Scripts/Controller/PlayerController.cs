@@ -263,7 +263,7 @@ namespace Game.Controller
         /// <summary>
         /// Does what the name says lol
         /// </summary>
-        private void CheckGrounded()
+        protected void CheckGrounded()
         {
             if(body.velocity.y > 2)
             {
@@ -299,7 +299,7 @@ namespace Game.Controller
                 }
             }
         }
-        private void SetGround(RaycastHit2D hit)
+        protected void SetGround(RaycastHit2D hit)
         {
             Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
             ground.rotation = rot;
@@ -309,7 +309,7 @@ namespace Game.Controller
         /// <summary>
         /// Check for a wall for walljumps.
         /// </summary>
-        private void CheckWall()
+        protected void CheckWall()
         {
             if (isGrounded)
             {
@@ -340,7 +340,7 @@ namespace Game.Controller
         /// <summary>
         /// check for a ledge to hang onto. presumably only in the direction the player is facing.
         /// </summary>
-        private void CheckLedge()
+        protected void CheckLedge()
         {
             if (isGrounded)
                 return;
@@ -351,7 +351,7 @@ namespace Game.Controller
 
             Debug.DrawRay(rayOrigin, Vector3.down * rayDistance, Color.red);
             RaycastHit2D hit;
-            if(hit= Physics2D.Raycast(rayOrigin, Vector2.down, rayDistance, groundLayer))
+            if(hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayDistance, groundLayer))
             {
                 isOnLedge = true;
                 ledgePosition = hit.point;
@@ -376,6 +376,7 @@ namespace Game.Controller
                 transform.localScale = new Vector3(xS, 1f, 1f);
             if (dashing)
                 return;
+            //Ledge hang behaviour
             if(isOnLedge)
             {
                 body.gravityScale = 0f;
