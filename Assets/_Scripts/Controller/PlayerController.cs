@@ -85,6 +85,7 @@ namespace Game.Controller
         protected bool isOnWall  = false;
         protected Vector2 wallNormal = Vector2.right;
         protected bool isOnLedge = false;
+        protected bool doLedgeCheck = true;
         protected Vector2 ledgePosition = Vector2.zero;
 
         private const float raycastError = 0.05f;
@@ -342,7 +343,7 @@ namespace Game.Controller
         /// </summary>
         protected void CheckLedge()
         {
-            if (isGrounded)
+            if (isGrounded || !doLedgeCheck)
                 return;
             Vector2 topCornerOffset = new Vector2(PlayerWidth / 2f * transform.localScale.x, PlayerHeight / 2f);
             Vector2 rayOffset = Vector2.right * (PlayerWidth / 4f * transform.localScale.x) + Vector2.up * (PlayerHeight / 4f);
@@ -376,23 +377,17 @@ namespace Game.Controller
                 transform.localScale = new Vector3(xS, 1f, 1f);
             if (dashing)
                 return;
+
             //Ledge hang behaviour
-            if(isOnLedge)
+            if (isOnLedge)
             {
-                body.gravityScale = 0f;
-                if(body.velocity.y <= 0.1f && body.velocity.magnitude < 1f)
-                    body.velocity = Vector2.zero;
+                LedgeBehaviour();
+                return;
             }
-            else
-                body.gravityScale = (isOnWall && body.velocity.y <= 0f) ? 0.3f : 1f;
+            //normal behaviour
+            body.gravityScale = (isOnWall && body.velocity.y <= 0f) ? 0.3f : 1f;
+
             //TODO: this part of the code is pretty dang ugly, fix that please!
-            if (jump)
-            {
-                if (isOnLedge)
-                    ClimbLedge();
-                else
-                    Jump();
-            }
             if (isGrounded)
             {
                 //Prevent slopes from interfering with movement.
@@ -414,6 +409,30 @@ namespace Game.Controller
                 var airControl = xMove * Acceleration * AirControlStrength * Vector2.right;
                 body.velocity += airControl * Time.fixedDeltaTime;
             }
+
+            //jump last.
+            if (jump)
+                Jump();
+        }
+        
+        /// <summary>
+        /// How the player should behave when hanging onto a ledge
+        /// </summary>
+        protected void LedgeBehaviour()
+        {
+            body.gravityScale = 0f;
+            if (body.velocity.y <= 0.1f && body.velocity.magnitude < 2f)
+                body.velocity = Vector2.zero;
+            if (jump)
+                ClimbLedge();
+            if (yMove < 0)
+            {
+                doLedgeCheck = false;
+                isOnLedge = false;
+                var delay = Delay(() => { doLedgeCheck = true; }, 1f);
+                StartCoroutine(delay);
+            }
+
         }
 
         /// <summary>
