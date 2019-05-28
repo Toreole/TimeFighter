@@ -3,6 +3,7 @@ using System.Collections;
 
 namespace Game.Controller
 {
+    [System.Obsolete("bruuuuuh")]
     public class GrapHookController : GenericHook 
     {
         [Header("Grapling Hook Fields")]

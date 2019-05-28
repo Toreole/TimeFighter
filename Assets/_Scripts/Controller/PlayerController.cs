@@ -35,6 +35,7 @@ namespace Game.Controller
             int   MaxDashCharges => controllerSettings.dashCharges;
             float DashCooldown => controllerSettings.dashCooldown;
             float DashLength => controllerSettings.dashLength;
+            float MaxAdhereDistance => controllerSettings.maxAdhereDist;
         #endregion
 
         //This could depend on different weapons?
@@ -273,7 +274,8 @@ namespace Game.Controller
             }
             RaycastHit2D hit;
             var raycastPos = transform.position;
-            var rayLength = PlayerHeight / 2f + raycastError;
+            var rayLength = PlayerHeight / 1.5f + raycastError;
+
             Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
             if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
             {
@@ -305,6 +307,13 @@ namespace Game.Controller
             Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
             ground.rotation = rot;
             isGrounded = true;
+            var nPoint = hit.point + Vector2.up * PlayerHeight / 2f;
+            var dist = Vector2.Distance(nPoint, transform.position);
+            //stick to the ground instead of flying off
+            if (dist < MaxAdhereDistance && dist > 0.05f)
+            {
+                body.position = nPoint;
+            }
         }
 
         /// <summary>
@@ -429,10 +438,10 @@ namespace Game.Controller
             {
                 doLedgeCheck = false;
                 isOnLedge = false;
-                var delay = Delay(() => { doLedgeCheck = true; }, 1f);
+                var delay = Delay(() => { doLedgeCheck = true; }, .5f);
                 StartCoroutine(delay);
             }
-
+            DrawCross(ledgePosition, 0.2f);
         }
 
         /// <summary>
@@ -514,9 +523,11 @@ namespace Game.Controller
         /// </summary>
         private void ClimbLedge()
         {
+            var topPos = ledgePosition + Vector2.up * PlayerHeight / 2f;
+            body.MovePosition(topPos);
             jump = false;
-            float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
-            body.velocity = new Vector2(0, v0);
+            //float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
+            //body.velocity = new Vector2(0, v0);
         }
         #endregion
 
@@ -641,6 +652,8 @@ namespace Game.Controller
         internal float dashCooldown;
         [SerializeField, Tooltip("amount of max charges")]
         internal int dashCharges;
+        [SerializeField, Tooltip("The max distance to stick to the ground")]
+        internal float maxAdhereDist;
 
         public static PlayerControllerSettings DefaultSettings 
             => new PlayerControllerSettings()
@@ -655,6 +668,7 @@ namespace Game.Controller
                 dashLength = 3.5f,
                 dashCooldown = 2.5f,
                 dashCharges = 2,
+                maxAdhereDist = 0.1f
             };
         
     }
