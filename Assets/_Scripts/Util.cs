@@ -14,6 +14,28 @@ namespace Game
             action?.Invoke();
         }
 
+        public static void Delay(MonoBehaviour mb, System.Action action, float time)
+        {
+            mb.StartCoroutine(Delay(action, time));
+        }
+
+        public static void DelayPhysicsFrame(MonoBehaviour mb, System.Action action)
+        {
+            mb.StartCoroutine(DelayPhysicsFrame(action, 1));
+        }
+        public static void DelayPhysicsFrames(MonoBehaviour mb, System.Action action, int frames)
+        {
+            mb.StartCoroutine(DelayPhysicsFrame(action,  frames));
+        }
+
+        private static IEnumerator DelayPhysicsFrame(System.Action action, int frameCount)
+        {
+            var wait = new WaitForFixedUpdate();
+            for (int i = 0; i < frameCount; i++)
+                yield return wait;
+            action?.Invoke();
+        }
+
         /// <summary>
         /// Draw with default color = red
         /// </summary>

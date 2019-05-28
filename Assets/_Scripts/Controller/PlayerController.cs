@@ -186,7 +186,8 @@ namespace Game.Controller
             if(Input.GetButtonDown("ActionSwap") && !actions[selectedAction].IsPerforming)
             {
                 selectedAction += (int)Input.GetAxisRaw("ActionSwap");
-                selectedAction = (selectedAction < 0) ? actions.Count - 1: (selectedAction >= actions.Count)? 0 : selectedAction;
+                //!this is nicer code now yay
+                selectedAction = (selectedAction + actions.Count) % actions.Count;
                 uIManager.SetAction(actions[selectedAction]);
             }
 
@@ -205,8 +206,8 @@ namespace Game.Controller
                 StartCoroutine(DoDash());
                 return;
             }
-            if (attack && canAttack)
-                Attack();
+            //if (attack && canAttack)
+            //    Attack();
 
             var act = actions[selectedAction];
             if (frameAction && act.CanPerform)
@@ -438,8 +439,7 @@ namespace Game.Controller
             {
                 doLedgeCheck = false;
                 isOnLedge = false;
-                var delay = Delay(() => { doLedgeCheck = true; }, .5f);
-                StartCoroutine(delay);
+                Delay(this, () => { doLedgeCheck = true; }, 0.5f);
             }
             DrawCross(ledgePosition, 0.2f);
         }
@@ -519,13 +519,20 @@ namespace Game.Controller
         }
 
         /// <summary>
-        /// Climb the ledge youre holding onto
+        /// Climb the ledge youre holding onto 
         /// </summary>
+        //TODO: This could be nicer, but it works. (2 physics frames long climb)
         private void ClimbLedge()
         {
-            var topPos = ledgePosition + Vector2.up * PlayerHeight / 2f;
-            body.MovePosition(topPos);
-            jump = false;
+            var finalPos = ledgePosition + Vector2.up * PlayerHeight / 2f;
+            var tempPos = new Vector2(body.position.x, finalPos.y);
+            body.MovePosition(tempPos);
+
+            DelayPhysicsFrame(this, () => 
+            {
+                body.MovePosition(finalPos);
+                jump = false;
+            });
             //float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
             //body.velocity = new Vector2(0, v0);
         }
@@ -551,6 +558,25 @@ namespace Game.Controller
                 ProcessHit(hitData);
         }
 
+        //TODO: Add Throwable Items
+        //TODO: also make this an action instead of this lol.
+        /// <summary>
+        /// Throw the equipped thing
+        /// </summary>
+        private void Throw()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Temporary Attack Code
+        /// </summary>
+        //TODO: This is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
+        private void Attack()
+        {
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         /// <summary>
@@ -563,53 +589,7 @@ namespace Game.Controller
         }
 
         #region ObsoleteCode
-
-        //TODO: Add Throwable Items
-        //TODO: also make this an action instead of this lol.
-        /// <summary>
-        /// Throw the equipped thing
-        /// </summary>
-        private void Throw()
-        {
-            //if (throwAmmo <= 0)
-            //    return;
-            //var velocity = throwable.startVelocity * directionToMouse;
-            //var obj = Instantiate(throwable.prefab, transform.position, Quaternion.identity, null);
-            //var throwBody = obj.GetComponent<Rigidbody2D>();
-            //throwBody.velocity = velocity;
-            //throwAmmo--;
-            //shouldThrow = false;
-            //state = EntityState.Throwing;
-        }
-
-        /// <summary>
-        /// Temporary Attack Code
-        /// </summary>
-        //TODO: This is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
-        [System.Obsolete("This is garbage lol")]
-        private void Attack()
-        {
-            canAttack = false;
-            attack = false;
-            Debug.Log("Attack!");
-            RaycastHit2D hit;
-            if (hit = Physics2D.Raycast(transform.position, directionToMouse, attackRange + (PlayerWidth / 2)))
-            {
-                var damageable = hit.transform.GetComponent<IDamageable>();
-                if (damageable != null)
-                    damageable.ProcessHit(new AttackHitData(attackDamage, hit.point));
-            }
-
-            StartCoroutine(ResetAttack());
-        }
-
-        //TODO: Make a Slider or some indicator for the attack cooldown (for-yield loop)
-        private IEnumerator ResetAttack()
-        {
-            yield return new WaitForSeconds(attackCooldown);
-            canAttack = true;
-        }
-
+        
         /// <summary>
         /// Makes the player face towards the mouse
         /// </summary>
