@@ -8,13 +8,11 @@ namespace Game.Controller
     {
         [Header("Grapling Hook Fields")]
         [SerializeField]
-        protected float yMaxTime = 0.6f;
-        [SerializeField]
-        protected float xPullSpeed = 5f;
+        protected float pullSpeed = 5f;
         [SerializeField]
         protected float gravity = -9.81f;
         [SerializeField]
-        protected float minSquareDist = 1f;
+        protected float minSquareDist = 3f;
         [SerializeField]
         protected CircleCollider2D triggerCollider;
         [Header("Extra Display")]
@@ -26,6 +24,13 @@ namespace Game.Controller
         protected List<IHookable> hookables = new List<IHookable>();
         protected Transform preferredTarget;
 
+#if UNITY_EDITOR
+        private void Update()
+        {
+            triggerCollider.radius = maxDistance;
+        }
+#endif
+
         //This basically acts as the Start() so instantiate the prefab in here
         public override void ClaimOwnership(Entity target)
         {
@@ -35,6 +40,7 @@ namespace Game.Controller
             activeDisplay.SetActive(false);
         }
 
+        //
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if(collision.CompareTag(targetTag))
@@ -75,6 +81,7 @@ namespace Game.Controller
             //! TargetDirection
             float lastDot = -1000f;
             Vector2 dist;
+            preferredTarget = null;
             foreach(var hookable in hookables)
             {
                 var offset = hookable.Position - entity.Position;
@@ -87,7 +94,10 @@ namespace Game.Controller
                 }
             }
             if (preferredTarget == null)
+            {
+                activeDisplay.SetActive(false);
                 return;
+            }
 
             activeDisplay.SetActive(true);
             activeDisplay.transform.position = preferredTarget.position;
@@ -103,6 +113,9 @@ namespace Game.Controller
             {
                 yield break;
             }
+            //
+            if (Vector2.SqrMagnitude((Vector2)preferredTarget.position - entity.Position) < minSquareDist)
+                yield break;
             CanPerform   = false;
             IsPerforming = true;
             
@@ -111,8 +124,6 @@ namespace Game.Controller
 
             AddHookForce();
 
-            CanPerform   = true;
-            IsPerforming = false;
             BreakChain();
             yield return DoCooldown();
         }
@@ -123,14 +134,23 @@ namespace Game.Controller
         void AddHookForce()
         {
             //TODO: y fling is now too much for some reason
-            var xDist = preferredTarget.position.x - entity.Position.x;
-            var tEnd = Mathf.Abs(xDist / xPullSpeed);
-                                   //yMaxTime * tEnd * -gravity;
-            var antiGravitySpeed = yMaxTime * tEnd * -gravity;
-            var yOffsetSpeed = (preferredTarget.position.y - entity.Position.y) / tEnd;
-            var ySpeed = antiGravitySpeed + yOffsetSpeed;
+            //distance
+            var ds = (Vector2)preferredTarget.position - entity.Position;
+            //required time for the diagonal
+            var dt = ds.magnitude / pullSpeed;
 
-            entity.Body.velocity = new Vector2(xPullSpeed * Util.Normalized(xDist), ySpeed);
+            //linear yVelocity
+            var vy = ds.y / dt;
+            //inverse square yVelocity for curve
+            var vy0 = 0.5f * gravity * dt;
+            //combined velocity on y
+            var yVel = vy - vy0;
+
+            //velocity on x
+            var xVel = ds.x / dt;
+
+            //apply the velocity to the entity
+            entity.Body.velocity = new Vector2(xVel, yVel);
         }
     }
 }

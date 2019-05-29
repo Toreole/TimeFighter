@@ -19,7 +19,7 @@ namespace Game.Controller
         protected bool useCenterPoint = false;
 
         public HookInteraction HookInteract => hookInteraction;
-        public Transform M_Transform { get => transform; }
+        public Transform M_Transform { get => (useCenterPoint) ? hookCenter : transform; }
         public bool CanBeDragged { get; }
         public Rigidbody2D Body { get; }
         public Vector2 Position { get => (useCenterPoint)? hookCenter.position :  transform.position; }
