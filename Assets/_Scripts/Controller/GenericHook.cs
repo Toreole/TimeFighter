@@ -63,6 +63,26 @@ namespace Game.Controller
                 yield return null;
             }
         }
+        //overload but with a parameter :heh: epic
+        protected virtual IEnumerator ShootHook(Vector2 targetPos)
+        {
+            Vector2 ch = targetPos - entity.Position;
+            float totalDist = ch.magnitude;
+            float reqTime = totalDist / tossSpeed;
+            for (float t = 0f; t < 1; t += Time.deltaTime / reqTime)
+            {
+                //now do the adjusting
+                ropeRenderer.transform.position = (Vector2)transform.position + ch * t / 2f;
+                ropeRenderer.size = new Vector2(1f, t * totalDist);
+                ropeRenderer.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
+
+                //recalculate this shit every single time ugh
+                ch = targetPos - entity.Position;
+                totalDist = ch.magnitude;
+                reqTime = totalDist / tossSpeed;
+                yield return null;
+            }
+        }
 
         protected virtual bool TestForTarget(out IHookable hookable)
         {

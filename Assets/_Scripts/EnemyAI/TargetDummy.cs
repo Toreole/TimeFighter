@@ -19,6 +19,8 @@ namespace Game
         public bool Looping { get { return loop; } }
         public List<Vector3> RailSystem { get { return railSystem; } }
 
+        public override bool IsGrounded => throw new System.NotImplementedException();
+
         protected override void Move()
         {
             //TODO if this is railed, move on the rails.

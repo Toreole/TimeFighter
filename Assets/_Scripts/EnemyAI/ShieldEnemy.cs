@@ -6,6 +6,8 @@ namespace Game
     [System.Obsolete]
     public class ShieldEnemy : EnemyBase
     {
+        public override bool IsGrounded => throw new System.NotImplementedException();
+
         [System.Obsolete]
         protected override void UpdateEnemy()
         {

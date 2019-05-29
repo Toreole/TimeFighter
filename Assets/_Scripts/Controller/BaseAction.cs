@@ -22,6 +22,7 @@ namespace Game.Controller
         public bool IsPerforming { get; protected set; } = false;
         public bool CanPerform   { get; protected set; } = true;
         public bool ShouldPerform { get; set; } = false;
+        public bool IsSelected { get; set; } = false;
         public float RemainingCooldown { get; protected set; } = 0f;
         public float RelativeCooldown => RemainingCooldown / cooldown;
         public Sprite UISprite => uiSprite;

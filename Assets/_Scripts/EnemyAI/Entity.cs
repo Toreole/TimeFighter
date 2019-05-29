@@ -34,9 +34,12 @@ namespace Game
         public Rigidbody2D Body => body;
         public Vector2 Position => transform.position;
         public bool IsInvincible => isInvincible;
+        public Vector2 LookDirection { get; protected set; } = Vector2.right;
+        public abstract bool IsGrounded { get; }
 
-        internal void AddAction(BaseAction action) { if(!actions.Exists(x => action)) actions.Add(action); }
-        internal void RemoveAction(BaseAction action) { if (!actions.Exists(x => action)) actions.Remove(action); }
+        internal void AddAction(BaseAction action) { if(!actions.Exists(x => x == action)) actions.Add(action); }
+        internal void RemoveAction(BaseAction action) { if (actions.Exists(x => x == action)) actions.Remove(action); }
+
         protected virtual void Start()
         {
             actions = new List<BaseAction>(GetComponents<BaseAction>());

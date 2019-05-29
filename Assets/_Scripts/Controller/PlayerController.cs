@@ -11,6 +11,9 @@ namespace Game.Controller
     [RequireComponent(typeof(Rigidbody2D))]
     public class PlayerController : Entity
     {
+        [Header("Renderer")]
+        [SerializeField]
+        protected new SpriteRenderer renderer;
         [Header("Camera Stuff")]
         [SerializeField]
         protected new Camera camera = null;
@@ -36,6 +39,7 @@ namespace Game.Controller
             float DashCooldown => controllerSettings.dashCooldown;
             float DashLength => controllerSettings.dashLength;
             float MaxAdhereDistance => controllerSettings.maxAdhereDist;
+            float LedgeClimbBoost => controllerSettings.ledgeClimbBoost;
         #endregion
 
         //This could depend on different weapons?
@@ -88,6 +92,8 @@ namespace Game.Controller
         protected bool isOnLedge = false;
         protected bool doLedgeCheck = true;
         protected Vector2 ledgePosition = Vector2.zero;
+
+        public override bool IsGrounded { get { return isGrounded; } }
 
         private const float raycastError = 0.05f;
         private const float g = 9.81f;
@@ -185,10 +191,12 @@ namespace Game.Controller
             //TODO: have all actions displayed at once, animate the swapping on the UI
             if(Input.GetButtonDown("ActionSwap") && !actions[selectedAction].IsPerforming)
             {
+                actions[selectedAction].IsSelected = false;
                 selectedAction += (int)Input.GetAxisRaw("ActionSwap");
                 //!this is nicer code now yay
                 selectedAction = (selectedAction + actions.Count) % actions.Count;
                 uIManager.SetAction(actions[selectedAction]);
+                actions[selectedAction].IsSelected = true;
             }
 
             //mouse position
@@ -210,9 +218,9 @@ namespace Game.Controller
             //    Attack();
 
             var act = actions[selectedAction];
+            act.TargetDirection = directionToMouse;
             if (frameAction && act.CanPerform)
             {
-                act.TargetDirection = directionToMouse;
                 frameAction = false;
                 act.PerformAction();
             }
@@ -383,8 +391,8 @@ namespace Game.Controller
         private void Move()
         {
             //adjust the curent "look direction"
-            var xS = (Mathf.Abs(body.velocity.x) < 0.1f)? transform.localScale.x : Normalized(body.velocity.x);
-                transform.localScale = new Vector3(xS, 1f, 1f);
+            renderer.flipX = (Mathf.Abs(body.velocity.x) < 0.1f) ? renderer.flipX : body.velocity.x < 0;
+            LookDirection = Vector2.right * (renderer.flipX ? 1 : -1);
             if (dashing)
                 return;
 
@@ -521,20 +529,21 @@ namespace Game.Controller
         /// <summary>
         /// Climb the ledge youre holding onto 
         /// </summary>
-        //TODO: This could be nicer, but it works. (2 physics frames long climb)
+        //TODO: This could be nicer, but it works. (2 physics frames long climb / optional speed boost)
         private void ClimbLedge()
         {
             var finalPos = ledgePosition + Vector2.up * PlayerHeight / 2f;
             var tempPos = new Vector2(body.position.x, finalPos.y);
+            var delta = Normalized(finalPos.x - tempPos.x);
             body.MovePosition(tempPos);
 
             DelayPhysicsFrame(this, () => 
             {
                 body.MovePosition(finalPos);
                 jump = false;
+                if(Mathf.Abs(xMove) > 0.1f)
+                    body.velocity = Vector2.right * delta * LedgeClimbBoost;
             });
-            //float v0 = Mathf.Sqrt((JumpHeight) * (2 * g));
-            //body.velocity = new Vector2(0, v0);
         }
         #endregion
 
@@ -634,6 +643,8 @@ namespace Game.Controller
         internal int dashCharges;
         [SerializeField, Tooltip("The max distance to stick to the ground")]
         internal float maxAdhereDist;
+        [SerializeField, Tooltip("The speed the player gains after climbing a ledge")]
+        internal float ledgeClimbBoost;
 
         public static PlayerControllerSettings DefaultSettings 
             => new PlayerControllerSettings()
@@ -648,7 +659,8 @@ namespace Game.Controller
                 dashLength = 3.5f,
                 dashCooldown = 2.5f,
                 dashCharges = 2,
-                maxAdhereDist = 0.1f
+                maxAdhereDist = 0.1f,
+                ledgeClimbBoost = 4f
             };
         
     }

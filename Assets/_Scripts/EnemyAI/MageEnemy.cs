@@ -12,6 +12,8 @@ namespace Game
         int posIndex = 1;
         bool canTeleport = true;
 
+        public override bool IsGrounded => throw new System.NotImplementedException();
+
         //TODO: Enemy logic n shit
         [System.Obsolete]
         protected override void UpdateEnemy()
