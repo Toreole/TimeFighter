@@ -357,14 +357,15 @@ namespace Game.Controller
         }
 
         /// <summary>
-        /// check for a ledge to hang onto. presumably only in the direction the player is facing.
+        /// check for a ledge to hang onto. presumably only in the direction the player is facing. 
         /// </summary>
         protected void CheckLedge()
         {
             if (isGrounded || !doLedgeCheck)
                 return;
-            Vector2 topCornerOffset = new Vector2(PlayerWidth / 2f * transform.localScale.x, PlayerHeight / 2f);
-            Vector2 rayOffset = Vector2.right * (PlayerWidth / 4f * transform.localScale.x) + Vector2.up * (PlayerHeight / 4f);
+            var xDir = (renderer.flipX) ? -1f: 1f;
+            Vector2 topCornerOffset = new Vector2(PlayerWidth / 2f * xDir, PlayerHeight / 2f);
+            Vector2 rayOffset = Vector2.right * (PlayerWidth / 4f * xDir) + Vector2.up * (PlayerHeight / 4f);
             Vector2 rayOrigin = this.Position + rayOffset + topCornerOffset;
             float rayDistance = PlayerHeight / 4f;
 

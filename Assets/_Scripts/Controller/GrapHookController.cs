@@ -45,7 +45,7 @@ namespace Game.Controller
         {
             if(collision.CompareTag(targetTag))
             {
-                Debug.Log("found hookable");
+                //Debug.Log("found hookable");
                 var temp = collision.GetComponent<IHookable>();
                 if (temp != null)
                     if(temp.HasFlag(this.hookType))
@@ -106,7 +106,7 @@ namespace Game.Controller
         /// <summary>
         /// Do Hook yay
         /// </summary>
-        /// <returns></returns>
+        //TODO: this handles everything as static anchor right now, pulling movable objects should be implemented soon (tm)
         protected override IEnumerator DoHook()
         {
             if (!preferredTarget)
@@ -131,10 +131,10 @@ namespace Game.Controller
         /// <summary>
         /// Add the hook force needed to get the player to the needed position
         /// </summary>
+        //TODO: vary speed based on distance (min, max, lerp)
         void AddHookForce()
         {
-            //TODO: y fling is now too much for some reason
-            //distance
+            //distance 
             var ds = (Vector2)preferredTarget.position - entity.Position;
             //required time for the diagonal
             var dt = ds.magnitude / pullSpeed;
