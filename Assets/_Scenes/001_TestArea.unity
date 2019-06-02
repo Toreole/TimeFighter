@@ -15861,7 +15861,7 @@ MonoBehaviour:
   swingVisualPrefab: {fileID: 1328023451071090194, guid: 5cd9a85a0ee56e54791545d5dca6402b,
     type: 3}
   maxDistance: 9
-  tossSpeed: 15
+  tossSpeed: 25
   targetLayer:
     serializedVersion: 2
     m_Bits: 1

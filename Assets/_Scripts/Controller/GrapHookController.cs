@@ -113,16 +113,24 @@ namespace Game.Controller
             {
                 yield break;
             }
-            //
-            if (Vector2.SqrMagnitude((Vector2)preferredTarget.position - entity.Position) < minSquareDist)
+            //yikes
+            var sqrDistance = Vector2.SqrMagnitude((Vector2)preferredTarget.position - entity.Position);
+            if (sqrDistance < minSquareDist || sqrDistance > maxDistance*maxDistance)
                 yield break;
             CanPerform   = false;
             IsPerforming = true;
-            
+
             //hook "animation"
+            ropeRenderer.gameObject.SetActive(true);
             yield return ShootHook(preferredTarget.position);
 
             AddHookForce();
+
+            for(float t = 0f; t < 0.1f; t += Time.deltaTime)
+            {
+                UpdateChain(preferredTarget.position);
+                yield return null;
+            }
 
             BreakChain();
             yield return DoCooldown();
@@ -131,7 +139,7 @@ namespace Game.Controller
         /// <summary>
         /// Add the hook force needed to get the player to the needed position
         /// </summary>
-        //TODO: vary speed based on distance (min, max, lerp)
+        //TODO: vary speed based on distance? (min, max, lerp)
         void AddHookForce()
         {
             //distance 

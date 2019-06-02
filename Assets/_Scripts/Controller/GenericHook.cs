@@ -109,6 +109,13 @@ namespace Game.Controller
             ropeRenderer.size = new Vector2(1f, ch.magnitude);
             ropeRenderer.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
         }
+        protected virtual void UpdateChain(Vector2 targetPos)
+        {
+            var ch = targetPos - entity.Position;
+            ropeRenderer.transform.position = Vector2.Lerp(transform.position, targetPos, 0.5f);
+            ropeRenderer.size = new Vector2(1f, ch.magnitude);
+            ropeRenderer.transform.rotation = Quaternion.LookRotation(Vector3.forward, -ch.normalized);
+        }
 
         protected virtual void BreakChain()
         {
