@@ -2,6 +2,8 @@
 using System.Collections;
 using UnityEngine;
 using Game.Controller;
+using Discord;
+using DiscordApp = Discord.Discord;
 
 namespace Game
 {
@@ -13,9 +15,31 @@ namespace Game
         private bool firstShutdown = true;
         [SerializeField]
         new AudioSource audio;
-        
+
+#if DISCORD
+        public static DiscordApp discord;
+        public static Discord.User user;
+#endif
+
         private void Awake()
         {
+#if DISCORD
+            //epic gamer hours hmmm
+            var mang = discord.GetUserManager();
+            mang.OnCurrentUserUpdate += () =>
+            {
+                user = mang.GetCurrentUser();
+                Debug.Log(user.Username);
+                if (mang.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
+                    Debug.Log("BRAVERY!");
+                else if (mang.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
+                    Debug.Log("BRILLIANCE!");
+                else if (mang.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
+                    Debug.Log("BALANCE!");
+                else
+                    Debug.Log("lmao normie");
+            };
+#endif
             if (instance != null)
             {
                 Destroy(this.gameObject);
@@ -34,6 +58,12 @@ namespace Game
             }
         }
 
+#if DISCORD
+        private void Update()
+        {
+            discord.RunCallbacks();
+        }
+#endif
         private void Start()
         {
             if (instance != this)
