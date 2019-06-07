@@ -19,22 +19,23 @@ namespace Game
 #if DISCORD
         public static DiscordApp discord;
         public static Discord.User user;
+        public static UserManager userManager;
 #endif
 
         private void Awake()
         {
 #if DISCORD
             //epic gamer hours hmmm
-            var mang = discord.GetUserManager();
-            mang.OnCurrentUserUpdate += () =>
+            userManager = discord.GetUserManager();
+            userManager.OnCurrentUserUpdate += () =>
             {
-                user = mang.GetCurrentUser();
+                user = userManager.GetCurrentUser();
                 Debug.Log(user.Username);
-                if (mang.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
+                if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
                     Debug.Log("BRAVERY!");
-                else if (mang.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
+                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
                     Debug.Log("BRILLIANCE!");
-                else if (mang.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
+                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
                     Debug.Log("BALANCE!");
                 else
                     Debug.Log("lmao normie");
