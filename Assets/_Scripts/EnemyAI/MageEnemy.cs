@@ -12,7 +12,12 @@ namespace Game
         int posIndex = 1;
         bool canTeleport = true;
 
-        public override bool IsGrounded => throw new System.NotImplementedException();
+        public override void Damage(float amount)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        //public override bool IsGrounded => throw new System.NotImplementedException();
 
         //TODO: Enemy logic n shit
         [System.Obsolete]
@@ -35,24 +40,24 @@ namespace Game
             canTeleport = true;
         }
 
-        public override void ProcessHit(AttackHitData hitData)
-        {
-            Debug.Log("Mage");
-            if(canTeleport)
-            {
-                Teleport();
-                return;
-            }
-            base.ProcessHit(hitData);
-        }
-        public override void ProcessHit(AttackHitData hitData, bool onlyDamage)
-        {
-            if (canTeleport)
-            {
-                Teleport();
-                return;
-            }
-            base.ProcessHit(hitData, onlyDamage);
-        }
+        //public override void ProcessHit(AttackHitData hitData)
+        //{
+        //    Debug.Log("Mage");
+        //    if(canTeleport)
+        //    {
+        //        Teleport();
+        //        return;
+        //    }
+        //    base.ProcessHit(hitData);
+        //}
+        //public override void ProcessHit(AttackHitData hitData, bool onlyDamage)
+        //{
+        //    if (canTeleport)
+        //    {
+        //        Teleport();
+        //        return;
+        //    }
+        //    base.ProcessHit(hitData, onlyDamage);
+        //}
     }
 }

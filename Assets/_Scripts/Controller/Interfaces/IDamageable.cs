@@ -8,7 +8,6 @@ namespace Game
 {
     public interface IDamageable
     {
-        void ProcessHit(AttackHitData data);
-        void ProcessHit(AttackHitData data, bool onlyDamage);
+        void Damage(float amount);
     }
 }

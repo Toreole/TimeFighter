@@ -123,24 +123,24 @@ namespace Game
         /// <summary>
         /// Update player health every frame and also check stuff
         /// </summary>
-        protected void LateUpdate()
-        {
-            if (!GameStarted)
-                return;
-            if (info.LevelTime <= 0)
-                return;
-            timeLeft -= Time.deltaTime;
-            levelTimeSlider.value = timeLeft;
-            sliderFill.color = sliderGradient.Evaluate(timeLeft / info.LevelTime);
+        //protected void LateUpdate()
+        //{
+        //    if (!GameStarted)
+        //        return;
+        //    if (info.LevelTime <= 0)
+        //        return;
+        //    timeLeft -= Time.deltaTime;
+        //    levelTimeSlider.value = timeLeft;
+        //    sliderFill.color = sliderGradient.Evaluate(timeLeft / info.LevelTime);
 
-            if (controller.IsDead || timeLeft <= 0f)
-                OnLevelFail?.Invoke();
-            if (deadEnemies >= enemyCount && !controller.IsDead && !justCompleted)
-            {
-                justCompleted = true;
-                OnLevelComplete?.Invoke();
-            }
-        }
+        //    if (controller.IsDead || timeLeft <= 0f)
+        //        OnLevelFail?.Invoke();
+        //    if (deadEnemies >= enemyCount && !controller.IsDead && !justCompleted)
+        //    {
+        //        justCompleted = true;
+        //        OnLevelComplete?.Invoke();
+        //    }
+        //}
 
         /// <summary>
         /// Start the game after counting down some time.
@@ -168,19 +168,19 @@ namespace Game
             instance = null;
         }
 
-        public void RegisterDead(EnemyBase deadEnemy)
-        {
-            if(enemies.Contains(deadEnemy))
-            {
-                enemies.Remove(deadEnemy);
-                deadEnemies++;
+        //public void RegisterDead(EnemyBase deadEnemy)
+        //{
+        //    if(enemies.Contains(deadEnemy))
+        //    {
+        //        enemies.Remove(deadEnemy);
+        //        deadEnemies++;
 
-                if(deadEnemies >= enemyCount && GameStarted)
-                {
-                    OnLevelComplete?.Invoke();
-                }
-            }
-        }
+        //        if(deadEnemies >= enemyCount && GameStarted)
+        //        {
+        //            OnLevelComplete?.Invoke();
+        //        }
+        //    }
+        //}
 
         protected void LevelFailed()
         {
@@ -193,8 +193,8 @@ namespace Game
             //instead of just reloading the scene, actually Reset all values of the entities n shit
             //SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             foreach (var entity in enemies)
-                entity.ResetEntity();
-            controller.ResetEntity();
+            //    entity.ResetEntity();
+            //controller.ResetEntity();
             SetupPlayer();
             StartCoroutine(StartLevel());
         }

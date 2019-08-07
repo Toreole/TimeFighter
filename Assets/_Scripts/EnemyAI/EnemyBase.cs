@@ -38,10 +38,10 @@ namespace Game
         /// <summary>
         /// One time initial update
         /// </summary>
-        protected override void Start()
+        protected virtual void Start()
         {
-            LevelManager.OnLevelStart += OnLevelStart;
-            LevelManager.OnLevelFail  += OnLevelFail;
+        //    LevelManager.OnLevelStart += OnLevelStart;
+        //    LevelManager.OnLevelFail  += OnLevelFail;
 
             startPos = transform.position;
             body = GetComponent<Rigidbody2D>();
@@ -49,8 +49,8 @@ namespace Game
 
         protected virtual void FixedUpdate()
         {
-            if (!active)
-                return;
+            //if (!active)
+            //    return;
             if (!turningAround && !LookingTowardsPlayer && playerIsNear)
             {
                 StartCoroutine(TurnAround());
@@ -63,31 +63,31 @@ namespace Game
         /// <summary>
         /// Do this when the level is started or re-started.
         /// </summary>
-        protected override void OnLevelStart()
-        {
-            active = true;
-            if (settings.Movement == MovementPattern.ShortDistance)
-                StartCoroutine(WanderAround());
+        //protected override void OnLevelStart()
+        //{
+        //    active = true;
+        //    if (settings.Movement == MovementPattern.ShortDistance)
+        //        StartCoroutine(WanderAround());
 
-            transform.position = startPos;
-            currentHealth = settings.HP;
-            body.WakeUp();
-            foreach (var col in GetComponentsInChildren<Collider2D>())
-            {
-                col.enabled = true;
-            }
-        }
+        //    transform.position = startPos;
+        //    currentHealth = settings.HP;
+        //    body.WakeUp();
+        //    foreach (var col in GetComponentsInChildren<Collider2D>())
+        //    {
+        //        col.enabled = true;
+        //    }
+        //}
 
-        protected override void OnLevelFail()
-        {
-            active = false;
-            //reset enemy? idk lol
-        }
+        //protected override void OnLevelFail()
+        //{
+        //    active = false;
+        //    //reset enemy? idk lol
+        //}
 
-        protected override void OnLevelComplete()
-        {
-            active = false;
-        }
+        //protected override void OnLevelComplete()
+        //{
+        //    active = false;
+        //}
 
         /// <summary>
         /// Move based on the movement pattern inside the settings.
@@ -109,36 +109,36 @@ namespace Game
             }
         }
 
-        public override void ProcessHit(AttackHitData hitData)
-        {
-            currentHealth -= hitData.Damage;
-            if (currentHealth <= 0)
-                Die();
-        }
+        //public override void ProcessHit(AttackHitData hitData)
+        //{
+        //    currentHealth -= hitData.Damage;
+        //    if (currentHealth <= 0)
+        //        Die();
+        //}
 
-        public override void ProcessHit(AttackHitData hitData, bool onlyDamage)
-        {
-            if (onlyDamage)
-            {
-                currentHealth -= hitData.Damage;
-                if (currentHealth <= 0)
-                    Die();
-                return;
-            }
-            ProcessHit(hitData);
-        }
+        //public override void ProcessHit(AttackHitData hitData, bool onlyDamage)
+        //{
+        //    if (onlyDamage)
+        //    {
+        //        currentHealth -= hitData.Damage;
+        //        if (currentHealth <= 0)
+        //            Die();
+        //        return;
+        //    }
+        //    ProcessHit(hitData);
+        //}
 
-        protected virtual void Die()
-        {
-            active = false;
-            LevelManager.instance.RegisterDead(this);
-            body.Sleep();
-            foreach( var col in GetComponentsInChildren<Collider2D>() )
-            {
-                col.enabled = false;
-            }
-            Debug.Log(name + " died");
-        }
+        //protected virtual void Die()
+        //{
+        //    active = false;
+        //    LevelManager.instance.RegisterDead(this);
+        //    body.Sleep();
+        //    foreach( var col in GetComponentsInChildren<Collider2D>() )
+        //    {
+        //        col.enabled = false;
+        //    }
+        //    Debug.Log(name + " died");
+        //}
 
         /// <summary>
         /// turn towards the player with some amount of delay or something i guess.
@@ -208,40 +208,40 @@ namespace Game
            
         }
 
-        protected virtual IEnumerator WanderAround()
-        {
-            while (active)
-            {
-                if (playerIsNear || !isGrounded)
-                    yield return new WaitForSeconds(0.2f);
-                else
-                {
-                    //else just go into a random direction / turn around when needed.
-                    var rand = Random.Range(0, 100);
-                    if (rand < 2)
-                    {
-                        //Turn around when player is not near
-                        if (!playerIsNear)
-                        {
-                            StartCoroutine(TurnAroundImmediate());
-                            yield return new WaitForSeconds(0.3f);
-                        }
-                    }
-                    else if (rand < 8)
-                    {
-                        body.velocity = new Vector2(0, body.velocity.y);
-                        yield return new WaitForSeconds(0.5f);
-                    }
-                    //Stop
-                    else
-                    {
-                        //Walk into the direction youre facing
-                        body.velocity = new Vector2(settings.MovementSpeed * facingDirection, body.velocity.y);
-                        yield return new WaitForSeconds(0.1f);
-                    }
-                }
-            }
-        }
+        //protected virtual IEnumerator WanderAround()
+        //{
+        //    while (active)
+        //    {
+        //        if (playerIsNear || !isGrounded)
+        //            yield return new WaitForSeconds(0.2f);
+        //        else
+        //        {
+        //            //else just go into a random direction / turn around when needed.
+        //            var rand = Random.Range(0, 100);
+        //            if (rand < 2)
+        //            {
+        //                //Turn around when player is not near
+        //                if (!playerIsNear)
+        //                {
+        //                    StartCoroutine(TurnAroundImmediate());
+        //                    yield return new WaitForSeconds(0.3f);
+        //                }
+        //            }
+        //            else if (rand < 8)
+        //            {
+        //                body.velocity = new Vector2(0, body.velocity.y);
+        //                yield return new WaitForSeconds(0.5f);
+        //            }
+        //            //Stop
+        //            else
+        //            {
+        //                //Walk into the direction youre facing
+        //                body.velocity = new Vector2(settings.MovementSpeed * facingDirection, body.velocity.y);
+        //                yield return new WaitForSeconds(0.1f);
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Walk from left to right and right to left, until you hit a wall, or some sort of cliff.
@@ -316,18 +316,18 @@ namespace Game
         /// <summary>
         /// Reset this entity to the defaults
         /// </summary>
-        internal override void ResetEntity()
-        {
-            StopAllCoroutines();
-            transform.position = startPos;
-            transform.localScale = Vector3.one;
-            active = false;
-            currentHealth = settings.HP;
-            facingDirection = 1;
-            active = false;
-            turningAround = false;
-            playerIsNear = false;
-            body.velocity = Vector2.zero;
-        }
+        //internal override void ResetEntity()
+        //{
+        //    StopAllCoroutines();
+        //    transform.position = startPos;
+        //    transform.localScale = Vector3.one;
+        //    active = false;
+        //    currentHealth = settings.HP;
+        //    facingDirection = 1;
+        //    active = false;
+        //    turningAround = false;
+        //    playerIsNear = false;
+        //    body.velocity = Vector2.zero;
+        //}
     }
 }
