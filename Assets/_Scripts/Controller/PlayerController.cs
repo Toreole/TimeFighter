@@ -94,6 +94,10 @@ namespace Game.Controller
         private const float raycastError = 0.05f;
         private const float g = 9.81f;
 
+        public void OnStart()
+        {
+            print("playerController onStart");
+        }
         /// <summary>
         /// Start! bruh unity gae
         /// </summary>
