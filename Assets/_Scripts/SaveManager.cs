@@ -12,6 +12,15 @@ namespace Game
         internal static Discord.StorageManager discordStorageManager;
         const string fileName = "HalfLifeThreeWillNeverExist.noobs";
 
+        public static string SaveLocation
+#if DISCORD
+             => discordStorageManager is null ? Application.persistentDataPath : discordStorageManager.GetPath();
+#elif STEAM
+        => "default";
+#else
+        => Application.persistentDataPath;
+#endif
+
         internal static bool TryLoad(out SaveData data)
         {
             data = null;

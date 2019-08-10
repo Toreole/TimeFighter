@@ -8,120 +8,123 @@ using static Game.Util;
 
 namespace Game.Controller
 {
-    [RequireComponent(typeof(Rigidbody2D))]
-    public class PlayerController : MonoBehaviour
+    public class PlayerController : PlayerComponent
     {
-        [Header("Renderer")]
-        [SerializeField]
-        protected new SpriteRenderer renderer;
-        [Header("Camera Stuff")]
-        [SerializeField]
-        protected new Camera camera = null;
-        protected int facingDirection = 1;
-        protected Vector2 directionToMouse = Vector2.zero;
+        #region New_StateMachine 
+        PlayerStateBehaviour activeState;
         
-        [Header("Physics And Movement")]
-        [SerializeField, Tooltip("The empty transform child, will be automatically set in Start()")]
-        protected Transform ground;
-        [SerializeField, Tooltip("The collision layer used to check for ground")]
-        protected LayerMask groundLayer;
-        [SerializeField, Tooltip("Settings for movement and that")]
-        protected PlayerControllerSettings controllerSettings = PlayerControllerSettings.DefaultSettings;
-        #region setting_properties
-            float PlayerWidth  => controllerSettings.playerWidth;
-            float Acceleration => controllerSettings.acceleration;
-            float PlayerHeight => controllerSettings.playerHeight;
-            float JumpHeight   => controllerSettings.jumpHeight;
-            float TargetSpeed  => controllerSettings.targetSpeed;
-            float WallJumpStrength   => controllerSettings.wallJumpStrength;
-            float AirControlStrength => controllerSettings.airControlStrength;
-            int   MaxDashCharges => controllerSettings.dashCharges;
-            float DashCooldown => controllerSettings.dashCooldown;
-            float DashLength => controllerSettings.dashLength;
-            float MaxAdhereDistance => controllerSettings.maxAdhereDist;
-            float LedgeClimbBoost => controllerSettings.ledgeClimbBoost;
         #endregion
+        #region OLD_ControllerSystem
+        //[Header("Renderer")]
+        //[SerializeField]
+        //protected new SpriteRenderer renderer;
+        //[Header("Camera Stuff")]
+        //[SerializeField]
+        //protected new Camera camera = null;
+        //protected int facingDirection = 1;
+        //protected Vector2 directionToMouse = Vector2.zero;
 
-        //This could depend on different weapons?
-        [Header("Combat Stats")]
-        
-        [SerializeField, Tooltip("The attack damage of normal attacks")]
-        protected float attackDamage = 1;
-        [SerializeField, Tooltip("The time between attacks")]
-        protected float attackCooldown = 0.75f;
+        //[Header("Physics And Movement")]
+        //[SerializeField, Tooltip("The empty transform child, will be automatically set in Start()")]
+        //protected Transform ground;
+        //[SerializeField, Tooltip("The collision layer used to check for ground")]
+        //protected LayerMask groundLayer;
+        //[SerializeField, Tooltip("Settings for movement and that")]
+        //protected PlayerControllerSettings controllerSettings = PlayerControllerSettings.DefaultSettings;
+        //#region setting_properties
+        //    float PlayerWidth  => controllerSettings.playerWidth;
+        //    float Acceleration => controllerSettings.acceleration;
+        //    float PlayerHeight => controllerSettings.playerHeight;
+        //    float JumpHeight   => controllerSettings.jumpHeight;
+        //    float TargetSpeed  => controllerSettings.targetSpeed;
+        //    float WallJumpStrength   => controllerSettings.wallJumpStrength;
+        //    float AirControlStrength => controllerSettings.airControlStrength;
+        //    int   MaxDashCharges => controllerSettings.dashCharges;
+        //    float DashCooldown => controllerSettings.dashCooldown;
+        //    float DashLength => controllerSettings.dashLength;
+        //    float MaxAdhereDistance => controllerSettings.maxAdhereDist;
+        //    float LedgeClimbBoost => controllerSettings.ledgeClimbBoost;
+        //#endregion
 
-        [Header("UI")]
-        [SerializeField]
-        protected PlayerUIManager uIManager;
+        ////This could depend on different weapons?
+        //[Header("Combat Stats")]
 
-        protected bool canAttack = true;
-        //public bool IsDead { get { return currentHealth <= 0f; } }
+        //[SerializeField, Tooltip("The attack damage of normal attacks")]
+        //protected float attackDamage = 1;
+        //[SerializeField, Tooltip("The time between attacks")]
+        //protected float attackCooldown = 0.75f;
 
-        //Input
-        protected float xMove = 0f;
-        protected float yMove = 0;
-        protected bool jump;
-        protected bool attack;
-        protected bool shouldThrow;
-        protected float mouseScroll;
-        protected bool actionPersist;
-        protected bool frameAction;
-        protected bool dash;
+        //[Header("UI")]
+        //[SerializeField]
+        //protected PlayerUIManager uIManager;
 
-        //Actions
-        protected int selectedAction;
-        protected float actionOffset;
-        protected int dashCharges;
-        protected bool dashing = false;
-        protected bool isRecharging = false;
-        protected float remainDashCd = 0f;
+        //protected bool canAttack = true;
+        ////public bool IsDead { get { return currentHealth <= 0f; } }
 
-        public float RelativeDashCD => remainDashCd / DashCooldown;
-        public int AvailableDashes => dashCharges;
+        ////Input
+        //protected float xMove = 0f;
+        //protected float yMove = 0;
+        //protected bool jump;
+        //protected bool attack;
+        //protected bool shouldThrow;
+        //protected float mouseScroll;
+        //protected bool actionPersist;
+        //protected bool frameAction;
+        //protected bool dash;
 
-        //other runtime variables
-        protected Vector3 startPos = Vector3.zero;
-        protected bool isGrounded = false;
-        protected EntityState state = EntityState.Idle;
-        protected bool isOnWall  = false;
-        protected Vector2 wallNormal = Vector2.right;
-        protected bool isOnLedge = false;
-        protected bool doLedgeCheck = true;
-        protected Vector2 ledgePosition = Vector2.zero;
+        ////Actions
+        //protected int selectedAction;
+        //protected float actionOffset;
+        //protected int dashCharges;
+        //protected bool dashing = false;
+        //protected bool isRecharging = false;
+        //protected float remainDashCd = 0f;
 
-        //public override bool IsGrounded { get { return isGrounded; } }
+        //public float RelativeDashCD => remainDashCd / DashCooldown;
+        //public int AvailableDashes => dashCharges;
 
-        private const float raycastError = 0.05f;
-        private const float g = 9.81f;
+        ////other runtime variables
+        //protected Vector3 startPos = Vector3.zero;
+        //protected bool isGrounded = false;
+        //protected EntityState state = EntityState.Idle;
+        //protected bool isOnWall  = false;
+        //protected Vector2 wallNormal = Vector2.right;
+        //protected bool isOnLedge = false;
+        //protected bool doLedgeCheck = true;
+        //protected Vector2 ledgePosition = Vector2.zero;
 
-        public void OnStart()
-        {
-            print("playerController onStart");
-        }
+        ////public override bool IsGrounded { get { return isGrounded; } }
+
+        //private const float raycastError = 0.05f;
+        //private const float g = 9.81f;
+
+        //public void OnStart()
+        //{
+        //    print("playerController onStart");
+        //}
         /// <summary>
         /// Start! bruh unity gae
         /// </summary>
-        protected void Start()
-        {
-            //IsPlayer = true;
-            startPos = transform.position;
-            dashCharges = MaxDashCharges;
+        //protected void Start()
+        //{
+        //    //IsPlayer = true;
+        //    startPos = transform.position;
+        //    dashCharges = MaxDashCharges;
 
-            if (camera == null)
-                camera = FindObjectOfType<Camera>();
-            if (ground == null)
-                ground = transform.GetChild(0);
-            //if (body == null)
-            //    body = GetComponent<Rigidbody2D>();
-            if (uIManager == null)
-                uIManager = FindObjectOfType<PlayerUIManager>();
-            //setup events
-            //LevelManager.OnLevelStart    += OnLevelStart;
-            //LevelManager.OnLevelFail     += OnLevelFail;
-            //LevelManager.OnLevelComplete += OnLevelComplete;
-        }
+        //    if (camera == null)
+        //        camera = FindObjectOfType<Camera>();
+        //    if (ground == null)
+        //        ground = transform.GetChild(0);
+        //    //if (body == null)
+        //    //    body = GetComponent<Rigidbody2D>();
+        //    if (uIManager == null)
+        //        uIManager = FindObjectOfType<PlayerUIManager>();
+        //    //setup events
+        //    //LevelManager.OnLevelStart    += OnLevelStart;
+        //    //LevelManager.OnLevelFail     += OnLevelFail;
+        //    //LevelManager.OnLevelComplete += OnLevelComplete;
+        //}
 
-        #region LevelEvents
         //protected override void OnLevelStart()
         //{
         //    Debug.Log("Player Level Start");
@@ -140,9 +143,6 @@ namespace Game.Controller
         //    Debug.Log("Player level Complete");
         //    active = false;
         //}
-        #endregion
-
-        #region FrameUpdates
         /// <summary>
         /// Input & mouse dependent stuff
         /// </summary>
@@ -172,34 +172,38 @@ namespace Game.Controller
         /// Gets relevant input
         /// </summary>
         //TODO: check for more input if needed
-        private void GetInput()
-        {
-            xMove  = Input.GetAxis("Horizontal");
-            yMove  = Input.GetAxis("Vertical");
-            jump   = (Input.GetButtonDown("Jump") || jump) && (isGrounded || isOnWall || isOnLedge); //include grounded check lmao idk, kind redundant but it works
-            attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
-            shouldThrow   = Input.GetButtonDown("MiddleClick") || shouldThrow;
-            actionPersist = Input.GetButton("RightClick");
-            frameAction   = Input.GetButtonDown("RightClick");
-            dash = Input.GetButtonDown("Dash");
+        //private void GetInput()
+        //{
+        //    xMove  = Input.GetAxis("Horizontal");
+        //    yMove  = Input.GetAxis("Vertical");
+        //    jump   = (Input.GetButtonDown("Jump") || jump) && (isGrounded || isOnWall || isOnLedge); //include grounded check lmao idk, kind redundant but it works
+        //    attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
+        //    shouldThrow   = Input.GetButtonDown("MiddleClick") || shouldThrow;
+        //    actionPersist = Input.GetButton("RightClick");
+        //    frameAction   = Input.GetButtonDown("RightClick");
+        //    dash = Input.GetButtonDown("Dash");
 
-            //Swap actions
-            //TODO: have all actions displayed at once, animate the swapping on the UI
-            //if(Input.GetButtonDown("ActionSwap") && !actions[selectedAction].IsPerforming)
-            //{
-            //    actions[selectedAction].IsSelected = false;
-            //    selectedAction += (int)Input.GetAxisRaw("ActionSwap");
-            //    //!this is nicer code now yay
-            //    selectedAction = (selectedAction + actions.Count) % actions.Count;
-            //    uIManager.SetAction(actions[selectedAction]);
-            //    actions[selectedAction].IsSelected = true;
-            //}
+        //    //Swap actions
+        //    //TODO: have all actions displayed at once, animate the swapping on the UI
+        //    //if(Input.GetButtonDown("ActionSwap") && !actions[selectedAction].IsPerforming)
+        //    //{
+        //    //    actions[selectedAction].IsSelected = false;
+        //    //    selectedAction += (int)Input.GetAxisRaw("ActionSwap");
+        //    //    //!this is nicer code now yay
+        //    //    selectedAction = (selectedAction + actions.Count) % actions.Count;
+        //    //    uIManager.SetAction(actions[selectedAction]);
+        //    //    actions[selectedAction].IsSelected = true;
+        //    //}
 
-            //mouse position
-            var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
-            directionToMouse = (mousePos - (Vector2)transform.position).normalized;
-        }
+        //    //mouse position
+        //    var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
+        //    directionToMouse = (mousePos - (Vector2)transform.position).normalized;
+        //}
 
+        //private void OnTriggerEnter2D(Collider2D collision)
+        //{
+        //    print("lmao");
+        //}
         //TODO: rework attacking
         //private void PerformActions()
         //{
@@ -227,31 +231,30 @@ namespace Game.Controller
         /// Update the PlayerState
         /// </summary>
         //TODO: constant WIP, 1. Add Attack state
-        private void UpdateState()
-        {
-            if (isGrounded)
-            {
-                if (xMove != 0 && !jump)
-                    state = EntityState.Run;
-                else if (jump)
-                    state = EntityState.Jump;
-                else 
-                    state = EntityState.Idle;
-            }
-            else
-            {
-                //if(body.velocity.y > 0)
-                //{
-                //    state = EntityState.Jump;
-                //}
-                //else if (body.velocity.y < 0)
-                //{
-                //    state = EntityState.Fall;
-                //}
-            }
-            //bruh
-        }
-        #endregion
+        //private void UpdateState()
+        //{
+        //    if (isGrounded)
+        //    {
+        //        if (xMove != 0 && !jump)
+        //            state = EntityState.Run;
+        //        else if (jump)
+        //            state = EntityState.Jump;
+        //        else 
+        //            state = EntityState.Idle;
+        //    }
+        //    else
+        //    {
+        //        //if(body.velocity.y > 0)
+        //        //{
+        //        //    state = EntityState.Jump;
+        //        //}
+        //        //else if (body.velocity.y < 0)
+        //        //{
+        //        //    state = EntityState.Fall;
+        //        //}
+        //    }
+        //    //bruh
+        //}
 
         /// <summary>
         /// YEAH, SCIENCE, BITCH!
@@ -266,91 +269,90 @@ namespace Game.Controller
         //    Move();
         //}
 
-        #region PhysicsAndMovement
         /// <summary>
         /// Does what the name says lol
         /// </summary>
-        protected void CheckGrounded()
-        {
-            //if(body.velocity.y > 2)
-            //{
-            //    isGrounded = false;
-            //    return;
-            //}
-            RaycastHit2D hit;
-            var raycastPos = transform.position;
-            var rayLength = PlayerHeight / 1.5f + raycastError;
+        //protected void CheckGrounded()
+        //{
+        //    //if(body.velocity.y > 2)
+        //    //{
+        //    //    isGrounded = false;
+        //    //    return;
+        //    //}
+        //    RaycastHit2D hit;
+        //    var raycastPos = transform.position;
+        //    var rayLength = PlayerHeight / 1.5f + raycastError;
 
-            Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-            if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
-            {
-                SetGround(hit);
-            }
-            else
-            {
-                raycastPos += Vector3.right * PlayerWidth / 3f;
-                Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-                if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
-                {
-                    SetGround(hit);
-                }
-                else
-                {
-                    raycastPos -= Vector3.right * PlayerWidth / 3f * 2f;
-                    Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-                    if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
-                    {
-                        SetGround(hit);
-                    }
-                    else
-                        isGrounded = false;
-                }
-            }
-        }
-        protected void SetGround(RaycastHit2D hit)
-        {
-            Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
-            ground.rotation = rot;
-            isGrounded = true;
-            var nPoint = hit.point + Vector2.up * PlayerHeight / 2f;
-            var dist = Vector2.Distance(nPoint, transform.position);
-            //stick to the ground instead of flying off
-            if (dist < MaxAdhereDistance && dist > 0.05f)
-            {
-                //body.position = nPoint;
-            }
-        }
+        //    Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
+        //    if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
+        //    {
+        //        SetGround(hit);
+        //    }
+        //    else
+        //    {
+        //        raycastPos += Vector3.right * PlayerWidth / 3f;
+        //        Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
+        //        if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
+        //        {
+        //            SetGround(hit);
+        //        }
+        //        else
+        //        {
+        //            raycastPos -= Vector3.right * PlayerWidth / 3f * 2f;
+        //            Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
+        //            if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
+        //            {
+        //                SetGround(hit);
+        //            }
+        //            else
+        //                isGrounded = false;
+        //        }
+        //    }
+        //}
+        //protected void SetGround(RaycastHit2D hit)
+        //{
+        //    Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
+        //    ground.rotation = rot;
+        //    isGrounded = true;
+        //    var nPoint = hit.point + Vector2.up * PlayerHeight / 2f;
+        //    var dist = Vector2.Distance(nPoint, transform.position);
+        //    //stick to the ground instead of flying off
+        //    if (dist < MaxAdhereDistance && dist > 0.05f)
+        //    {
+        //        //body.position = nPoint;
+        //    }
+        //}
 
-        /// <summary>
-        /// Check for a wall for walljumps.
-        /// </summary>
-        protected void CheckWall()
-        {
-            if (isGrounded)
-            {
-                isOnWall = false;
-                return;
-            }
-            var dist = PlayerWidth / 2f + raycastError;
-            Debug.DrawRay(transform.position, Vector3.right * dist, Color.blue);
-            Debug.DrawRay(transform.position, -Vector3.right * dist, Color.blue);
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, dist, groundLayer);
-            if (hit)
-            {
-                //bruh
-                wallNormal = hit.normal;
-                isOnWall = true;
-            }
-            else if(hit = Physics2D.Raycast(transform.position, -Vector2.right, dist, groundLayer))
-            {
-                wallNormal = hit.normal;
-                isOnWall = true;
-            }
-            else
-            {
-                isOnWall = false;
-            }
-        }
+        ///// <summary>
+        ///// Check for a wall for walljumps.
+        ///// </summary>
+        //protected void CheckWall()
+        //{
+        //    if (isGrounded)
+        //    {
+        //        isOnWall = false;
+        //        return;
+        //    }
+        //    var dist = PlayerWidth / 2f + raycastError;
+        //    Debug.DrawRay(transform.position, Vector3.right * dist, Color.blue);
+        //    Debug.DrawRay(transform.position, -Vector3.right * dist, Color.blue);
+        //    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, dist, groundLayer);
+        //    if (hit)
+        //    {
+        //        //bruh
+        //        wallNormal = hit.normal;
+        //        isOnWall = true;
+        //    }
+        //    else if(hit = Physics2D.Raycast(transform.position, -Vector2.right, dist, groundLayer))
+        //    {
+        //        wallNormal = hit.normal;
+        //        isOnWall = true;
+        //    }
+        //    else
+        //    {
+        //        isOnWall = false;
+        //    }
+        //}
 
         /// <summary>
         /// check for a ledge to hang onto. presumably only in the direction the player is facing. 
@@ -429,7 +431,7 @@ namespace Game.Controller
         //    if (jump)
         //        Jump();
         //}
-        
+
         /// <summary>
         /// How the player should behave when hanging onto a ledge
         /// </summary>
@@ -471,25 +473,25 @@ namespace Game.Controller
         //    if (!isRecharging)
         //        StartCoroutine(RechargeDash());
         //}
-        
+
         /// <summary>
         /// recharge dashes if needed
         /// </summary>
-        protected IEnumerator RechargeDash()
-        {
-            if (isRecharging)
-                yield break;
-            isRecharging = true;
-            while( dashCharges < MaxDashCharges )
-            {
-                for(remainDashCd = DashCooldown; remainDashCd > 0f; remainDashCd -= Time.deltaTime)
-                {
-                    yield return null;
-                }
-                dashCharges++;
-            }
-            isRecharging = false;
-        }
+        //protected IEnumerator RechargeDash()
+        //{
+        //    if (isRecharging)
+        //        yield break;
+        //    isRecharging = true;
+        //    while( dashCharges < MaxDashCharges )
+        //    {
+        //        for(remainDashCd = DashCooldown; remainDashCd > 0f; remainDashCd -= Time.deltaTime)
+        //        {
+        //            yield return null;
+        //        }
+        //        dashCharges++;
+        //    }
+        //    isRecharging = false;
+        //}
 
         /// <summary>
         /// The resulting force of the (sloped) ground and gravity, that accelerates the body towards the lower ground.
@@ -526,7 +528,6 @@ namespace Game.Controller
         /// <summary>
         /// Climb the ledge youre holding onto 
         /// </summary>
-        //TODO: This could be nicer, but it works. (2 physics frames long climb / optional speed boost)
         //private void ClimbLedge()
         //{
         //    var finalPos = ledgePosition + Vector2.up * PlayerHeight / 2f;
@@ -542,9 +543,6 @@ namespace Game.Controller
         //            body.velocity = Vector2.right * delta * LedgeClimbBoost;
         //    });
         //}
-        #endregion
-
-        #region CombatCode
 
         //TODO: process knockback and that kind of stuff.
         /// <summary>
@@ -564,27 +562,6 @@ namespace Game.Controller
         //        ProcessHit(hitData);
         //}
 
-        //TODO: Add Throwable Items
-        //TODO: also make this an action instead of this lol.
-        /// <summary>
-        /// Throw the equipped thing
-        /// </summary>
-        private void Throw()
-        {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Temporary Attack Code
-        /// </summary>
-        //TODO: This is absolute dogshit. Make it play an attack animation and work with trigger colliders for hit detection.
-        private void Attack()
-        {
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
         /// <summary>
         /// Reset the Player to his start values.
         /// </summary>
@@ -594,8 +571,7 @@ namespace Game.Controller
         //    body.velocity = Vector2.zero;
         //}
 
-        #region ObsoleteCode
-        
+
         /// <summary>
         /// Makes the player face towards the mouse
         /// </summary>
@@ -611,54 +587,54 @@ namespace Game.Controller
         //    facingDirection = newFacingDirection;
         //    transform.localScale = new Vector3(facingDirection, 1.0f, 1.0f);
         //}
+        //[System.Serializable]
+        //public struct PlayerControllerSettings
+        //{
+        //    [SerializeField, Tooltip("height of the players hitbox")]
+        //    internal float playerHeight;
+        //    [SerializeField, Tooltip("width of the players hitbox")]
+        //    internal float playerWidth;
+        //    [SerializeField, Tooltip("The fixed height the player can jump (in Units).")]
+        //    internal float jumpHeight;
+        //    [SerializeField, Tooltip("how fast the player usually moves on the ground.")]
+        //    internal float targetSpeed;
+        //    [SerializeField, Tooltip("how fast the speed of the player changes while on ground.")]
+        //    internal float acceleration;
+        //    [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
+        //    internal float airControlStrength;
+        //    [SerializeField, Tooltip("strength of wall jumps")]
+        //    internal float wallJumpStrength;
+        //    [SerializeField, Tooltip("length of the dash")]
+        //    internal float dashLength;
+        //    [SerializeField, Tooltip("dash cooldown")]
+        //    internal float dashCooldown;
+        //    [SerializeField, Tooltip("amount of max charges")]
+        //    internal int dashCharges;
+        //    [SerializeField, Tooltip("The max distance to stick to the ground")]
+        //    internal float maxAdhereDist;
+        //    [SerializeField, Tooltip("The speed the player gains after climbing a ledge")]
+        //    internal float ledgeClimbBoost;
 
+        //    public static PlayerControllerSettings DefaultSettings 
+        //        => new PlayerControllerSettings()
+        //        {
+        //            playerHeight = 0.8f,
+        //            playerWidth = 0.8f,
+        //            jumpHeight = 1.0f,
+        //            targetSpeed = 1.0f,
+        //            acceleration = 2.0f,
+        //            airControlStrength = 0.25f,
+        //            wallJumpStrength = 0.75f,
+        //            dashLength = 3.5f,
+        //            dashCooldown = 2.5f,
+        //            dashCharges = 2,
+        //            maxAdhereDist = 0.1f,
+        //            ledgeClimbBoost = 4f
+        //        };
+
+        //}
         #endregion
     }
 
-    [System.Serializable]
-    public struct PlayerControllerSettings
-    {
-        [SerializeField, Tooltip("height of the players hitbox")]
-        internal float playerHeight;
-        [SerializeField, Tooltip("width of the players hitbox")]
-        internal float playerWidth;
-        [SerializeField, Tooltip("The fixed height the player can jump (in Units).")]
-        internal float jumpHeight;
-        [SerializeField, Tooltip("how fast the player usually moves on the ground.")]
-        internal float targetSpeed;
-        [SerializeField, Tooltip("how fast the speed of the player changes while on ground.")]
-        internal float acceleration;
-        [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
-        internal float airControlStrength;
-        [SerializeField, Tooltip("strength of wall jumps")]
-        internal float wallJumpStrength;
-        [SerializeField, Tooltip("length of the dash")]
-        internal float dashLength;
-        [SerializeField, Tooltip("dash cooldown")]
-        internal float dashCooldown;
-        [SerializeField, Tooltip("amount of max charges")]
-        internal int dashCharges;
-        [SerializeField, Tooltip("The max distance to stick to the ground")]
-        internal float maxAdhereDist;
-        [SerializeField, Tooltip("The speed the player gains after climbing a ledge")]
-        internal float ledgeClimbBoost;
 
-        public static PlayerControllerSettings DefaultSettings 
-            => new PlayerControllerSettings()
-            {
-                playerHeight = 0.8f,
-                playerWidth = 0.8f,
-                jumpHeight = 1.0f,
-                targetSpeed = 1.0f,
-                acceleration = 2.0f,
-                airControlStrength = 0.25f,
-                wallJumpStrength = 0.75f,
-                dashLength = 3.5f,
-                dashCooldown = 2.5f,
-                dashCharges = 2,
-                maxAdhereDist = 0.1f,
-                ledgeClimbBoost = 4f
-            };
-        
-    }
 }
