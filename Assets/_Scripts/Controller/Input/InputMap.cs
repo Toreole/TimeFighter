@@ -43,6 +43,11 @@ namespace Game.Controller.Input
         {
             return JsonUtility.FromJson<InputMap>(content);
         }
+
+        public string ToJson()
+        {
+            return JsonUtility.ToJson(this);
+        }
     }
 
     [System.Serializable]

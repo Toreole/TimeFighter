@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.IO;
+using System.Text;
 
 using UInput = UnityEngine.Input;
 
@@ -15,7 +16,7 @@ namespace Game.Controller.Input
         protected TextAsset fallbackInputMap;
         
         //the input map created from the json files in the start.
-        protected InputMap runtimeInputMap;
+        public InputMap runtimeInputMap;
 
         //file name for input
         const string playerInputMap = "CustomInput.json";
@@ -31,7 +32,7 @@ namespace Game.Controller.Input
                 FileStream stream = File.Open(path, FileMode.Open);
                 byte[] buffer = new byte[512];
                 stream.Read(buffer, 0, (int)stream.Length);
-                var content = System.Text.Encoding.ASCII.GetString(buffer);
+                var content = Encoding.ASCII.GetString(buffer);
                 runtimeInputMap = InputMap.FromJson(content);
                 stream.Flush();
                 stream.Close();
@@ -44,9 +45,28 @@ namespace Game.Controller.Input
             DontDestroyOnLoad(gameObject);
         }
 
-        private void Update()
+        //just for saving new maps.
+        internal void OverrideInputMap(InputMap map)
         {
-            print(GetAxis(InputButtonAxis.Horizontal));
+            runtimeInputMap = map;
+        }
+
+        /// <summary>
+        /// Save the user changed input scheme
+        /// </summary>
+        public void SaveCustomControls()
+        {
+            var path = Path.Combine(SaveManager.SaveLocation, playerInputMap);
+
+            if (File.Exists(path))
+                File.Delete(path);
+
+            FileStream stream = File.Create(path);
+            string content = runtimeInputMap.ToJson();
+            byte[] buffer = Encoding.ASCII.GetBytes(content);
+            stream.Write(buffer, 0, buffer.Length);
+            stream.Flush();
+            stream.Close();
         }
 
         public float GetAxis(InputButtonAxis axis)
