@@ -79,4 +79,11 @@ namespace Game.Controller.Input
     {
         Horizontal, Vertical, None
     }
+
+    public class DuplicateKeyBind
+    {
+        public string bindName;
+        public bool positiveKeyIsDuplicate = false;
+        public bool negativeKeyIsDuplicate = false;
+    }
 }

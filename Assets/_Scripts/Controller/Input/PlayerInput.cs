@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -49,6 +49,26 @@ namespace Game.Controller.Input
         internal void OverrideInputMap(InputMap map)
         {
             runtimeInputMap = map;
+        }
+        public void OverrideInputBind(string bindName, KeyCode key, bool positive)
+        {
+            var bind = runtimeInputMap.GetBinding(bindName);
+            if (bind is null)
+                return;
+            if (positive)
+                bind.positive = key;
+            else
+                bind.negative = key;
+        }
+        
+        public bool HasDuplicateBinds(out List<DuplicateKeyBind> duplicates)
+        {
+            duplicates = new List<DuplicateKeyBind>();
+            for(int i = 0; i < (int)(runtimeInputMap.bindings.Length / 2); i++)
+            {
+
+            }
+            return false;
         }
 
         /// <summary>
