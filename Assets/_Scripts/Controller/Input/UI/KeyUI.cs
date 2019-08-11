@@ -23,7 +23,7 @@ namespace Game.Controller.Input.UI
 
         public void Set(string key)
         {
-            keyText.text = key;
+            keyText.text = key.Equals("None")? "":  key;
         }
         public void Set(KeyCode key)
         {

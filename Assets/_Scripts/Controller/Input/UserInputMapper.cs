@@ -72,8 +72,11 @@ namespace Game.Controller.Input
             {
                 yield return null;
 
-                foreach (KeyCode key in enumValues)
+                foreach(KeyCode key in enumValues)
                 {
+                    //Dont allow keys to be rebound to controllers.
+                    if (key >= KeyCode.JoystickButton0)
+                        break;
                     if (UnityEngine.Input.GetKeyDown(key))
                     {
                         nextKey = key;
