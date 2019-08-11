@@ -52,9 +52,12 @@ namespace Game.Controller.Input
         }
     }
 
+    //public class ControllerInputBinding { } ???
+
     [System.Serializable]
     public class InputBinding
     {
+        //public string altControllerInput ?
         public string name;
         public InputButtonAxis axis;
         public KeyCode positive;

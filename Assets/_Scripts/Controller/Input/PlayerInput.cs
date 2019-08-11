@@ -12,6 +12,8 @@ namespace Game.Controller.Input
         //Just to avoid having to do something like Find()
         public static PlayerInput Instance { get; private set; }
 
+        //TODO: bool usesController = false; -> Init that in the PlayerInput setup scene.
+
         [SerializeField]
         protected TextAsset fallbackInputMap;
         

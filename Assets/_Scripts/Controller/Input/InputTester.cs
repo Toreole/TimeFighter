@@ -15,6 +15,17 @@ namespace Game.Controller.Input
         private void Start()
         {
             keys = Enum.GetValues(typeof(KeyCode));
+
+            var sticks = UInput.GetJoystickNames();
+            if(sticks.Length > 0)
+            {
+                for(int i = 0; i < sticks.Length; i++)
+                {
+                    var stick = sticks[i];
+                    if (!string.IsNullOrEmpty(stick))
+                    Debug.Log("Connected at " + i.ToString() + ": " + stick);
+                }
+            }
         }
 
         private void Update() 
