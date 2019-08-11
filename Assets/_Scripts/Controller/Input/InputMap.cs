@@ -1,11 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Game.Controller.Input
 {
     [System.Serializable]
     public class InputMap
     {
+        public string versionID = "0.1.2019_Alpha_01";
         public InputBinding[] bindings;
 
         //public string this[string x] => x;

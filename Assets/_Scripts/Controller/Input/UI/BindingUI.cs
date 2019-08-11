@@ -29,5 +29,30 @@ namespace Game.Controller.Input.UI
                 mapper.GetNewKey(myBind, false, (string nKey) => { negKey.Set(nKey); negKey.SetColor(mapper.InactiveKeyColor); });
             }
         }
+
+        //Initialize the binding on the UI
+        public void InitFor(InputBinding binding)
+        {
+            posKey.Set(binding.positive);
+            if (binding.positive == KeyCode.Escape)
+                posKey.enabled = false;
+            negKey.Set(binding.negative);
+            if (binding.negative == KeyCode.Escape)
+                negKey.enabled = false;
+            bindName.text = (myBind = binding.name);
+        }
+
+        public void SetColor(bool positiveKey, bool negativeKey, Color c)
+        {
+            if(positiveKey)
+                posKey.SetColor(c);
+            if (negativeKey)
+                negKey.SetColor(c);
+        }
+        public void SetColorBoth(Color c)
+        {
+            posKey.SetColor(c);
+            negKey.SetColor(c);
+        }
     }
 }

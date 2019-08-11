@@ -62,6 +62,7 @@ namespace Game.Editor
         void ShowTarget()
         {
             GUILayout.Label("Edit Input Map");
+            target.versionID = EditorGUILayout.TextField("Version ID", target.versionID);
             foreach(var binding in target.bindings)
             {
                 Show(binding);

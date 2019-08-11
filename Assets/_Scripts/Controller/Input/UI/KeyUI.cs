@@ -27,7 +27,7 @@ namespace Game.Controller.Input.UI
         }
         public void Set(KeyCode key)
         {
-            keyText.tag = key.ToString();
+            keyText.text = key == KeyCode.None? "" : key.ToString();
         }
         public void SetColor(Color c)
         {

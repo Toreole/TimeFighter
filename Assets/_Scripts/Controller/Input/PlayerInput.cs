@@ -16,7 +16,8 @@ namespace Game.Controller.Input
         protected TextAsset fallbackInputMap;
         
         //the input map created from the json files in the start.
-        public InputMap runtimeInputMap;
+        protected InputMap runtimeInputMap;
+        public InputMap RuntimeInputMap => runtimeInputMap;
 
         //file name for input
         const string playerInputMap = "CustomInput.json";
@@ -33,7 +34,12 @@ namespace Game.Controller.Input
                 byte[] buffer = new byte[512];
                 stream.Read(buffer, 0, (int)stream.Length);
                 var content = Encoding.ASCII.GetString(buffer);
-                runtimeInputMap = InputMap.FromJson(content);
+                var userInput = InputMap.FromJson(content);
+                //TODO: Instead of completely overwriting the user created input map, add any bindings to the map that arent in there yet! This will be great with cross versions.
+                if (userInput.versionID == GameInfo.Version)
+                    runtimeInputMap = userInput;
+                else
+                    runtimeInputMap = InputMap.FromJson(fallbackInputMap);
                 stream.Flush();
                 stream.Close();
             }
@@ -64,11 +70,34 @@ namespace Game.Controller.Input
         public bool HasDuplicateBinds(out List<DuplicateKeyBind> duplicates)
         {
             duplicates = new List<DuplicateKeyBind>();
-            for(int i = 0; i < (int)(runtimeInputMap.bindings.Length / 2); i++)
+            //loop through the stuff
+            for(int i = 0; i < runtimeInputMap.bindings.Length; i++)
             {
+                var original = runtimeInputMap.bindings[i];
+                for(int j = 0; j < runtimeInputMap.bindings.Length; j++)
+                {
+                    //dont compare itself lol
+                    if (i == j)
+                        continue;
 
+                    var second = runtimeInputMap.bindings[j];
+                    var dup = new DuplicateKeyBind
+                    {
+                        bindName = original.name,
+                        positiveKeyIsDuplicate = original.positive == KeyCode.None? false : original.positive == second.positive || original.positive == second.negative,
+                        negativeKeyIsDuplicate = original.negative == KeyCode.None? false : original.negative == second.negative || original.negative == second.positive
+                    };
+                    if (dup.positiveKeyIsDuplicate || dup.negativeKeyIsDuplicate)
+                        duplicates.Add(dup);
+                }
             }
-            return false;
+            return duplicates.Count > 0;
+        }
+
+        public void ResetInputMap()
+        {
+            runtimeInputMap = InputMap.FromJson(fallbackInputMap);
+            SaveCustomControls();
         }
 
         /// <summary>

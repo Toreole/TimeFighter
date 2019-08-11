@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using System.Collections;
 using Game.Controller.Input.UI;
+using System.Linq;
 
 namespace Game.Controller.Input
 {
@@ -24,11 +25,36 @@ namespace Game.Controller.Input
 
         protected PlayerInput inputModule;
 
-        protected BindingUI[] bindingUIs;
+        protected bool alreadyAwake = false;
 
-        private void Start()
+        protected List<BindingUI> bindingUIs;
+
+        private void Awake()
         {
+            if (alreadyAwake)
+                return;
             inputModule = PlayerInput.Instance;
+            InitMapper();
+            DoDuplicateCheck();
+            alreadyAwake = true;
+        }
+
+        //maybe clear and then do that other stuff idk
+        private void InitMapper()
+        {
+            foreach(Transform child in bindingParent)
+            {
+                Destroy(child.gameObject);
+            }
+            bindingUIs = new List<BindingUI>();
+            foreach(InputBinding bind in inputModule.RuntimeInputMap.bindings)
+            {
+                var go = Instantiate(bindingPrefab, bindingParent);
+                var bUI = go.GetComponent<BindingUI>();
+                bUI.InitFor(bind);
+                bUI.mapper = this;
+                bindingUIs.Add(bUI);
+            }
         }
 
         public void GetNewKey(string binding, bool positiveKey, Action<string> onKeyGet)
@@ -59,10 +85,44 @@ namespace Game.Controller.Input
             }
             popupDialog.SetActive(false);
             if (nextKey == KeyCode.Escape)
+            {
+                string oldKey = (positiveKey)? inputModule.RuntimeInputMap.GetBinding(binding).positive.ToString() : inputModule.RuntimeInputMap.GetBinding(binding).negative.ToString();
+                onKeyGet?.Invoke(oldKey);
                 yield break;
+            }
             //New Key get succesfull!
             onKeyGet?.Invoke(nextKey.ToString());
             inputModule.OverrideInputBind(binding, nextKey, positiveKey);
+            DoDuplicateCheck();
+        }
+
+        void DoDuplicateCheck()
+        {
+            //Reset colors of all binds.
+            foreach (var bind in bindingUIs)
+                bind.SetColorBoth(inactiveKeyColor);
+
+            //Only if the input module has any duplicate bindings, it should do this
+            if (inputModule.HasDuplicateBinds(out List<DuplicateKeyBind> duplicates))
+            {
+                //Mark the duplicates as such.
+                foreach (var duplicate in duplicates)
+                {
+                    BindingUI target = bindingUIs.Where(x => x.myBind.Equals(duplicate.bindName)).First();
+                    target.SetColor(duplicate.positiveKeyIsDuplicate, duplicate.negativeKeyIsDuplicate, duplicateColor);
+                }
+            }
+        }
+
+        public void SaveInputMap()
+        {
+            inputModule.SaveCustomControls();
+        }
+        public void ResetInputMap()
+        {
+            inputModule.ResetInputMap();
+            //re init the mapper.
+            InitMapper();
         }
     }
 }
