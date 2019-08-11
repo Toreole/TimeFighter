@@ -49,6 +49,20 @@ namespace Game.Controller.Input
                 runtimeInputMap = InputMap.FromJson(fallbackInputMap);
             }
             DontDestroyOnLoad(gameObject);
+            IsControllerPresent(); 
+        }
+
+        //With this i could detect whether a joystick is present.
+        public static bool IsControllerPresent()
+        {
+            var joysticks = UInput.GetJoystickNames();
+            if(joysticks.Length > 0)
+            {
+                var nEmpty = string.IsNullOrEmpty(joysticks[0]);
+                Debug.Log(joysticks[0] + " - " + nEmpty.ToString());
+                return !nEmpty; 
+            }
+            return false;
         }
 
         //just for saving new maps.
@@ -97,7 +111,6 @@ namespace Game.Controller.Input
         public void ResetInputMap()
         {
             runtimeInputMap = InputMap.FromJson(fallbackInputMap);
-            SaveCustomControls();
         }
 
         /// <summary>
