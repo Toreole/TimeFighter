@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Luminosity.IO;
 
 using UInput = UnityEngine.Input;
 
@@ -8,7 +9,7 @@ namespace Game.Controller.Input
 {
     public class InputTester : MonoBehaviour
     {
-        Array keys;
+        /*Array keys;
 
         public string[] controllerAxes;
 
@@ -45,6 +46,8 @@ namespace Game.Controller.Input
                     Debug.Log(axis + ": " + t.ToString("0.000"));
                 }
             }
-        }
+        }*/
+
+
     }
 }

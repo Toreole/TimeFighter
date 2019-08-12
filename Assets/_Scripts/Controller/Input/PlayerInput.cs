@@ -86,7 +86,7 @@ namespace Game.Controller.Input
                 return;
             if (positive)
                 bind.positive = key;
-            else 
+            else
                 bind.negative = key;
         }
 
