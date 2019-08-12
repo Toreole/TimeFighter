@@ -91,6 +91,7 @@ namespace Game.Controller.Input
             {
                 string oldKey = (positiveKey)? inputModule.RuntimeInputMap.GetBinding(binding).positive.ToString() : inputModule.RuntimeInputMap.GetBinding(binding).negative.ToString();
                 onKeyGet?.Invoke(oldKey);
+                DoDuplicateCheck();
                 yield break;
             }
             //New Key get succesfull!

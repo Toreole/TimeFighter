@@ -1069,20 +1069,20 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 565291562}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 30b99601e65454d44bb1ee66d4f3981a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   controllerAxes:
-  - JoyAX
-  - JoyAY
-  - JoyBX
-  - JoyBY
+  - LStickX
+  - LStickY
+  - RStickX
+  - RStickY
   - LTrigger
   - RTrigger
-  - DPY
-  - DPX
+  - DPadX
+  - DPadY
 --- !u!4 &565291564
 Transform:
   m_ObjectHideFlags: 0

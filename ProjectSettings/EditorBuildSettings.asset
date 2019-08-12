@@ -5,19 +5,19 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/_DRM_Check.unity
     guid: 3f70405371b53cd479d52d3f42603f19
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/_Menu.unity
     guid: 4c80ba119bd769e47a3efc3bcb0bd37d
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/001_TestArea.unity
     guid: c1647465a5d27b045acd332e4c4eaf82
   - enabled: 0
     path: Assets/_Scenes/_DiscordRPC_Loader.unity
     guid: b1cb5f697e396204582441bde00d5e86
-  - enabled: 0
-    path: Assets/_Scenes/000_DebugTore.unity
-    guid: 638ede6c507b280449d88682e201f2b0
+  - enabled: 1
+    path: Assets/_Scenes/Dev.unity
+    guid: 28fbf5bd366d9f14e8c172c337fa1d22
   m_configObjects: {}

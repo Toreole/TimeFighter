@@ -7,6 +7,9 @@ using UInput = UnityEngine.Input;
 
 namespace Game.Controller.Input
 {
+    /// <summary>
+    /// The Input Module. Handles both controller and keyboard/mouse input. 
+    /// </summary>
     public class PlayerInput : MonoBehaviour
     {
         //Just to avoid having to do something like Find()
@@ -16,7 +19,7 @@ namespace Game.Controller.Input
 
         [SerializeField]
         protected TextAsset fallbackInputMap;
-        
+
         //the input map created from the json files in the start.
         protected InputMap runtimeInputMap;
         public InputMap RuntimeInputMap => runtimeInputMap;
@@ -36,12 +39,14 @@ namespace Game.Controller.Input
                 byte[] buffer = new byte[512];
                 stream.Read(buffer, 0, (int)stream.Length);
                 var content = Encoding.ASCII.GetString(buffer);
-                var userInput = InputMap.FromJson(content);
+                InputMap userInput = InputMap.FromJson(content);
                 //TODO: Instead of completely overwriting the user created input map, add any bindings to the map that arent in there yet! This will be great with cross versions.
-                if (userInput.versionID == GameInfo.Version)
-                    runtimeInputMap = userInput;
-                else
-                    runtimeInputMap = InputMap.FromJson(fallbackInputMap);
+                //if (userInput.versionID == GameInfo.Version)
+                //    runtimeInputMap = userInput;
+                //else
+                InputMap builtinInput = InputMap.FromJson(fallbackInputMap);
+                TryUpdateMap(userInput, builtinInput);
+                runtimeInputMap = userInput;
                 stream.Flush();
                 stream.Close();
             }
@@ -51,22 +56,24 @@ namespace Game.Controller.Input
                 runtimeInputMap = InputMap.FromJson(fallbackInputMap);
             }
             DontDestroyOnLoad(gameObject);
-            IsControllerPresent(); 
         }
 
+#if UNITY_STANDALONE_WIN
         //With this i could detect whether a joystick is present.
         public static bool IsControllerPresent()
         {
             var joysticks = UInput.GetJoystickNames();
-            if(joysticks.Length > 0)
+            bool controllerPresent = false;
+            if (joysticks.Length > 0)
             {
-                var nEmpty = string.IsNullOrEmpty(joysticks[0]);
-                Debug.Log(joysticks[0] + " - " + nEmpty.ToString());
-                return !nEmpty; 
+                foreach (var con in joysticks)
+                {
+                    controllerPresent = controllerPresent | !string.IsNullOrEmpty(con);
+                }
             }
-            return false;
+            return controllerPresent;
         }
-
+#endif
         //just for saving new maps.
         internal void OverrideInputMap(InputMap map)
         {
@@ -79,18 +86,18 @@ namespace Game.Controller.Input
                 return;
             if (positive)
                 bind.positive = key;
-            else
+            else 
                 bind.negative = key;
         }
-        
+
         public bool HasDuplicateBinds(out List<DuplicateKeyBind> duplicates)
         {
             duplicates = new List<DuplicateKeyBind>();
             //loop through the stuff
-            for(int i = 0; i < runtimeInputMap.bindings.Length; i++)
+            for (int i = 0; i < runtimeInputMap.bindings.Length; i++)
             {
                 var original = runtimeInputMap.bindings[i];
-                for(int j = 0; j < runtimeInputMap.bindings.Length; j++)
+                for (int j = 0; j < runtimeInputMap.bindings.Length; j++)
                 {
                     //dont compare itself lol
                     if (i == j)
@@ -100,8 +107,8 @@ namespace Game.Controller.Input
                     var dup = new DuplicateKeyBind
                     {
                         bindName = original.name,
-                        positiveKeyIsDuplicate = original.positive == KeyCode.None? false : original.positive == second.positive || original.positive == second.negative,
-                        negativeKeyIsDuplicate = original.negative == KeyCode.None? false : original.negative == second.negative || original.negative == second.positive
+                        positiveKeyIsDuplicate = original.positive == KeyCode.None ? false : original.positive == second.positive || original.positive == second.negative,
+                        negativeKeyIsDuplicate = original.negative == KeyCode.None ? false : original.negative == second.negative || original.negative == second.positive
                     };
                     if (dup.positiveKeyIsDuplicate || dup.negativeKeyIsDuplicate)
                         duplicates.Add(dup);
@@ -113,6 +120,27 @@ namespace Game.Controller.Input
         public void ResetInputMap()
         {
             runtimeInputMap = InputMap.FromJson(fallbackInputMap);
+        }
+
+        //Add Any new axis / buttons to the user input map (target) from the builtin input map (source)
+        void TryUpdateMap(InputMap target, InputMap source)
+        {
+            //check if all the axis exist in the context of the user input map, if not, add them
+            foreach(var bind in source.bindings)
+            {
+                if(target.GetBinding(bind.name) is null)
+                {
+                    //Add to the array.
+                    int tBindLength = target.bindings.Length;
+                    InputBinding[] buffer = new InputBinding[tBindLength + 1];
+                    buffer[tBindLength] = bind;
+                    for(int i = 0; i < tBindLength; i++)
+                    {
+                        buffer[i] = target.bindings[i];
+                    }
+                    target.bindings = buffer;
+                }
+            }
         }
 
         /// <summary>
