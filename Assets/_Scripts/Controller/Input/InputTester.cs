@@ -1,17 +1,60 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Luminosity.IO;
-
-using UInput = UnityEngine.Input;
 
 namespace Game.Controller.Input
 {
     public class InputTester : MonoBehaviour
     {
-        /*Array keys;
+        public string[] inputs;
+        public string[] buttons;
 
-        public string[] controllerAxes;
+        public XInputDotNetAdapter adapt;
+
+        private void Start()
+        {
+            var x = InputManager.GetControlScheme(PlayerID.One).GetActionLookupTable();
+            foreach(KeyValuePair<string, InputAction> action in x)
+            {
+                print(action.Key + " -- " + action.Value.Description);
+            }
+
+#if UNITY_STANDALONE_WIN && ENABLE_X_INPUT 
+            //var vibr = new GamepadVibration
+            //{
+            //    LeftMotor = 1f,
+            //    RightMotor = 1f
+            //}; 
+            //adapt.SetVibration(vibr, GamepadIndex.GamepadOne);
+            //yield return new WaitForSeconds(1f);
+            //var v = adapt.GetVibration(GamepadIndex.GamepadOne);
+            //v.RightMotor = 0;
+            //v.LeftMotor = 0;
+            //adapt.SetVibration(v, GamepadIndex.GamepadOne);
+
+#endif 
+        }
+
+        private void Update()
+        { 
+            foreach(var input in inputs)
+            {
+                var ax = InputManager.GetAxis(input);
+                if (Mathf.Abs(ax) > 0.01f)
+                    print(input + ": " + ax.ToString("0.000"));
+            }
+            foreach(var a in buttons)
+            {
+                if(InputManager.GetButtonDown(a))
+                {
+                    print(a); 
+                }
+            }
+        }
+
+        /* 
+        Array keys;
 
         private void Start()
         {
@@ -38,16 +81,8 @@ namespace Game.Controller.Input
                     Debug.Log("Pressed: " + key.ToString());
                 }
             }
-            foreach(var axis in controllerAxes)
-            {
-                float t = UInput.GetAxis(axis);
-                if (Mathf.Abs(t) > 0.1)
-                {
-                    Debug.Log(axis + ": " + t.ToString("0.000"));
-                }
-            }
-        }*/
-
+        }
+        */
 
     }
 }

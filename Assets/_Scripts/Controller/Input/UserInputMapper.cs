@@ -23,6 +23,10 @@ namespace Game.Controller.Input
         public Color InactiveKeyColor => inactiveKeyColor;
         public Color ActiveKeyColor => activeKeyColor;
 
+        //TODO: replace PlayerInput with the InputManager from Luminosity.IO !
+        //! For this i need to get the input actions in the controlscheme and represent them.
+        //! I can hard-design this into the UI. Just need to mark duplicates and all that then. should be fine.
+        //! Only the FIRST (index 0) input binding should be changed. since those are the ones that are mapped to the keyb
         protected PlayerInput inputModule;
 
         protected bool alreadyAwake = false;

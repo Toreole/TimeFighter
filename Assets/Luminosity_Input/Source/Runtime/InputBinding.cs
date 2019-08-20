@@ -434,8 +434,12 @@ namespace Luminosity.IO
 			if(m_type == InputType.Button)
 			{
 				value = Input.GetKey(m_positive);
-			}
-			else if(m_type == InputType.GamepadButton)
+            }
+            else if (m_type == InputType.DigitalAxis)
+            {
+                value = Input.GetKey(m_positive) || Input.GetKey(m_negative);
+            }
+            else if(m_type == InputType.GamepadButton)
 			{
 				value = GamepadState.GetButton(m_gamepadButton, m_gamepadIndex);
 			}
@@ -462,6 +466,10 @@ namespace Luminosity.IO
 			{
 				value = Input.GetKeyDown(m_positive);
 			}
+            else if (m_type == InputType.DigitalAxis)
+            {
+                value = Input.GetKeyDown(m_positive) || Input.GetKeyDown(m_negative);
+            }
 			else if(m_type == InputType.GamepadButton)
 			{
 				value = GamepadState.GetButtonDown(m_gamepadButton, m_gamepadIndex);
@@ -488,8 +496,12 @@ namespace Luminosity.IO
 			if(m_type == InputType.Button)
 			{
 				value = Input.GetKeyUp(m_positive);
-			}
-			else if(m_type == InputType.GamepadButton)
+            }
+            else if (m_type == InputType.DigitalAxis)
+            {
+                value = Input.GetKeyUp(m_positive) || Input.GetKeyUp(m_negative);
+            }
+            else if(m_type == InputType.GamepadButton)
 			{
 				value = GamepadState.GetButtonUp(m_gamepadButton, m_gamepadIndex);
 			}

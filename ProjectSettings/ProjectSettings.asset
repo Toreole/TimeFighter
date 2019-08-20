@@ -497,7 +497,7 @@ PlayerSettings:
   webGLLinkerTarget: 1
   webGLThreadsSupport: 0
   scriptingDefineSymbols:
-    1: DISCORD
+    1: DISCORD;ENABLE_X_INPUT
   platformArchitecture: {}
   scriptingBackend:
     Standalone: 1
