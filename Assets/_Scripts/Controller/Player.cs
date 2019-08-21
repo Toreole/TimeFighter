@@ -15,10 +15,19 @@ namespace Game.Controller
         [Header("Player Fields")]
         [SerializeField]
         protected PlayerController controller;
-        
+
+        /// <summary>
+        /// Setup all player components
+        /// </summary>
+        private void Awake()
+        {
+            foreach (var pc in GetComponents<PlayerComponent>())
+                pc.SetPlayer(this);
+        }
+
         public override void Damage(float amount)
         {
-            throw new System.NotImplementedException();
+            
         }
 
         private void OnTriggerEnter2D(Collider2D collision)

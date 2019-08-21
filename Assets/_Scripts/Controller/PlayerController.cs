@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
-using Game;
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using Luminosity.IO;
 
 using static Game.Util;
 
@@ -11,8 +9,124 @@ namespace Game.Controller
     public class PlayerController : PlayerComponent
     {
         #region New_StateMachine 
+        //Serialized, not to be changed during runtime.
+        [SerializeField]
+        protected PlayerStateBehaviour defaultState;
+        [SerializeField]
+        protected ControllerSettings settings;
+
+        //public settings properties.
+        public float BaseSpeed => settings.BaseSpeed;
+
+        //Active State Controls
         PlayerStateBehaviour activeState;
+        bool overrideStateControls = false;
+
+        //State callback events.
+        public event ControllerCallback OnPressJump;
+        public event ControllerCallback OnHoldJump;
+
+        public event ControllerCallback OnSpecialA;
+        public event ControllerCallback OnSpecialB;
+
+        public event ControllerCallback OnAttackA;
+        public event ControllerCallback OnAttackB;
+
+        public event ControllerCallback OnTakeDamage;
+
+        //Input Buffer to avoid unnecessary garbage?
+        Vector2 movementInput;
+        bool jumpPressed, jumpHold;
+        bool specialA, specialB;
+        bool attackA, attackB;
+
+        //other public properties
+        public bool IsGrounded { get; } = true;
+
+        /// <summary>
+        /// Initial Setup
+        /// </summary>
+        private void Start()
+        {
+            activeState = defaultState;
+            defaultState.OnEnterState();
+        }
+
+        /// <summary>
+        /// Update Loop
+        /// </summary>
+        private void Update()
+        {
+            CheckGround();
+            FetchInput();
+            RunCallbacks();
+        }
+
+        /// <summary>
+        /// Fixed update callbacks
+        /// </summary>
+        private void FixedUpdate()
+        {
+            RunFixedCallbacks();
+        }
+
+        void FetchInput()
+        { 
+            movementInput.x = InputManager.GetAxis("Horizontal");
+            movementInput.y = InputManager.GetAxis("Vertical");
+            jumpPressed = InputManager.GetButtonDown("Jump");
+            jumpHold = InputManager.GetButton("Jump");
+
+        }
+
+        //TODO: grounded check
+        void CheckGround()
+        {
+
+        }
+
+        void RunCallbacks()
+        {
+            if (jumpPressed)
+                OnPressJump?.Invoke();
+            if (jumpHold)
+                OnHoldJump?.Invoke();
+        }
+
+        void RunFixedCallbacks()
+        {
+            activeState.FixedStep(movementInput, Time.deltaTime);
+        }
         
+        public void TransitionToState(PlayerStateBehaviour state)
+        {
+            activeState.OnExitState();
+            activeState = state;
+            state.OnEnterState();
+            state.controller = this;
+        }
+
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            
+        }
+
+        private void OnTriggerStay(Collider other)
+        {
+            
+        }
+
+        [Serializable]
+        public class ControllerSettings
+        {
+            [SerializeField]
+            private float baseSpeed = 3f;
+
+            public float BaseSpeed => baseSpeed;
+        }
+
+        public delegate void ControllerCallback();
+
         #endregion
         #region OLD_ControllerSystem
         //[Header("Renderer")]

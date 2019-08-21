@@ -430,441 +430,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 249902654}
   m_CullTransparentMesh: 0
---- !u!1 &258510153
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 258510155}
-  - component: {fileID: 258510154}
-  - component: {fileID: 258510157}
-  m_Layer: 0
-  m_Name: InputManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &258510154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 258510153}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bb91bdba6520fd248bbc41b14d02e9a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_controlSchemes:
-  - m_name: DefaultControls
-    m_description: 
-    m_isExpanded: 1
-    m_uniqueID: 8c8a3771eb9f4eb68d5c929cfc33a748
-    m_actions:
-    - m_name: Horizontal
-      m_description: Horizontal Movement
-      m_bindings:
-      - m_positive: 100
-        m_negative: 97
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 3
-        m_sensitivity: 4
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 2
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0.15
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 9
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-    - m_name: Vertical
-      m_description: Vertical Movement
-      m_bindings:
-      - m_positive: 119
-        m_negative: 115
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 2
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0.15
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 9
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 1
-        m_gamepadIndex: 0
-    - m_name: Aim X
-      m_description: Mouse Or Right Stick
-      m_bindings:
-      - m_positive: 100
-        m_negative: 97
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 3
-        m_sensitivity: 0.1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 1
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0.15
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 9
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 2
-        m_gamepadIndex: 0
-    - m_name: Aim Y
-      m_description: Mouse or Right Stick
-      m_bindings:
-      - m_positive: 119
-        m_negative: 115
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 0.1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 1
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0.15
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 9
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 3
-        m_gamepadIndex: 0
-    - m_name: Jump
-      m_description: Jumping and similar movement.
-      m_bindings:
-      - m_positive: 32
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 0
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 7
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 10
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-    - m_name: Interact
-      m_description: Interact with special items, Characters, etc.
-      m_bindings:
-      - m_positive: 101
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 0
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 7
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 12
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-    - m_name: Menu
-      m_description: Open / Close Menus, Cancel Stuff
-      m_bindings:
-      - m_positive: 27
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 0
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 7
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 9
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-    - m_name: Special1
-      m_description: The first special move
-      m_bindings:
-      - m_positive: 304
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 0
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 7
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 13
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-    - m_name: Special2
-      m_description: The second special move
-      m_bindings:
-      - m_positive: 306
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 0
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 7
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 11
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-    - m_name: Attack1
-      m_description: First Attack
-      m_bindings:
-      - m_positive: 323
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 0
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 7
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 2
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-    - m_name: Attack2
-      m_description: Second Attack
-      m_bindings:
-      - m_positive: 324
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 0
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 0
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-      - m_positive: 0
-        m_negative: 0
-        m_deadZoneType: 0
-        m_deadZone: 0
-        m_gravity: 1
-        m_sensitivity: 1
-        m_scale: 1
-        m_snap: 0
-        m_invert: 0
-        m_type: 7
-        m_axis: 0
-        m_joystick: 0
-        m_gamepadButton: 3
-        m_gamepadAxis: 0
-        m_gamepadIndex: 0
-  m_playerOneDefault: 8c8a3771eb9f4eb68d5c929cfc33a748
-  m_playerTwoDefault: 
-  m_playerThreeDefault: 
-  m_playerFourDefault: 
-  m_ignoreTimescale: 1
-  m_runScanningInLateUpdate: 0
---- !u!4 &258510155
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 258510153}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &258510157
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 258510153}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 506d7d93ba11b6f4fb082ab596c37d1b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_dpadGravity: 3
-  m_dpadSensitivity: 3
-  m_dpadSnap: 1
-  m_ignoreTimescale: 1
 --- !u!1 &315506834
 GameObject:
   m_ObjectHideFlags: 0
@@ -1522,7 +1087,7 @@ MonoBehaviour:
   - Special2
   - Attack1
   - Attack2
-  adapt: {fileID: 258510157}
+  adapt: {fileID: 0}
 --- !u!4 &565291564
 Transform:
   m_ObjectHideFlags: 0
@@ -2628,6 +2193,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1109650159}
+  - component: {fileID: 1109650156}
   m_Layer: 0
   m_Name: _Player
   m_TagString: Untagged
@@ -2635,6 +2201,27 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!50 &1109650156
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1109650155}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 1
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 4
 --- !u!4 &1109650159
 Transform:
   m_ObjectHideFlags: 0
@@ -2819,7 +2406,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1263488360}
   - component: {fileID: 1263488362}
-  - component: {fileID: 1263488361}
+  - component: {fileID: 1263488363}
   m_Layer: 0
   m_Name: PlayerBrain
   m_TagString: Untagged
@@ -2843,27 +2430,6 @@ Transform:
   m_Father: {fileID: 1109650159}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!50 &1263488361
-Rigidbody2D:
-  serializedVersion: 4
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1263488359}
-  m_BodyType: 0
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 10
-  m_LinearDrag: 0
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!114 &1263488362
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2876,11 +2442,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b688ecc6bf7a454ea98953634a9cfc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  body: {fileID: 0}
-  maxHealth: 0
-  currentHealth: 0
+  body: {fileID: 1109650156}
+  maxHealth: 100
+  currentHealth: 100
   isInvincible: 0
-  controller: {fileID: 0}
+  controller: {fileID: 1263488363}
+--- !u!114 &1263488363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1263488359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f814471261eeb6141b0d3341f628f33e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  defaultState: {fileID: 1304992085}
+  settings:
+    baseSpeed: 3
 --- !u!1 &1303972182
 GameObject:
   m_ObjectHideFlags: 0
@@ -2981,6 +2562,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1304992084}
+  - component: {fileID: 1304992085}
   m_Layer: 0
   m_Name: Controller
   m_TagString: Untagged
@@ -3002,6 +2584,19 @@ Transform:
   m_Father: {fileID: 1263488360}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1304992085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1304992083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57e8834589a76484bb898b151412be7f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 1263488363}
 --- !u!1 &1537887300
 GameObject:
   m_ObjectHideFlags: 0
