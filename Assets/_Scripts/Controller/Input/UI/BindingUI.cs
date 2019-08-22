@@ -21,12 +21,12 @@ namespace Game.Controller.Input.UI
             if (isPositive)
             {
                 posKey.SetColor(mapper.ActiveKeyColor);
-                mapper.GetNewKey(myBind,  true, (string nKey) => { posKey.Set(nKey); posKey.SetColor(mapper.InactiveKeyColor); });
+                //mapper.GetNewKey(myBind,  true, (string nKey) => { posKey.Set(nKey); posKey.SetColor(mapper.InactiveKeyColor); }); 
             }
             else
             {
                 negKey.SetColor(mapper.ActiveKeyColor);
-                mapper.GetNewKey(myBind, false, (string nKey) => { negKey.Set(nKey); negKey.SetColor(mapper.InactiveKeyColor); });
+                //mapper.GetNewKey(myBind, false, (string nKey) => { negKey.Set(nKey); negKey.SetColor(mapper.InactiveKeyColor); });
             }
         }
 

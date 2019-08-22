@@ -19,7 +19,6 @@ namespace Game.Controller.Input
             {
                 print(action.Key + " -- " + action.Value.Description);
             }
-
 #if UNITY_STANDALONE_WIN && ENABLE_X_INPUT 
             //var vibr = new GamepadVibration
             //{

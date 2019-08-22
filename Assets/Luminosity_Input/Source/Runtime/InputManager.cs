@@ -28,6 +28,7 @@ using UnityEditor.Callbacks;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
+using Game;
 
 namespace Luminosity.IO
 {
@@ -960,7 +961,9 @@ namespace Luminosity.IO
 		/// </summary>
 		public static void Save()
 		{
-			string filename = Application.persistentDataPath + "/input_config.xml";
+			string filename = SaveManager.SaveLocation + "/input_config.xml";
+            Debug.Log(filename);
+            Debug.Log(Application.persistentDataPath);
 			Save(new InputSaverXML(filename));
 		}
 

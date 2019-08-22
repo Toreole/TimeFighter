@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
-using UnityEngine.UI;
 using System.Collections;
 using Game.Controller.Input.UI;
 using System.Linq;
+using Luminosity.IO;
 
 namespace Game.Controller.Input
 {
     public class UserInputMapper : MonoBehaviour
     {
         [SerializeField]
-        protected GameObject bindingPrefab;
+        protected GameObject axisBindingPrefab, buttonBindingPrefab;
         [SerializeField]
         protected Transform bindingParent;
         [SerializeField]
@@ -27,9 +26,11 @@ namespace Game.Controller.Input
         //! For this i need to get the input actions in the controlscheme and represent them.
         //! I can hard-design this into the UI. Just need to mark duplicates and all that then. should be fine.
         //! Only the FIRST (index 0) input binding should be changed. since those are the ones that are mapped to the keyb
-        protected PlayerInput inputModule;
+        
+        //protected PlayerInput inputModule;
 
         protected bool alreadyAwake = false;
+        protected ControlScheme controls;
 
         protected List<BindingUI> bindingUIs;
 
@@ -37,7 +38,6 @@ namespace Game.Controller.Input
         {
             if (alreadyAwake)
                 return;
-            inputModule = PlayerInput.Instance;
             InitMapper();
             DoDuplicateCheck();
             alreadyAwake = true;
@@ -51,67 +51,67 @@ namespace Game.Controller.Input
                 Destroy(child.gameObject);
             }
             bindingUIs = new List<BindingUI>();
-            foreach(InputBinding bind in inputModule.RuntimeInputMap.bindings)
-            {
-                var go = Instantiate(bindingPrefab, bindingParent);
-                var bUI = go.GetComponent<BindingUI>();
-                bUI.InitFor(bind);
-                bUI.mapper = this;
-                bindingUIs.Add(bUI);
-            }
+            //foreach(InputBinding bind in inputModule.RuntimeInputMap.bindings)
+            //{
+            //    var go = Instantiate(axisBindingPrefab, bindingParent);
+            //    var bUI = go.GetComponent<BindingUI>();
+            //    bUI.InitFor(bind);
+            //    bUI.mapper = this;
+            //    bindingUIs.Add(bUI);
+            //}
         }
 
-        public void GetNewKey(string binding, bool positiveKey, Action<string> onKeyGet)
-        {
-            StartCoroutine(AwaitKey(onKeyGet, binding, positiveKey));
-        }
+        //public void GetNewKey(string binding, bool positiveKey, Action<string> onKeyGet)
+        //{
+        //    StartCoroutine(AwaitKey(onKeyGet, binding, positiveKey));
+        //}
 
         //Gotta be a coroutine since i cant really do async lol
-        private IEnumerator AwaitKey(Action<string> onKeyGet, string binding, bool positiveKey)
-        {
-            popupDialog.SetActive(true);
-            var enumValues = Enum.GetValues(typeof(KeyCode));
-            KeyCode nextKey = KeyCode.None;
-            while(true)
-            {
-                yield return null;
+        //private IEnumerator AwaitKey(Action<string> onKeyGet, string binding, bool positiveKey)
+        //{
+        //    popupDialog.SetActive(true);
+        //    var enumValues = Enum.GetValues(typeof(KeyCode));
+        //    KeyCode nextKey = KeyCode.None;
+        //    while(true)
+        //    {
+        //        yield return null;
 
-                foreach(KeyCode key in enumValues)
-                {
-                    //Dont allow keys to be rebound to controllers.
-                    if (key >= KeyCode.JoystickButton0)
-                        break;
-                    if (UnityEngine.Input.GetKeyDown(key))
-                    {
-                        nextKey = key;
-                        break;
-                    }
-                }
-                if (nextKey != KeyCode.None)
-                    break;
-            }
-            popupDialog.SetActive(false);
-            if (nextKey == KeyCode.Escape)
-            {
-                string oldKey = (positiveKey)? inputModule.RuntimeInputMap.GetBinding(binding).positive.ToString() : inputModule.RuntimeInputMap.GetBinding(binding).negative.ToString();
-                onKeyGet?.Invoke(oldKey);
-                DoDuplicateCheck();
-                yield break;
-            }
-            //New Key get succesfull!
-            onKeyGet?.Invoke(nextKey.ToString());
-            inputModule.OverrideInputBind(binding, nextKey, positiveKey);
-            DoDuplicateCheck();
-        }
+        //        foreach(KeyCode key in enumValues)
+        //        {
+        //            //Dont allow keys to be rebound to controllers.
+        //            if (key >= KeyCode.JoystickButton0)
+        //                break;
+        //            if (UnityEngine.Input.GetKeyDown(key))
+        //            {
+        //                nextKey = key;
+        //                break;
+        //            }
+        //        }
+        //        if (nextKey != KeyCode.None)
+        //            break;
+        //    }
+        //    popupDialog.SetActive(false);
+        //    if (nextKey == KeyCode.Escape)
+        //    {
+        //        string oldKey = (positiveKey)? inputModule.RuntimeInputMap.GetBinding(binding).positive.ToString() : inputModule.RuntimeInputMap.GetBinding(binding).negative.ToString();
+        //        onKeyGet?.Invoke(oldKey);
+        //        DoDuplicateCheck();
+        //        yield break;
+        //    }
+        //    //New Key get succesfull!
+        //    onKeyGet?.Invoke(nextKey.ToString());
+        //    inputModule.OverrideInputBind(binding, nextKey, positiveKey);
+        //    DoDuplicateCheck();
+        //}
 
         void DoDuplicateCheck()
         {
             //Reset colors of all binds.
             foreach (var bind in bindingUIs)
                 bind.SetColorBoth(inactiveKeyColor);
-
+            controls = InputManager.GetControlScheme(PlayerID.One);
             //Only if the input module has any duplicate bindings, it should do this
-            if (inputModule.HasDuplicateBinds(out List<DuplicateKeyBind> duplicates))
+            if (controls.HasDuplicates(out List<DuplicateKeyBind> duplicates))
             {
                 //Mark the duplicates as such.
                 foreach (var duplicate in duplicates)
@@ -122,15 +122,15 @@ namespace Game.Controller.Input
             }
         }
 
-        public void SaveInputMap()
-        {
-            inputModule.SaveCustomControls();
-        }
-        public void ResetInputMap()
-        {
-            inputModule.ResetInputMap();
-            //re init the mapper.
-            InitMapper();
-        }
+        //public void SaveInputMap()
+        //{
+        //    inputModule.SaveCustomControls();
+        //}
+        //public void ResetInputMap()
+        //{
+        //    inputModule.ResetInputMap();
+        //    //re init the mapper.
+        //    InitMapper();
+        //}
     }
 }
