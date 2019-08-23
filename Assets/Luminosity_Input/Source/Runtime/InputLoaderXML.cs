@@ -88,7 +88,6 @@ namespace Luminosity.IO
 			{
 				XmlDocument doc = new XmlDocument();
 				doc.Load(m_textReader);
-
 				return doc;
 			}
 
@@ -107,6 +106,17 @@ namespace Luminosity.IO
 
 			return new SaveData();
 		}
+
+        public SaveData LoadFromXmlString(string xmlData)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xmlData);
+            if (doc is null)
+                return new SaveData();
+            int version = ReadAttributeAsInt(doc.DocumentElement, "version", 1);
+            if (version == 2) return Load_V2(doc);
+            else return Load_V1(doc);
+        }
 
 		public ControlScheme Load(string schemeName)
 		{

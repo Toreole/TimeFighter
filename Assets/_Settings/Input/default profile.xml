@@ -453,7 +453,7 @@
         <GamepadIndex>GamepadOne</GamepadIndex>
       </Binding>
     </Action>
-    <Action name="DPad X">
+    <Action name="UI_Right">
       <Description>horizontal DPad input (controller)</Description>
       <Binding>
         <Positive>None</Positive>
@@ -465,15 +465,69 @@
         <Scale>1</Scale>
         <Snap>false</Snap>
         <Invert>false</Invert>
-        <Type>GamepadAxis</Type>
+        <Type>GamepadAnalogButton</Type>
         <Axis>1</Axis>
         <Joystick>0</Joystick>
         <GamepadButton>LeftStick</GamepadButton>
         <GamepadAxis>DPadX</GamepadAxis>
         <GamepadIndex>GamepadOne</GamepadIndex>
       </Binding>
+      <Binding>
+        <Positive>RightArrow</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>Button</Type>
+        <Axis>0</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>LeftThumbstickX</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
     </Action>
-    <Action name="DPad Y">
+    <Action name="UI_Left">
+      <Description>vertical DPad input (controller)</Description>
+      <Binding>
+        <Positive>None</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0.2</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>true</Invert>
+        <Type>GamepadAnalogButton</Type>
+        <Axis>1</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>DPadX</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+      <Binding>
+        <Positive>LeftArrow</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>Button</Type>
+        <Axis>0</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>LeftThumbstickX</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+    </Action>
+    <Action name="UI_Up">
       <Description>vertical DPad input (controller)</Description>
       <Binding>
         <Positive>None</Positive>
@@ -485,11 +539,139 @@
         <Scale>1</Scale>
         <Snap>false</Snap>
         <Invert>false</Invert>
-        <Type>GamepadAxis</Type>
+        <Type>GamepadAnalogButton</Type>
         <Axis>1</Axis>
         <Joystick>0</Joystick>
         <GamepadButton>LeftStick</GamepadButton>
         <GamepadAxis>DPadY</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+      <Binding>
+        <Positive>UpArrow</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>Button</Type>
+        <Axis>0</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>LeftThumbstickX</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+    </Action>
+    <Action name="UI_Down">
+      <Description>vertical DPad input (controller)</Description>
+      <Binding>
+        <Positive>None</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0.2</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>true</Invert>
+        <Type>GamepadAnalogButton</Type>
+        <Axis>1</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>DPadY</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+      <Binding>
+        <Positive>DownArrow</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>Button</Type>
+        <Axis>0</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>LeftThumbstickX</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+    </Action>
+    <Action name="UI_Submit">
+      <Description>vertical DPad input (controller)</Description>
+      <Binding>
+        <Positive>None</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0.2</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>GamepadButton</Type>
+        <Axis>1</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>ActionBottom</GamepadButton>
+        <GamepadAxis>DPadY</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+      <Binding>
+        <Positive>Return</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>Button</Type>
+        <Axis>0</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>LeftThumbstickX</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+    </Action>
+    <Action name="UI_Cancel">
+      <Description>vertical DPad input (controller)</Description>
+      <Binding>
+        <Positive>None</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0.2</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>GamepadButton</Type>
+        <Axis>1</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>ActionRight</GamepadButton>
+        <GamepadAxis>DPadY</GamepadAxis>
+        <GamepadIndex>GamepadOne</GamepadIndex>
+      </Binding>
+      <Binding>
+        <Positive>Escape</Positive>
+        <Negative>None</Negative>
+        <DeadZoneType>CutOff</DeadZoneType>
+        <DeadZone>0</DeadZone>
+        <Gravity>1</Gravity>
+        <Sensitivity>1</Sensitivity>
+        <Scale>1</Scale>
+        <Snap>false</Snap>
+        <Invert>false</Invert>
+        <Type>Button</Type>
+        <Axis>0</Axis>
+        <Joystick>0</Joystick>
+        <GamepadButton>LeftStick</GamepadButton>
+        <GamepadAxis>LeftThumbstickX</GamepadAxis>
         <GamepadIndex>GamepadOne</GamepadIndex>
       </Binding>
     </Action>

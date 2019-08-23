@@ -123,6 +123,7 @@ namespace Luminosity.IO
 				m_actionLookup = new Dictionary<string, Dictionary<string, InputAction>>();
                 AddDefaultServices();
 				Initialize();
+                Load(); //< test to see if this works
 			}
 			else
 			{
@@ -962,8 +963,8 @@ namespace Luminosity.IO
 		public static void Save()
 		{
 			string filename = SaveManager.SaveLocation + "/input_config.xml";
-            Debug.Log(filename);
-            Debug.Log(Application.persistentDataPath);
+            //Debug.Log(filename);
+            //Debug.Log(Application.persistentDataPath);
 			Save(new InputSaverXML(filename));
 		}
 
@@ -1000,7 +1001,7 @@ namespace Luminosity.IO
 				Load(new InputLoaderXML(filename));
 			}
 #else
-			string filename = Application.persistentDataPath + "/input_config.xml";
+			string filename = SaveManager.SaveLocation + "/input_config.xml";
 			if(System.IO.File.Exists(filename))
 			{
 				Load(new InputLoaderXML(filename));

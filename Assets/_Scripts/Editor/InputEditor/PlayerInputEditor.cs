@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using Game.Controller.Input;
+using Game.Controller.Input.Obsolete;
 
-namespace Game.Editor
+namespace Game.Editor.Obsolete
 {
     [CustomEditor(typeof(PlayerInput))]
     public class PlayerInputEditor : UnityEditor.Editor

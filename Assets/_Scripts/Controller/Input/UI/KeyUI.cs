@@ -21,13 +21,14 @@ namespace Game.Controller.Input.UI
             binding.Rebind(this);
         }
 
+        //public setters
         public void Set(string key)
         {
             keyText.text = key.Equals("None")? "":  key;
         }
         public void Set(KeyCode key)
         {
-            keyText.text = key == KeyCode.None? "" : key.ToString();
+            keyText.text = key == KeyCode.None? "" : key.GetString();
         }
         public void SetColor(Color c)
         {

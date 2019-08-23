@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Game.Controller.Input
+namespace Game.Controller.Input.Obsolete
 {
     [System.Serializable]
     public class InputMap
@@ -85,10 +85,4 @@ namespace Game.Controller.Input
         Horizontal, Vertical, None
     }
 
-    public class DuplicateKeyBind
-    {
-        public string bindName;
-        public bool positiveKeyIsDuplicate = false;
-        public bool negativeKeyIsDuplicate = false;
-    }
 }

@@ -1,10 +1,10 @@
 ﻿using UnityEngine;
 using UnityEditor;
-using Game.Controller.Input;
+using Game.Controller.Input.Obsolete;
 using System.IO;
 using System.Text;
 
-namespace Game.Editor
+namespace Game.Editor.Obsolete
 {
     public class InputMapEditor : EditorWindow
     {

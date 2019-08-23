@@ -5,7 +5,7 @@ using System.Text;
 
 using UInput = UnityEngine.Input;
 
-namespace Game.Controller.Input
+namespace Game.Controller.Input.Obsolete
 {
     /// <summary>
     /// The Input Module. Handles both controller and keyboard/mouse input. 
