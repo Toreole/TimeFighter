@@ -1,4 +1,6 @@
-﻿namespace Game
+﻿using UnityEngine;
+
+namespace Game
 {
     public static class GameInfo
     {
@@ -8,11 +10,18 @@
         private static RuntimeInfo gameIni;
 
         //Information about the Game during Runtime. This COULD include things such as detected OS, and other things that generally dont change
+        [System.Serializable]
         public class RuntimeInfo
         {
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+            public readonly string configFile = "Game.Ini";
+            //windows only
             public bool allowControllerVibration = true;
-#endif
+            public bool fullscreen = true;
+            public Resolution resolution = new Resolution() {
+                width = 1920,
+                height = 1080,
+                refreshRate = 60
+                };
         }
     }
 }

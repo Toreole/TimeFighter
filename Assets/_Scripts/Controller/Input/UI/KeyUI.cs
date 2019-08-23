@@ -24,11 +24,11 @@ namespace Game.Controller.Input.UI
         //public setters
         public void Set(string key)
         {
-            keyText.text = key.Equals("None")? "":  key;
+            keyText.text = key;
         }
         public void Set(KeyCode key)
         {
-            keyText.text = key == KeyCode.None? "" : key.GetString();
+            keyText.text = key.GetString();
         }
         public void SetColor(Color c)
         {
