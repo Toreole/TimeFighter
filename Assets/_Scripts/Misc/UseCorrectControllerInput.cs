@@ -3,25 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using Luminosity.IO;
 
-public class UseCorrectControllerInput : MonoBehaviour
+namespace Game.Controller.Input
 {
-    [SerializeField]
-    GenericGamepadStateAdapter genericApdater;
-    [SerializeField]
-    GenericGamepadProfileSelector genericSelector;
-    [SerializeField]
-    XInputDotNetAdapter xInputAdapter;
-
-        // Start is called before the first frame update
-    void Awake()
+    public class UseCorrectControllerInput : MonoBehaviour
     {
+        // Start is called before the first frame update
+        void Awake()
+        {
 #if UNITY_STANDALONE_WIN
-        Destroy(genericSelector);
-        Destroy(genericApdater);
-#else
-        Destroy(xInputAdapter);
+            gameObject.AddComponent<XInputDotNetAdapter>();
 #endif
-        Destroy(this);
+            Destroy(this);
+        }
+
     }
-    
 }

@@ -4,7 +4,8 @@ namespace Game
 {
     public static class GameInfo
     {
-        public const string Version = "0.1.2019_Alpha_02";
+        private static string version = "0.1.2019_Alpha_02";
+        public static string Version { get => version; private set => version = value; }
 
         public static RuntimeInfo Config => gameIni;
         private static RuntimeInfo gameIni;
@@ -22,6 +23,13 @@ namespace Game
                 height = 1080,
                 refreshRate = 60
                 };
+        }
+
+        static GameInfo()
+        {
+            TextAsset textAsset = Resources.Load<TextAsset>("Settings/Version");
+            Version = textAsset.text;
+            Debug.Log(Version); 
         }
     }
 }

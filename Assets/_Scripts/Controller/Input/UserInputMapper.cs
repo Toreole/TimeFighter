@@ -46,7 +46,6 @@ namespace Game.Controller.Input
             if (alreadyAwake)
                 return;
             InitMapper();
-            DoDuplicateCheck();
             alreadyAwake = true;
         }
 

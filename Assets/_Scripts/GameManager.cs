@@ -9,12 +9,10 @@ namespace Game
 {
     public class GameManager : MonoBehaviour
     {
-        public static GameManager instance = null;
+        public static GameManager Instance { get => instance; }
+        private static GameManager instance = null;
         
         private SaveData save = null;
-        private bool firstShutdown = true;
-        [SerializeField]
-        new AudioSource audio;
 
 #if DISCORD
         public static DiscordApp discord;
@@ -54,11 +52,14 @@ namespace Game
                 if (!SaveManager.TryLoad(out save))
                 {   //try to load, if it cant load, create a new save
                     save = new SaveData();
-                    //Debug.Log("Creating New SaveData");
+                    //Debug.Log("Creating New SaveData"); 
                 }
             }
         }
-
+        private void OnGUI()
+        {
+            GUILayout.Label(GameInfo.Version); 
+        }
 #if DISCORD
         private void Update()
         {
@@ -77,21 +78,12 @@ namespace Game
         /// </summary>
         private void OnApplicationQuit()
         {
-            if (firstShutdown)
+            bool isCrash = !Input.GetKey(KeyCode.F4); //alt f4 pressed hmmm
+            if(isCrash)
             {
-                firstShutdown = false;
-                Application.CancelQuit();
-                audio.Play();
-                StartCoroutine(DelayedShutdown());
-                return;
+                //TODO: maybe try and give some error stuff idk wtf. probably: opened scenes, last known player state, player x/y, OS version, similar stuff.
             }
             TrySave();
-        }
-
-        private System.Collections.IEnumerator DelayedShutdown()
-        {
-            yield return new WaitForSeconds(2.0f);
-            Application.Quit();
         }
 
         /// <summary>
