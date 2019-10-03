@@ -5,9 +5,11 @@ namespace Game
 {
     public static partial class Util
     {
+        public const float g = 9.81f;
+        public const float g2 = 19.62f;
         public static float Normalized(float f) => (f > 0)? 1f : (f < 0)? -1f : 0f;
         public static int NormalizeInt(float f) => (f > 0) ? 1 : (f < 0) ? -1 : 0;
-
+        
         public static IEnumerator Delay(System.Action action, float time)
         {
             yield return new WaitForSeconds(time);

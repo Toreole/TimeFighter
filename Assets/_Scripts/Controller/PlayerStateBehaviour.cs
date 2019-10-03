@@ -8,10 +8,10 @@ namespace Game.Controller
     /// <summary>
     /// The base class for behaviour in the statemachine controller of the player.
     /// </summary>
-    public abstract class PlayerStateBehaviour : MonoBehaviour
+    public abstract class PlayerStateBehaviour
     {
         public PlayerController controller;
-
+        protected Rigidbody2D Body => controller.Body;
         /// <summary>
         /// Basically FixedUpdate(), but it already knows horizontal and vertical input (AD/WS)
         /// </summary>

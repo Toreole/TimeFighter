@@ -8,21 +8,63 @@ namespace Game.Controller
 {
     public class PlayerController : PlayerComponent
     {
-        #region New_StateMachine 
         //Serialized, not to be changed during runtime.
+        //[SerializeField]
+        //protected PlayerStateBehaviour defaultState;
+        [Header("Player Settings")]
         [SerializeField]
-        protected PlayerStateBehaviour defaultState;
+        protected float baseSpeed = 3.5f;
         [SerializeField]
-        protected ControllerSettings settings;
+        protected float acceleration = 2.5f;
+        [SerializeField]
+        protected float jumpHeight = 2.5f;
+        [SerializeField]
+        protected LayerMask groundMask;
+        [SerializeField]
+        protected float halfHeight = 0.5f, halfWidth = 0.5f;
+        [SerializeField]
+        protected float groundedTolerance = 0.1f;
 
         //public settings properties.
-        public float BaseSpeed => settings.BaseSpeed;
+        public float BaseSpeed => baseSpeed;
+        public float BaseSpeedSqr { get; protected set; }
+        public float JumpHeight => jumpHeight;
+        public float Acceleration => acceleration;
 
         //Active State Controls
         PlayerStateBehaviour activeState;
         bool overrideStateControls = false;
 
+        //Input Buffer
+        Vector2 movementInput;
+        bool jumpPressed, jumpHold;
+        bool specialA, specialB;
+        bool attackA, attackB;
+
+        //other variables
+        protected bool isGrounded = true;
+        protected bool stickToGround = true;
+        protected bool ignorePlayerInput = false;
+        //other properties
+        public bool IsGrounded {
+            get => isGrounded; set
+            {
+                if (!IsGrounded && value)
+                    OnEnterGround?.Invoke();
+                else if (IsGrounded && !value)
+                    OnLeaveGround?.Invoke();
+                isGrounded = value;
+            }
+        }
+        protected Vector2 groundNormal = Vector2.up;
+        public Vector2 GroundNormal => groundNormal;
+        public bool StickToGround { get => stickToGround; set => stickToGround = value; }
+        public bool IgnorePlayerInput { get => ignorePlayerInput; set => ignorePlayerInput = value; }
+
         //State callback events.
+        #region events
+        public delegate void ControllerCallback();
+
         public event ControllerCallback OnPressJump;
         public event ControllerCallback OnHoldJump;
 
@@ -34,25 +76,23 @@ namespace Game.Controller
 
         public event ControllerCallback OnTakeDamage;
 
-        //Input Buffer to avoid unnecessary garbage?
-        Vector2 movementInput;
-        bool jumpPressed, jumpHold;
-        bool specialA, specialB;
-        bool attackA, attackB;
-
-        //other public properties
-        public bool IsGrounded { get; } = true;
-
+        public event ControllerCallback OnEnterGround;
+        public event ControllerCallback OnLeaveGround;
+        #endregion
         /// <summary>
         /// Initial Setup
         /// </summary>
         private void Start()
         {
-            activeState = defaultState;
-            defaultState.OnEnterState();
+            BaseSpeedSqr = baseSpeed * baseSpeed;
+            activeState = new GroundedPlayerState
+            {
+                controller = this
+            };
+            activeState.OnEnterState();
         }
 
-        /// <summary>
+        /// <summary> 
         /// Update Loop
         /// </summary>
         private void Update()
@@ -70,21 +110,82 @@ namespace Game.Controller
             RunFixedCallbacks();
         }
 
+        /// <summary>
+        /// Get the input for this frame.
+        /// </summary>
         void FetchInput()
         { 
+            if(ignorePlayerInput)
+            {
+                movementInput = Vector2.zero;
+                jumpHold = false;
+                jumpPressed = false;
+                return;
+            }
             movementInput.x = InputManager.GetAxis("Horizontal");
             movementInput.y = InputManager.GetAxis("Vertical");
-            jumpPressed = InputManager.GetButtonDown("Jump");
-            jumpHold = InputManager.GetButton("Jump");
-
+            jumpPressed     = InputManager.GetButtonDown("Jump");
+            jumpHold        = InputManager.GetButton("Jump");
         }
 
-        //TODO: grounded check
+        /// <summary>
+        /// Checks for ground in a more or less arbitrary way.
+        /// </summary>
         void CheckGround()
         {
-
+#if UNITY_EDITOR
+            Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
+#endif
+            ////set up the boxcast.
+            //Vector2 rayOrigin = Body.position;
+            //Vector2 boxSize = new Vector2 { x = halfWidth * 0.7f, y = groundedTolerance };
+            //RaycastHit2D hit2D;
+            ////box cast.
+            //if (hit2D = Physics2D.BoxCast(Body.position,boxSize,0f, Vector2.down, halfHeight, groundMask))
+            //{
+            //    //Set ground data.
+            //    groundNormal = hit2D.normal;
+            //    IsGrounded = true;
+            //    //If necessary, "stick" to the ground.
+            //    if (stickToGround)
+            //    {
+            //        Vector2 newPos = Body.position;
+            //        newPos.y = hit2D.point.y + halfHeight;
+            //        Body.position = newPos;
+            //    }
+            //    return;
+            //}
+            var rayOrigin = Body.position;
+            RaycastHit2D hit2D;
+            if (hit2D = Physics2D.Raycast(rayOrigin, Vector2.down, halfHeight + groundedTolerance, groundMask))
+            {
+                groundNormal = hit2D.normal;
+                IsGrounded = true;
+                //If necessary, "stick" to the ground.
+                if (stickToGround)
+                {
+                    Vector2 newPos = Body.position;
+                    newPos.y = hit2D.point.y + halfHeight;
+                    Body.position = newPos;
+                }
+                return;
+            }
+            //If that failed, do a box cast
+            Vector2 boxCenter = Body.position - Vector2.up * halfHeight;
+            Vector2 boxSize = new Vector2(halfWidth * 0.6f, groundedTolerance);
+            Debug.DrawLine(boxCenter - (boxSize / 2f), boxCenter + (boxSize / 2f), Color.red);
+            if (Physics2D.OverlapBox(boxCenter, boxSize, 0f, groundMask))
+            {
+                Debug.Log("BoxOverlap"); 
+                IsGrounded = true;
+                return;
+            } 
+            IsGrounded = false;
         }
-
+        
+        /// <summary>
+        /// Run the callbacks based on input n such i guess.
+        /// </summary>
         void RunCallbacks()
         {
             if (jumpPressed)
@@ -97,13 +198,14 @@ namespace Game.Controller
         {
             activeState.FixedStep(movementInput, Time.deltaTime);
         }
-        
-        public void TransitionToState(PlayerStateBehaviour state)
+
+        //TODO: some food for thought
+        public void SwitchToState<T>() where T : PlayerStateBehaviour, new()
         {
             activeState.OnExitState();
-            activeState = state;
-            state.OnEnterState();
-            state.controller = this;
+            activeState = new T();
+            activeState.controller = this;
+            activeState.OnEnterState();
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
@@ -115,19 +217,7 @@ namespace Game.Controller
         {
             
         }
-
-        [Serializable]
-        public class ControllerSettings
-        {
-            [SerializeField]
-            private float baseSpeed = 3f;
-
-            public float BaseSpeed => baseSpeed;
-        }
-
-        public delegate void ControllerCallback();
-
-        #endregion
+        
         #region OLD_ControllerSystem
         //[Header("Renderer")]
         //[SerializeField]
@@ -749,6 +839,4 @@ namespace Game.Controller
         //}
         #endregion
     }
-
-
 }

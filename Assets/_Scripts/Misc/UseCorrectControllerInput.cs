@@ -7,9 +7,11 @@ namespace Game.Controller.Input
 {
     public class UseCorrectControllerInput : MonoBehaviour
     {
-        // Start is called before the first frame update
+        // Only Windows builds can use Controller Input because im totally fucking upset at how it doesnt work otherwise
         void Awake()
         {
+            //enable only after adding the correct shit
+            GetComponent<InputManager>().enabled = true;
 #if UNITY_STANDALONE_WIN
             gameObject.AddComponent<XInputDotNetAdapter>();
 #endif
