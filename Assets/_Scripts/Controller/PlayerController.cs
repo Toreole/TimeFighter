@@ -17,6 +17,8 @@ namespace Game.Controller
         [SerializeField]
         protected float acceleration = 2.5f;
         [SerializeField]
+        protected float maxSteepAngle = 37.5f;
+        [SerializeField]
         protected float jumpHeight = 2.5f;
         [SerializeField]
         protected LayerMask groundMask;
@@ -24,12 +26,17 @@ namespace Game.Controller
         protected float halfHeight = 0.5f, halfWidth = 0.5f;
         [SerializeField]
         protected float groundedTolerance = 0.1f;
+        [SerializeField]
+        protected int airJumps = 1;
 
         //public settings properties.
         public float BaseSpeed => baseSpeed;
         public float BaseSpeedSqr { get; protected set; }
         public float JumpHeight => jumpHeight;
         public float Acceleration => acceleration;
+        public float MaxSteepAngle => maxSteepAngle;
+        public int AvailableAirJumps { get => availableAirJumps; set => availableAirJumps = Mathf.Clamp(value, 0, airJumps); }
+        public bool CanAirJump { get => availableAirJumps > 0; set { availableAirJumps = value ? airJumps : 0; } }
 
         //Active State Controls
         PlayerStateBehaviour activeState;
@@ -45,6 +52,11 @@ namespace Game.Controller
         protected bool isGrounded = true;
         protected bool stickToGround = true;
         protected bool ignorePlayerInput = false;
+        protected int availableAirJumps;
+
+        protected ContactPoint2D[] contactPoints = new ContactPoint2D[10];
+        protected ContactFilter2D filter;
+
         //other properties
         public bool IsGrounded {
             get => isGrounded; set
@@ -58,6 +70,7 @@ namespace Game.Controller
         }
         protected Vector2 groundNormal = Vector2.up;
         public Vector2 GroundNormal => groundNormal;
+        public float GroundFriction { get; protected set; } = 0.4f;
         public bool StickToGround { get => stickToGround; set => stickToGround = value; }
         public bool IgnorePlayerInput { get => ignorePlayerInput; set => ignorePlayerInput = value; }
 
@@ -84,7 +97,13 @@ namespace Game.Controller
         /// </summary>
         private void Start()
         {
+            availableAirJumps = airJumps;
             BaseSpeedSqr = baseSpeed * baseSpeed;
+
+            filter = new ContactFilter2D();
+            filter.layerMask = groundMask;
+            filter.useLayerMask = true;
+
             activeState = new GroundedPlayerState
             {
                 controller = this
@@ -136,29 +155,12 @@ namespace Game.Controller
 #if UNITY_EDITOR
             Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
 #endif
-            ////set up the boxcast.
-            //Vector2 rayOrigin = Body.position;
-            //Vector2 boxSize = new Vector2 { x = halfWidth * 0.7f, y = groundedTolerance };
-            //RaycastHit2D hit2D;
-            ////box cast.
-            //if (hit2D = Physics2D.BoxCast(Body.position,boxSize,0f, Vector2.down, halfHeight, groundMask))
-            //{
-            //    //Set ground data.
-            //    groundNormal = hit2D.normal;
-            //    IsGrounded = true;
-            //    //If necessary, "stick" to the ground.
-            //    if (stickToGround)
-            //    {
-            //        Vector2 newPos = Body.position;
-            //        newPos.y = hit2D.point.y + halfHeight;
-            //        Body.position = newPos;
-            //    }
-            //    return;
-            //}
-            var rayOrigin = Body.position;
+            //TODO: test out with multi raycast again 
+            Vector2 rayOrigin = Body.position;
             RaycastHit2D hit2D;
             if (hit2D = Physics2D.Raycast(rayOrigin, Vector2.down, halfHeight + groundedTolerance, groundMask))
             {
+                GroundFriction = hit2D.collider.friction;
                 groundNormal = hit2D.normal;
                 IsGrounded = true;
                 //If necessary, "stick" to the ground.
@@ -170,13 +172,19 @@ namespace Game.Controller
                 }
                 return;
             }
+
+            //TODO search contacts. for idk what
+            int contacts = Body.GetContacts(contactPoints);
+            for(int i = 0; i < contacts && i < 10; i++)
+            {
+                var contact = contactPoints[i];
+            }
             //If that failed, do a box cast
             Vector2 boxCenter = Body.position - Vector2.up * halfHeight;
             Vector2 boxSize = new Vector2(halfWidth * 0.6f, groundedTolerance);
-            Debug.DrawLine(boxCenter - (boxSize / 2f), boxCenter + (boxSize / 2f), Color.red);
             if (Physics2D.OverlapBox(boxCenter, boxSize, 0f, groundMask))
             {
-                Debug.Log("BoxOverlap"); 
+                //? maybe stick to the ground using the data in here? but how tho?
                 IsGrounded = true;
                 return;
             } 
@@ -199,7 +207,8 @@ namespace Game.Controller
             activeState.FixedStep(movementInput, Time.deltaTime);
         }
 
-        //TODO: some food for thought
+        //TODO: This should be the new way to switch states. no enums,
+        //TODO: no weird storing. the PlayerStateBehaviours dont create a lot of garbage anyway
         public void SwitchToState<T>() where T : PlayerStateBehaviour, new()
         {
             activeState.OnExitState();

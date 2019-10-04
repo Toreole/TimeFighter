@@ -49,11 +49,26 @@ namespace Game.Controller
             Body.AddForce(force, ForceMode2D.Impulse);
         }
 
-        //TODO: proper movement from left to right and so on.
+        /// <summary>
+        /// Movement for the base ground
+        /// </summary>
+        /// <param name="input">the inputs on x and y</param>
+        /// <param name="deltaTime"></param>
         private void Move(Vector2 input, float deltaTime)
         {
             if (!controller.IsGrounded)
                 return;
+            Vector2 normal = controller.GroundNormal;
+            float groundAngle = Vector2.SignedAngle(normal, Vector2.up);
+            float absAngle = Mathf.Abs(groundAngle);
+            //Test against the max angle to walk.
+            //if the friction is low on this piece of ground, slide, otherwise stay
+            if (absAngle >= controller.MaxSteepAngle && controller.GroundFriction < 0.3f)
+            {
+                return;
+            }
+
+            //TODO: Accelerate
             //float sqrVelocity = Body.velocity.sqrMagnitude; 
             //float percentSqrVelocity = sqrVelocity / controller.BaseSpeedSqr;
 
@@ -62,6 +77,26 @@ namespace Game.Controller
             Vector2 force = Vector2.right * acc;
             force.y = Body.velocity.y;
             Body.velocity = force;
+
+            //Add a force to prevent sliding off hills for no reason. 
+            //Testing if the angle is something that matters 
+            if (absAngle <= 4f)
+                return;
+
+            //TODO: wtf it doesnt work again | i get stuck on corners n shit all the time, jumping is still fucking retarded
+            //float alpha = Vector2.Angle(normal, -Fg);
+            float sinAlpha = Mathf.Sin(absAngle * Mathf.Deg2Rad);
+            
+            Vector2 right = Quaternion.AngleAxis(-groundAngle, Vector3.forward) * Vector2.right;
+            right.Normalize();
+            Debug.DrawLine(Body.position, Body.position + right);
+            
+            var groundOffsetDirection = (normal.x >= 0) ? -right : right;
+
+            float absFg = Body.gravityScale * Body.mass * g; //hmm 
+            Vector2 Fh = groundOffsetDirection * sinAlpha * -absFg;
+
+            Body.AddForce(Fh, ForceMode2D.Force);
         }
 
         private void OnLeaveGround()
