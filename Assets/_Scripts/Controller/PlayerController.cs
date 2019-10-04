@@ -54,7 +54,7 @@ namespace Game.Controller
         protected bool ignorePlayerInput = false;
         protected int availableAirJumps;
 
-        protected ContactPoint2D[] contactPoints = new ContactPoint2D[10];
+        protected ContactPoint2D[] contactPoints = new ContactPoint2D[16];
         protected ContactFilter2D filter;
 
         //other properties
@@ -152,6 +152,75 @@ namespace Game.Controller
         /// </summary>
         void CheckGround()
         {
+            //RayCastGroundA();
+            CheckContactsForGround();
+        }
+        
+        /// <summary>
+        /// Checks for ground using the rigidbody contacts, or a raycast to handle slopes
+        /// </summary>
+        void CheckContactsForGround()
+        {
+            //TODO search contacts. for idk what
+            int contacts = Body.GetContacts(contactPoints);
+            if (contacts == 0)
+            {
+                IsGrounded = DoGroundStick();
+                return;
+            }
+            Vector2 normals = Vector2.zero;
+            float frictions = 0f;
+            for (int i = 0; i < contacts && i < 16; i++)
+            {
+                var contact = contactPoints[i];
+                if (contact.normal.y > 0.4)
+                {
+                    normals += contact.normal;
+                    frictions += contact.collider.friction;
+                }
+            }
+            if (normals.Equals(Vector2.zero))
+            {
+                IsGrounded = false;
+                return;
+            }
+            //WOULD BE FUCKING COOL IF UNITY COULD JUST FUCKING COMPILE
+            GroundFriction = frictions / contacts;
+
+            normals.Normalize();
+            groundNormal = normals;
+            IsGrounded = true;
+        }
+
+        /// <summary>
+        /// Additional check for ground, keeps the player connected to terrain on slope starts
+        /// </summary>
+        /// <returns></returns>
+        bool DoGroundStick()
+        {
+            if (!StickToGround)
+                return false;
+            //Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
+            Vector2 rayOrigin = Body.position;
+            
+            //TODO: somehow it sometimes thinks it doesnt hit anything when really it should
+            RaycastHit2D hit2D;
+            if (hit2D = Physics2D.CircleCast(rayOrigin, halfHeight*1.01f, Vector2.down, halfHeight + groundedTolerance, groundMask))
+            {
+                //If necessary, "stick" to the ground.
+                //Vector2 newPos = Body.position;
+                //newPos.y = hit2D.point.y + halfHeight;
+                float oldVel = Body.velocity.magnitude;
+                
+
+                Body.position = hit2D.centroid;
+            }
+            return hit2D;
+        }
+
+        //The first solution for finding ground i tried out.
+        void RayCastGroundA()
+        {
 #if UNITY_EDITOR
             Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
 #endif
@@ -173,12 +242,6 @@ namespace Game.Controller
                 return;
             }
 
-            //TODO search contacts. for idk what
-            int contacts = Body.GetContacts(contactPoints);
-            for(int i = 0; i < contacts && i < 10; i++)
-            {
-                var contact = contactPoints[i];
-            }
             //If that failed, do a box cast
             Vector2 boxCenter = Body.position - Vector2.up * halfHeight;
             Vector2 boxSize = new Vector2(halfWidth * 0.6f, groundedTolerance);
@@ -187,7 +250,7 @@ namespace Game.Controller
                 //? maybe stick to the ground using the data in here? but how tho?
                 IsGrounded = true;
                 return;
-            } 
+            }
             IsGrounded = false;
         }
         

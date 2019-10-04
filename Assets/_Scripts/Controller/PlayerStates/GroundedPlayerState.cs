@@ -43,10 +43,10 @@ namespace Game.Controller
 
             controller.StickToGround = false;
             var force = Vector2.zero;
-            
-            force.y = Mathf.Sqrt(controller.JumpHeight * g2) * Body.mass;
-            
-            Body.AddForce(force, ForceMode2D.Impulse);
+            force.y = Mathf.Sqrt(controller.JumpHeight * g2);
+            force.x = Body.velocity.x;
+            Body.velocity = force;
+            //Body.AddForce(force, ForceMode2D.Impulse);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace Game.Controller
             //float alpha = Vector2.Angle(normal, -Fg);
             float sinAlpha = Mathf.Sin(absAngle * Mathf.Deg2Rad);
             
-            Vector2 right = Quaternion.AngleAxis(-groundAngle, Vector3.forward) * Vector2.right;
+            Vector2 right = RotateVector2D(Vector2.right, - groundAngle);
             right.Normalize();
             Debug.DrawLine(Body.position, Body.position + right);
             

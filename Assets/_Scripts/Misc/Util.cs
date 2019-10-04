@@ -10,6 +10,11 @@ namespace Game
         public static float Normalized(float f) => (f > 0)? 1f : (f < 0)? -1f : 0f;
         public static int NormalizeInt(float f) => (f > 0) ? 1 : (f < 0) ? -1 : 0;
         
+        public static Vector2 RotateVector2D(Vector2 vector, float angle)
+        {
+            return Quaternion.AngleAxis(angle, Vector3.forward) * vector;
+        }
+
         public static IEnumerator Delay(System.Action action, float time)
         {
             yield return new WaitForSeconds(time);
