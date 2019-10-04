@@ -1484,7 +1484,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 741445824}
   m_LocalRotation: {x: -0, y: -0, z: -0.102651045, w: 0.9947175}
-  m_LocalPosition: {x: -8.88, y: -1.468, z: 0.0993039}
+  m_LocalPosition: {x: -9.67, y: -2.69, z: 0.0993039}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2141,7 +2141,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 966764886}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 10.711, y: -1.4492, z: 0.72}
+  m_LocalPosition: {x: 8.8312, y: -3.0292, z: 0.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -2499,7 +2499,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1109650155}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.2, y: -1.05, z: 0}
+  m_LocalPosition: {x: 6.74, y: 0.48, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1263488360}
@@ -3404,7 +3404,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   baseSpeed: 3
-  acceleration: 2.5
+  acceleration: 10
   maxSteepAngle: 37.5
   jumpHeight: 2.5
   groundMask:
@@ -3603,7 +3603,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1413365948}
   m_LocalRotation: {x: -0, y: -0, z: 0.20741749, w: 0.97825253}
-  m_LocalPosition: {x: 3.61, y: -3.42, z: 0.72}
+  m_LocalPosition: {x: 1.52, y: -4.52, z: 0.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -4060,7 +4060,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1809158738}
   m_LocalRotation: {x: -0, y: -0, z: 0.33881178, w: 0.94085425}
-  m_LocalPosition: {x: 4.8, y: -2.56, z: 0.72}
+  m_LocalPosition: {x: 2.92, y: -4.14, z: 0.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

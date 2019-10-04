@@ -100,9 +100,11 @@ namespace Game.Controller
             availableAirJumps = airJumps;
             BaseSpeedSqr = baseSpeed * baseSpeed;
 
-            filter = new ContactFilter2D();
-            filter.layerMask = groundMask;
-            filter.useLayerMask = true;
+            filter = new ContactFilter2D
+            {
+                layerMask = groundMask,
+                useLayerMask = true
+            };
 
             activeState = new GroundedPlayerState
             {
@@ -181,6 +183,7 @@ namespace Game.Controller
             }
             if (normals.Equals(Vector2.zero))
             {
+                //Debug.Log("no normals");
                 IsGrounded = false;
                 return;
             }
@@ -199,25 +202,38 @@ namespace Game.Controller
         bool DoGroundStick()
         {
             if (!StickToGround)
+            {
+                //Debug.Log("Dont stick");
                 return false;
+            }
             //Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
-            Vector2 rayOrigin = Body.position;
+            float xOffset = Body.velocity.x * Time.deltaTime;
+            Vector2 rayOrigin = Body.position + new Vector2(xOffset, 0f);
             
             //TODO: somehow it sometimes thinks it doesnt hit anything when really it should
             RaycastHit2D hit2D;
-            if (hit2D = Physics2D.CircleCast(rayOrigin, halfHeight*1.01f, Vector2.down, halfHeight + groundedTolerance, groundMask))
+            if (hit2D = Physics2D.CircleCast(rayOrigin, halfHeight, Vector2.down, groundedTolerance, groundMask))
             {
-                //If necessary, "stick" to the ground.
-                //Vector2 newPos = Body.position;
-                //newPos.y = hit2D.point.y + halfHeight;
+                //! maybe offsetting the circle cast by velocity.x/deltaTime on the X Axis could help with predicting this shit.
+                //! then i only need to offset on y, and can ignore X of the centroid.
+                //Debug.Log("CIRCLE CAST");
                 float oldVel = Body.velocity.magnitude;
-                
 
-                Body.position = hit2D.centroid;
+                var pos = Body.position;
+                //float deltaX = xOffset;
+                //this should hopefully adjust the goddamn direction of the velocity to fit with the ground. 
+                if (Vector2.Dot(groundNormal, hit2D.normal) < 0.95)
+                {
+                    float alpha = Vector2.SignedAngle(groundNormal, hit2D.normal);
+                    Body.velocity = RotateVector2D(Body.velocity, alpha);
+                    //Debug.Log("adjust velocity");
+                }
+                pos.y = hit2D.centroid.y;
+                Body.position = pos;
             }
             return hit2D;
         }
-
+         
         //The first solution for finding ground i tried out.
         void RayCastGroundA()
         {

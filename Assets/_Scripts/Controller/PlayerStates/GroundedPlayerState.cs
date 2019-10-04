@@ -19,18 +19,12 @@ namespace Game.Controller
         {
             controller.OnPressJump += Jump;
             controller.OnLeaveGround += OnLeaveGround;
-            controller.OnEnterGround += EditorOnlyTest;
             controller.StickToGround = true;
         }
         public override void OnExitState()
         {
             controller.OnPressJump -= Jump;
             controller.OnLeaveGround -= OnLeaveGround;
-            controller.OnEnterGround -= EditorOnlyTest;
-        }
-        void EditorOnlyTest()
-        {
-            controller.StickToGround = true;
         }
 
         /// <summary>
@@ -38,9 +32,6 @@ namespace Game.Controller
         /// </summary> 
         private void Jump()
         {
-            if (!controller.IsGrounded)
-                return;
-
             controller.StickToGround = false;
             var force = Vector2.zero;
             force.y = Mathf.Sqrt(controller.JumpHeight * g2);
@@ -56,8 +47,6 @@ namespace Game.Controller
         /// <param name="deltaTime"></param>
         private void Move(Vector2 input, float deltaTime)
         {
-            if (!controller.IsGrounded)
-                return;
             Vector2 normal = controller.GroundNormal;
             float groundAngle = Vector2.SignedAngle(normal, Vector2.up);
             float absAngle = Mathf.Abs(groundAngle);
@@ -65,29 +54,31 @@ namespace Game.Controller
             //if the friction is low on this piece of ground, slide, otherwise stay
             if (absAngle >= controller.MaxSteepAngle && controller.GroundFriction < 0.3f)
             {
+                //"sliding"
                 return;
             }
+            Vector2 right = RotateVector2D(Vector2.right, -groundAngle);
 
             //TODO: Accelerate
-            //float sqrVelocity = Body.velocity.sqrMagnitude; 
-            //float percentSqrVelocity = sqrVelocity / controller.BaseSpeedSqr;
+            Vector2 velocity = Body.velocity;
 
-            float acc = input.x * controller.BaseSpeed;
+            //This should be decent enough i guess
+            Vector2 acceleration = right * (input.x * controller.Acceleration * deltaTime);
+            velocity += acceleration;
 
-            Vector2 force = Vector2.right * acc;
-            force.y = Body.velocity.y;
-            Body.velocity = force;
+            //hmmm i wanted to clamp the overall velocity including y, but it doesnt seem to work with jumping at all
+            velocity.x = Mathf.Clamp(velocity.x, -controller.BaseSpeed, controller.BaseSpeed);
 
-            //Add a force to prevent sliding off hills for no reason. 
+            Body.velocity = velocity;
+
+            //TODO: Add a force to prevent sliding off hills for no reason. 
             //Testing if the angle is something that matters 
             if (absAngle <= 4f)
                 return;
 
-            //TODO: wtf it doesnt work again | i get stuck on corners n shit all the time, jumping is still fucking retarded
-            //float alpha = Vector2.Angle(normal, -Fg);
+            //TODO: the force isnt really strong enough or whatever so it
             float sinAlpha = Mathf.Sin(absAngle * Mathf.Deg2Rad);
             
-            Vector2 right = RotateVector2D(Vector2.right, - groundAngle);
             right.Normalize();
             Debug.DrawLine(Body.position, Body.position + right);
             
@@ -101,8 +92,9 @@ namespace Game.Controller
 
         private void OnLeaveGround()
         {
-            Debug.Log("Left Ground");
-            //controller.SwitchToState<AirbournePlayerState>();
+            Debug.Log("Left Ground"); 
+            controller.StickToGround = false;
+            controller.SwitchToState<AirbournePlayerState>();
         }
     }
 }
