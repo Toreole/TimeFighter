@@ -34,7 +34,7 @@ namespace Game.Controller
         {
             controller.StickToGround = false;
             var force = Vector2.zero;
-            force.y = Mathf.Sqrt(controller.JumpHeight * g2);
+            force.y = Mathf.Sqrt(controller.JumpHeight * Util.g2);
             force.x = Body.velocity.x;
             Body.velocity = force;
             //Body.AddForce(force, ForceMode2D.Impulse);
@@ -52,27 +52,25 @@ namespace Game.Controller
             float absAngle = Mathf.Abs(groundAngle);
             //Test against the max angle to walk.
             //if the friction is low on this piece of ground, slide, otherwise stay
-            if (absAngle >= controller.MaxSteepAngle && controller.GroundFriction < 0.3f)
+            if (absAngle >= controller.MaxSteepAngle || controller.GroundFriction < 0.3f)
             {
                 //"sliding"
                 return;
             }
-            Vector2 right = RotateVector2D(Vector2.right, -groundAngle);
-
-            //TODO: Accelerate
+            //TODO: this doesnt work on slopes at all
+            Vector2 right = Util.RotateVector2D(Vector2.right, -groundAngle);
             Vector2 velocity = Body.velocity;
+
+            Debug.DrawLine(Body.position, Body.position + right, Color.blue);
 
             //This should be decent enough i guess
             Vector2 acceleration = right * (input.x * controller.Acceleration * deltaTime);
             velocity += acceleration;
-
             //hmmm i wanted to clamp the overall velocity including y, but it doesnt seem to work with jumping at all
             velocity.x = Mathf.Clamp(velocity.x, -controller.BaseSpeed, controller.BaseSpeed);
-
             Body.velocity = velocity;
-
-            //TODO: Add a force to prevent sliding off hills for no reason. 
-            //Testing if the angle is something that matters 
+            
+            //Only add a ground counter force if the surface is sloped.
             if (absAngle <= 4f)
                 return;
 
@@ -80,7 +78,6 @@ namespace Game.Controller
             float sinAlpha = Mathf.Sin(absAngle * Mathf.Deg2Rad);
             
             right.Normalize();
-            Debug.DrawLine(Body.position, Body.position + right);
             
             var groundOffsetDirection = (normal.x >= 0) ? -right : right;
 
@@ -89,7 +86,7 @@ namespace Game.Controller
 
             Body.AddForce(Fh, ForceMode2D.Force);
         }
-
+        
         private void OnLeaveGround()
         {
             Debug.Log("Left Ground"); 

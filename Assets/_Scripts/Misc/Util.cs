@@ -42,7 +42,7 @@ namespace Game
                 yield return wait;
             action?.Invoke();
         }
-
+        
         /// <summary>
         /// Draw with default color = red
         /// </summary>

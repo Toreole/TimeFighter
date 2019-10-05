@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-using System;
+using System.Collections;
 using Luminosity.IO;
 
 using static Game.Util;
@@ -19,7 +19,7 @@ namespace Game.Controller
         [SerializeField]
         protected float maxSteepAngle = 37.5f;
         [SerializeField]
-        protected float jumpHeight = 2.5f;
+        protected float jumpHeight = 2.5f, airJumpHeight = 1.75f;
         [SerializeField]
         protected LayerMask groundMask;
         [SerializeField]
@@ -33,17 +33,20 @@ namespace Game.Controller
         public float BaseSpeed => baseSpeed;
         public float BaseSpeedSqr { get; protected set; }
         public float JumpHeight => jumpHeight;
+        public float AirJumpHeight => airJumpHeight;
         public float Acceleration => acceleration;
         public float MaxSteepAngle => maxSteepAngle;
         public int AvailableAirJumps { get => availableAirJumps; set => availableAirJumps = Mathf.Clamp(value, 0, airJumps); }
         public bool CanAirJump { get => availableAirJumps > 0; set { availableAirJumps = value ? airJumps : 0; } }
+        public Vector2 MoveInput => movementInput;
+        public Vector2 MoveInputRaw => movementRaw;
 
         //Active State Controls
         PlayerStateBehaviour activeState;
         bool overrideStateControls = false;
 
         //Input Buffer
-        Vector2 movementInput;
+        Vector2 movementInput, movementRaw;
         bool jumpPressed, jumpHold;
         bool specialA, specialB;
         bool attackA, attackB;
@@ -64,7 +67,7 @@ namespace Game.Controller
                 if (!IsGrounded && value)
                     OnEnterGround?.Invoke();
                 else if (IsGrounded && !value)
-                    OnLeaveGround?.Invoke();
+                    GroundLeaveOnNextFrame();
                 isGrounded = value;
             }
         }
@@ -145,6 +148,8 @@ namespace Game.Controller
             }
             movementInput.x = InputManager.GetAxis("Horizontal");
             movementInput.y = InputManager.GetAxis("Vertical");
+            movementRaw.x   = InputManager.GetAxisRaw("Horizontal");
+            movementRaw.y   = InputManager.GetAxisRaw("Vertical");
             jumpPressed     = InputManager.GetButtonDown("Jump");
             jumpHold        = InputManager.GetButton("Jump");
         }
@@ -210,23 +215,18 @@ namespace Game.Controller
             float xOffset = Body.velocity.x * Time.deltaTime;
             Vector2 rayOrigin = Body.position + new Vector2(xOffset, 0f);
             
-            //TODO: somehow it sometimes thinks it doesnt hit anything when really it should
+            //TODO its not 100% accurate at times.
             RaycastHit2D hit2D;
             if (hit2D = Physics2D.CircleCast(rayOrigin, halfHeight, Vector2.down, groundedTolerance, groundMask))
             {
-                //! maybe offsetting the circle cast by velocity.x/deltaTime on the X Axis could help with predicting this shit.
-                //! then i only need to offset on y, and can ignore X of the centroid.
-                //Debug.Log("CIRCLE CAST");
                 float oldVel = Body.velocity.magnitude;
 
                 var pos = Body.position;
-                //float deltaX = xOffset;
-                //this should hopefully adjust the goddamn direction of the velocity to fit with the ground. 
+                //If there is a big enough change in surface angle, adjust the velocity of the player to walk along it
                 if (Vector2.Dot(groundNormal, hit2D.normal) < 0.95)
                 {
                     float alpha = Vector2.SignedAngle(groundNormal, hit2D.normal);
                     Body.velocity = RotateVector2D(Body.velocity, alpha);
-                    //Debug.Log("adjust velocity");
                 }
                 pos.y = hit2D.centroid.y;
                 Body.position = pos;
@@ -234,7 +234,7 @@ namespace Game.Controller
             return hit2D;
         }
          
-        //The first solution for finding ground i tried out.
+        ///The first solution for finding ground i tried out.
         void RayCastGroundA()
         {
 #if UNITY_EDITOR
@@ -269,7 +269,19 @@ namespace Game.Controller
             }
             IsGrounded = false;
         }
-        
+        /// <summary>
+        /// Delays the groundLeave callback until the next frame and checks if it is still valid at that point.
+        /// </summary>
+        void GroundLeaveOnNextFrame()
+        {
+            StartCoroutine(DelayCheck());
+            IEnumerator DelayCheck()
+            {
+                yield return null;
+                if (!IsGrounded)
+                    OnLeaveGround?.Invoke();
+            }
+        }
         /// <summary>
         /// Run the callbacks based on input n such i guess.
         /// </summary>
