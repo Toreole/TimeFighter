@@ -34,6 +34,10 @@ namespace Game.Controller
         /// </summary> 
         private void Jump()
         {
+            //TODO: only be able to jump when slipping (slope) and a certain speed is reached ???
+            if (controller.GroundFriction <= controller.SlipThreshold)
+                if(Body.velocity.magnitude < 4f)
+                    return; 
             controller.StickToGround = false;
             var force = Vector2.zero;
             force.y = Mathf.Sqrt(controller.JumpHeight * Util.g2);
@@ -59,33 +63,55 @@ namespace Game.Controller
                 //"sliding"
                 return;
             }
+
+            //baseline for the following calculations
             Vector2 right = Util.RotateVector2D(Vector2.right, -groundAngle);
             Vector2 velocity = Body.velocity;
 
-            Debug.DrawLine(Body.position, Body.position + right, Color.blue);
+            AddGroundCounterForce();
 
-            //This should be decent enough i guess
-            Vector2 acceleration = right * (input.x * controller.Acceleration * deltaTime);
-            velocity += acceleration;
-            //hmmm i wanted to clamp the overall velocity including y, but it doesnt seem to work with jumping at all
-            velocity.x = Mathf.Clamp(velocity.x, -controller.BaseSpeed, controller.BaseSpeed);
-            Body.velocity = velocity;
-            
-            //Only add a ground counter force if the surface is sloped.
-            if (absAngle <= 4f)
+            //Check for raw input, we want to stop moving when the axis is no longer actively used.
+            if (Mathf.Approximately(controller.MoveInputRaw.x, 0f))
+            {
+                //no horizontal input here.
+                velocity.x = Mathf.Lerp(velocity.x, 0f, 0.65f*deltaTime);
+                Body.velocity = velocity;
                 return;
+            }
 
-            //TODO: the force isnt really strong enough or whatever so it
-            float sinAlpha = Mathf.Sin(absAngle * Mathf.Deg2Rad);
+            DoMovement();
+
+            void DoMovement()
+            {
+                //The acceleration for this frame
+                Vector2 acceleration = right * (input.x * controller.Acceleration * deltaTime);
+                velocity += acceleration;
+                float xInAbsSpeed = Mathf.Abs(input.x) * controller.BaseSpeed;
+                //Clamp x velocity, y should not matter that much
+                velocity.x = Mathf.Clamp(velocity.x, -xInAbsSpeed, xInAbsSpeed);
+                Body.velocity = velocity;
+            }
             
-            right.Normalize();
-            
-            var groundOffsetDirection = (normal.x >= 0) ? -right : right;
+            void AddGroundCounterForce()
+            {
+                //Only add a ground counter force if the surface is sloped.
+                if (absAngle <= 4f)
+                    return;
 
-            float absFg = Body.gravityScale * Body.mass * g; //hmm 
-            Vector2 Fh = groundOffsetDirection * sinAlpha * -absFg;
+                //! Absolute sinAlpha solves the issue with the force not being in the correct direction
+                float sinAlpha = Mathf.Abs(Mathf.Sin(groundAngle * Mathf.Deg2Rad));
 
-            Body.AddForce(Fh, ForceMode2D.Force);
+                //normalizing the right vector shouldnt be necessary as a normalized vector stays normalized when rotated.
+                //right.Normalize();
+
+                var groundOffsetDirection = (normal.x >= 0) ? -right : right;
+
+                float absFg = Body.gravityScale * Body.mass * g; //hmm 
+
+                Vector2 Fh = groundOffsetDirection * sinAlpha * absFg;
+
+                Body.AddForce(Fh, ForceMode2D.Force);
+            }
         }
         
         private void OnLeaveGround()

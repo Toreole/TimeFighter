@@ -17,7 +17,7 @@ namespace Game.Controller
         [SerializeField]
         protected float acceleration = 2.5f;
         [SerializeField]
-        protected float maxSteepAngle = 37.5f;
+        protected float maxSteepAngle = 37.5f, slipThreshold = 0.25f;
         [SerializeField]
         protected float jumpHeight = 2.5f, airJumpHeight = 1.75f;
         [SerializeField]
@@ -36,6 +36,7 @@ namespace Game.Controller
         public float AirJumpHeight => airJumpHeight;
         public float Acceleration => acceleration;
         public float MaxSteepAngle => maxSteepAngle;
+        public float SlipThreshold => slipThreshold;
         public int AvailableAirJumps { get => availableAirJumps; set => availableAirJumps = Mathf.Clamp(value, 0, airJumps); }
         public bool CanAirJump { get => availableAirJumps > 0; set { availableAirJumps = value ? airJumps : 0; } }
         public Vector2 MoveInput => movementInput;
@@ -76,6 +77,7 @@ namespace Game.Controller
         public float GroundFriction { get; protected set; } = 0.4f;
         public bool StickToGround { get => stickToGround; set => stickToGround = value; }
         public bool IgnorePlayerInput { get => ignorePlayerInput; set => ignorePlayerInput = value; }
+        public float LastVerticalVel { get; protected set; }
 
         //State callback events.
         #region events
@@ -125,15 +127,13 @@ namespace Game.Controller
             FetchInput();
             RunCallbacks();
         }
-
-        public float lastVerticalVel;
         /// <summary>
         /// Fixed update callbacks 
         /// </summary>  
         private void FixedUpdate()
         {
             RunFixedCallbacks();
-            lastVerticalVel = Body.velocity.y;
+            LastVerticalVel = Body.velocity.y;
         }
 
         /// <summary>
