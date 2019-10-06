@@ -186,7 +186,7 @@
         <Type>GamepadButton</Type>
         <Axis>0</Axis>
         <Joystick>0</Joystick>
-        <GamepadButton>ActionBottom</GamepadButton>
+        <GamepadButton>LeftStick</GamepadButton>
         <GamepadAxis>LeftThumbstickX</GamepadAxis>
         <GamepadIndex>GamepadOne</GamepadIndex>
       </Binding>

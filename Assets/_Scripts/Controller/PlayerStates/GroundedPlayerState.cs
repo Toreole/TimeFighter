@@ -20,6 +20,8 @@ namespace Game.Controller
             controller.OnPressJump += Jump;
             controller.OnLeaveGround += OnLeaveGround;
             controller.StickToGround = true;
+            //Debug.Log(controller.lastVerticalVel);
+            //TODO: enter state -> roll / damage 
         }
         public override void OnExitState()
         {
@@ -57,7 +59,6 @@ namespace Game.Controller
                 //"sliding"
                 return;
             }
-            //TODO: this doesnt work on slopes at all
             Vector2 right = Util.RotateVector2D(Vector2.right, -groundAngle);
             Vector2 velocity = Body.velocity;
 

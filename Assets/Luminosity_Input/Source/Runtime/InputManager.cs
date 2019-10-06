@@ -123,7 +123,9 @@ namespace Luminosity.IO
 				m_actionLookup = new Dictionary<string, Dictionary<string, InputAction>>();
                 AddDefaultServices();
 				Initialize();
-                Load(); //< test to see if this works
+#if !UNITY_EDITOR
+                Load(); //It should only try loading when NOT in the editor right?
+#endif
 			}
 			else
 			{
@@ -429,7 +431,7 @@ namespace Luminosity.IO
 				m_savedHandler();
 		}
 
-		#region [Static Interface]
+#region [Static Interface]
 		public static event Action<PlayerID> PlayerControlsChanged
 		{
 			add { if(m_instance != null) m_instance.m_playerControlsChangedHandler += value; }
@@ -1045,6 +1047,6 @@ namespace Luminosity.IO
 			}
 		}
 #endif
-		#endregion
+#endregion
 	}
 }

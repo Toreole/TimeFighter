@@ -126,12 +126,14 @@ namespace Game.Controller
             RunCallbacks();
         }
 
+        public float lastVerticalVel;
         /// <summary>
-        /// Fixed update callbacks
-        /// </summary>
+        /// Fixed update callbacks 
+        /// </summary>  
         private void FixedUpdate()
         {
             RunFixedCallbacks();
+            lastVerticalVel = Body.velocity.y;
         }
 
         /// <summary>

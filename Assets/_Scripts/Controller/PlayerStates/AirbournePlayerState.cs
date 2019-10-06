@@ -25,6 +25,7 @@ namespace Game.Controller
         void EnterGround()
         {
             controller.CanAirJump = true;
+            //Debug.Log(controller.lastVerticalVel); <-- this actually seems to get the correct one
             controller.SwitchToState<GroundedPlayerState>();
         }
 
