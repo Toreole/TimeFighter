@@ -7,7 +7,7 @@ namespace Game.Controller
     {
         public override void FixedStep(Vector2 input, float deltaTime)
         {
-            //throw new System.NotImplementedException();
+            //TODO: think about some usecases for this, atm its just dead lol.
         }
 
         public override void OnEnterState()
@@ -55,6 +55,14 @@ namespace Game.Controller
                 tVelocity.y = Mathf.Sqrt(controller.AirJumpHeight * Util.g2);
                 Body.velocity = tVelocity;
             }
+        }
+
+        /// <summary>
+        /// A dash performed in mid-air.
+        /// </summary>
+        void Dash()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

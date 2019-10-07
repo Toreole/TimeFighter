@@ -17,6 +17,10 @@ namespace Game.Controller
         [SerializeField]
         protected float acceleration = 2.5f;
         [SerializeField]
+        protected float maxStamina = 100, staminaRegen = 20f;
+        [SerializeField] //TODO: everything around dashing in the state behaviours
+        protected float dashDistance = 4f, dashCost = 25f, dashSpeed = 9f;
+        [SerializeField]
         protected float maxSteepAngle = 37.5f, slipThreshold = 0.25f;
         [SerializeField]
         protected float jumpHeight = 2.5f, airJumpHeight = 1.75f;
@@ -57,6 +61,7 @@ namespace Game.Controller
         protected bool stickToGround = true;
         protected bool ignorePlayerInput = false;
         protected int availableAirJumps;
+        protected float stamina;
 
         protected ContactPoint2D[] contactPoints = new ContactPoint2D[16];
         protected ContactFilter2D filter;
@@ -78,6 +83,11 @@ namespace Game.Controller
         public bool StickToGround { get => stickToGround; set => stickToGround = value; }
         public bool IgnorePlayerInput { get => ignorePlayerInput; set => ignorePlayerInput = value; }
         public float LastVerticalVel { get; protected set; }
+        public float Stamina { get => stamina; set => stamina = Mathf.Clamp(value, 0f, maxStamina); }
+        public float StaminaRegen { get => staminaRegen; protected set => staminaRegen = value; }
+        public float DashDistance { get => dashDistance; }
+        public float DashCost { get => dashCost; }
+        public float DashSpeed { get => dashSpeed; }
 
         //State callback events.
         #region events
@@ -97,6 +107,7 @@ namespace Game.Controller
         public event ControllerCallback OnEnterGround;
         public event ControllerCallback OnLeaveGround;
         #endregion
+
         /// <summary>
         /// Initial Setup
         /// </summary>
@@ -104,6 +115,7 @@ namespace Game.Controller
         {
             availableAirJumps = airJumps;
             BaseSpeedSqr = baseSpeed * baseSpeed;
+            stamina = maxStamina;
 
             filter = new ContactFilter2D
             {

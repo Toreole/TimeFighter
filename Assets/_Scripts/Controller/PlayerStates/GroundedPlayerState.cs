@@ -10,6 +10,7 @@ namespace Game.Controller
         public override void FixedStep(Vector2 input, float deltaTime)
         {
             Move(input, deltaTime);
+            controller.Stamina += deltaTime * controller.StaminaRegen;
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace Game.Controller
             if (Mathf.Approximately(controller.MoveInputRaw.x, 0f))
             {
                 //no horizontal input here.
-                velocity.x = Mathf.Lerp(velocity.x, 0f, 0.65f*deltaTime);
+                velocity.x = Mathf.Lerp(velocity.x, 0f, 0.55f*deltaTime);
                 Body.velocity = velocity;
                 return;
             }
@@ -119,6 +120,14 @@ namespace Game.Controller
             Debug.Log("Left Ground"); 
             controller.StickToGround = false;
             controller.SwitchToState<AirbournePlayerState>();
+        }
+
+        /// <summary>
+        /// A dash performed on ground.
+        /// </summary>
+        void Dash()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
