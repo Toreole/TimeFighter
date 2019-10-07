@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: 001_TestArea
   m_EditorClassIdentifier: 
   descriptiveName: Test Area
-  sceneName: 000_TestArea
+  sceneName: 001_TestArea
   time: 0
   additionalInfo: This is just my debugging area for game mechanics.

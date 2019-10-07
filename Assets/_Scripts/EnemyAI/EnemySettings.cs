@@ -6,6 +6,7 @@ namespace Game
     /// <summary>
     /// Extra info about a type of enemy.
     /// </summary>
+    [System.Obsolete]
     [CreateAssetMenu]
     public class EnemySettings : ScriptableObject
     {

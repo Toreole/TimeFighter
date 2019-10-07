@@ -2,20 +2,43 @@
 using System.Collections;
 using UnityEngine;
 using Game.Controller;
+using Discord;
+using DiscordApp = Discord.Discord;
 
 namespace Game
 {
     public class GameManager : MonoBehaviour
     {
-        public static GameManager instance = null;
+        public static GameManager Instance { get => instance; }
+        private static GameManager instance = null;
         
         private SaveData save = null;
-        private bool firstShutdown = true;
-        [SerializeField]
-        new AudioSource audio;
-        
+
+#if DISCORD
+        public static DiscordApp discord;
+        public static Discord.User user;
+        public static UserManager userManager;
+#endif
+
         private void Awake()
         {
+#if DISCORD
+            //epic gamer hours hmmm
+            userManager = discord.GetUserManager();
+            userManager.OnCurrentUserUpdate += () =>
+            {
+                user = userManager.GetCurrentUser();
+                Debug.Log(user.Username);
+                if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
+                    Debug.Log("BRAVERY!");
+                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
+                    Debug.Log("BRILLIANCE!");
+                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
+                    Debug.Log("BALANCE!");
+                else
+                    Debug.Log("lmao normie");
+            };
+#endif
             if (instance != null)
             {
                 Destroy(this.gameObject);
@@ -29,11 +52,20 @@ namespace Game
                 if (!SaveManager.TryLoad(out save))
                 {   //try to load, if it cant load, create a new save
                     save = new SaveData();
-                    //Debug.Log("Creating New SaveData");
+                    //Debug.Log("Creating New SaveData"); 
                 }
             }
         }
-
+        private void OnGUI()
+        {
+            GUILayout.Label(GameInfo.Version); 
+        }
+#if DISCORD
+        private void Update()
+        {
+            discord.RunCallbacks();
+        }
+#endif
         private void Start()
         {
             if (instance != this)
@@ -46,21 +78,12 @@ namespace Game
         /// </summary>
         private void OnApplicationQuit()
         {
-            if (firstShutdown)
+            bool isCrash = !Input.GetKey(KeyCode.F4); //alt f4 pressed hmmm
+            if(isCrash)
             {
-                firstShutdown = false;
-                Application.CancelQuit();
-                audio.Play();
-                StartCoroutine(DelayedShutdown());
-                return;
+                //TODO: maybe try and give some error stuff idk wtf. probably: opened scenes, last known player state, player x/y, OS version, similar stuff.
             }
             TrySave();
-        }
-
-        private System.Collections.IEnumerator DelayedShutdown()
-        {
-            yield return new WaitForSeconds(2.0f);
-            Application.Quit();
         }
 
         /// <summary>

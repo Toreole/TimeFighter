@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Discord;
-using UnityEngine.SceneManagement;
 
 namespace Game
 {
@@ -24,10 +23,7 @@ namespace Game
         [SerializeField]
         protected string optionalSteamId;
         protected bool isRunning = false;
-
-        [Header("Which Scene to Load next"), SerializeField]
-        protected string nextScene;
-
+        
         [Header("Event Callbacks")]
         public UnityEngine.Events.UnityEvent onConnect;
         public UnityEngine.Events.UnityEvent onDisconnect;
@@ -47,7 +43,6 @@ namespace Game
                 return;
 
             Init();
-            SceneManager.LoadScene(nextScene);
         }
 
         private void Init()
