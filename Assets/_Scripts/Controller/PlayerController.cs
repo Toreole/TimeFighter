@@ -41,10 +41,20 @@ namespace Game.Controller
         public float Acceleration => acceleration;
         public float MaxSteepAngle => maxSteepAngle;
         public float SlipThreshold => slipThreshold;
-        public int AvailableAirJumps { get => availableAirJumps; set => availableAirJumps = Mathf.Clamp(value, 0, airJumps); }
-        public bool CanAirJump { get => availableAirJumps > 0; set { availableAirJumps = value ? airJumps : 0; } }
-        public Vector2 MoveInput => movementInput;
-        public Vector2 MoveInputRaw => movementRaw;
+        public int AvailableAirJumps 
+        { get => availableAirJumps; set => availableAirJumps = Mathf.Clamp(value, 0, airJumps); }
+        public bool CanAirJump 
+        { get => availableAirJumps > 0; set { availableAirJumps = value ? airJumps : 0; } }
+        public float Stamina 
+        { get => stamina; set => stamina = Mathf.Clamp(value, 0f, maxStamina); }
+        public float StaminaRegen 
+        { get => staminaRegen; protected set => staminaRegen = value; }
+        public float DashDistance 
+        { get => dashDistance; }
+        public float DashCost 
+        { get => dashCost; }
+        public float DashSpeed 
+        { get => dashSpeed; }
 
         //Active State Controls
         PlayerStateBehaviour activeState;
@@ -55,6 +65,8 @@ namespace Game.Controller
         bool jumpPressed, jumpHold;
         bool specialA, specialB;
         bool attackA, attackB;
+        public Vector2 MoveInput => movementInput;
+        public Vector2 MoveInputRaw => movementRaw;
 
         //other variables
         protected bool isGrounded = true;
@@ -68,7 +80,8 @@ namespace Game.Controller
 
         //other properties
         public bool IsGrounded {
-            get => isGrounded; set
+            get => isGrounded;
+            set
             {
                 if (!IsGrounded && value)
                     OnEnterGround?.Invoke();
@@ -79,15 +92,14 @@ namespace Game.Controller
         }
         protected Vector2 groundNormal = Vector2.up;
         public Vector2 GroundNormal => groundNormal;
-        public float GroundFriction { get; protected set; } = 0.4f;
-        public bool StickToGround { get => stickToGround; set => stickToGround = value; }
-        public bool IgnorePlayerInput { get => ignorePlayerInput; set => ignorePlayerInput = value; }
-        public float LastVerticalVel { get; protected set; }
-        public float Stamina { get => stamina; set => stamina = Mathf.Clamp(value, 0f, maxStamina); }
-        public float StaminaRegen { get => staminaRegen; protected set => staminaRegen = value; }
-        public float DashDistance { get => dashDistance; }
-        public float DashCost { get => dashCost; }
-        public float DashSpeed { get => dashSpeed; }
+        public float GroundFriction 
+        { get; protected set; } = 0.4f;
+        public bool  StickToGround 
+        { get => stickToGround; set => stickToGround = value; }
+        public bool  IgnorePlayerInput 
+        { get => ignorePlayerInput; set => ignorePlayerInput = value; }
+        public float LastVerticalVel 
+        { get; protected set; }
 
         //State callback events.
         #region events
@@ -180,9 +192,9 @@ namespace Game.Controller
         /// <summary>
         /// Checks for ground using the rigidbody contacts, or a raycast to handle slopes
         /// </summary>
+        //TODO: searching the contacts should also include checking for a wall i guess.
         void CheckContactsForGround()
         {
-            //TODO search contacts. for idk what
             int contacts = Body.GetContacts(contactPoints);
             if (contacts == 0)
             {
