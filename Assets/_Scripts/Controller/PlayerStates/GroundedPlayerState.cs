@@ -21,6 +21,7 @@ namespace Game.Controller
             controller.OnPressJump += Jump;
             controller.OnLeaveGround += OnLeaveGround;
             controller.StickToGround = true;
+            HandleFall();
             //Debug.Log(controller.lastVerticalVel);
             //TODO: enter state -> roll / damage 
         }
@@ -28,6 +29,20 @@ namespace Game.Controller
         {
             controller.OnPressJump -= Jump;
             controller.OnLeaveGround -= OnLeaveGround;
+        }
+
+        void HandleFall()
+        {
+            float lastVel = controller.LastVerticalVel;
+            if(lastVel < controller.FallDamageThreshold)
+            {
+                //Take damage.
+                //TODO: damage system
+            }
+            else if (lastVel < controller.RollFallThreshold)
+            {
+                //TODO: roll
+            }
         }
 
         /// <summary>

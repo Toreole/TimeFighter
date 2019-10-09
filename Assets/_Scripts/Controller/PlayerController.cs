@@ -16,6 +16,8 @@ namespace Game.Controller
         protected float baseSpeed = 3.5f;
         [SerializeField]
         protected float acceleration = 2.5f;
+        [SerializeField, Range(-100f, 0f)] //TODO: roll on ender ground state. roll with large x speed but low y?
+        protected float rollFallThreshold = -5f, fallDamageThreshold = -16f;
         [SerializeField]
         protected float maxStamina = 100, staminaRegen = 20f;
         [SerializeField] //TODO: everything around dashing in the state behaviours
@@ -55,6 +57,8 @@ namespace Game.Controller
         { get => dashCost; }
         public float DashSpeed 
         { get => dashSpeed; }
+        public float RollFallThreshold => rollFallThreshold;
+        public float FallDamageThreshold => fallDamageThreshold;
 
         //Active State Controls
         PlayerStateBehaviour activeState;
