@@ -9,8 +9,10 @@ namespace Game.Controller
     {
         public override void FixedStep(Vector2 input, float deltaTime)
         {
-            Move(input, deltaTime);
             controller.Stamina += deltaTime * controller.StaminaRegen;
+            if (controller.IgnorePlayerInput)
+                return; //it shouldnt move when the player input is ignored anyway.
+            Move(input, deltaTime);
         }
 
         /// <summary>
@@ -33,15 +35,18 @@ namespace Game.Controller
 
         void HandleFall()
         {
-            float lastVel = controller.LastVerticalVel;
-            if(lastVel < controller.FallDamageThreshold)
+            Vector2 lastVel = controller.LastVel;
+            if(lastVel.y < controller.FallDamageThreshold)
             {
                 //Take damage.
                 //TODO: damage system
             }
-            else if (lastVel < controller.RollFallThreshold)
+            else if (lastVel.y < controller.RollFallThreshold)
             {
                 //TODO: roll
+                Debug.Log("Ground Roll");
+                controller.SetAnimTrigger("Grounded_Roll");
+                Body.velocity = GetGroundRight() * controller.BaseSpeed * Util.Normalized(controller.LastVel.x);
             }
         }
 
@@ -62,6 +67,19 @@ namespace Game.Controller
             //Body.AddForce(force, ForceMode2D.Impulse);
         }
 
+        Vector2 GetGroundRight()
+        {
+            float groundAngle = Vector2.SignedAngle(controller.GroundNormal, Vector2.up);
+            Vector2 right = Util.RotateVector2D(Vector2.right, -groundAngle);
+            return right;
+        }
+        Vector2 GetGroundRight(out float angle)
+        {
+            angle = Vector2.SignedAngle(controller.GroundNormal, Vector2.up);
+            Vector2 right = Util.RotateVector2D(Vector2.right, -angle);
+            return right;
+        }
+
         /// <summary>
         /// Movement for the base ground
         /// </summary>
@@ -69,8 +87,7 @@ namespace Game.Controller
         /// <param name="deltaTime"></param>
         private void Move(Vector2 input, float deltaTime)
         {
-            Vector2 normal = controller.GroundNormal;
-            float groundAngle = Vector2.SignedAngle(normal, Vector2.up);
+            Vector2 right = GetGroundRight(out float groundAngle);
             float absAngle = Mathf.Abs(groundAngle);
             //Test against the max angle to walk.
             //if the friction is low on this piece of ground, slide, otherwise stay
@@ -81,7 +98,6 @@ namespace Game.Controller
             }
 
             //baseline for the following calculations
-            Vector2 right = Util.RotateVector2D(Vector2.right, -groundAngle);
             Vector2 velocity = Body.velocity;
 
             AddGroundCounterForce();
@@ -120,7 +136,7 @@ namespace Game.Controller
                 //normalizing the right vector shouldnt be necessary as a normalized vector stays normalized when rotated.
                 //right.Normalize();
 
-                var groundOffsetDirection = (normal.x >= 0) ? -right : right;
+                var groundOffsetDirection = (controller.GroundNormal.x >= 0) ? -right : right;
 
                 float absFg = Body.gravityScale * Body.mass * g; //hmm 
 

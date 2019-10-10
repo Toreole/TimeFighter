@@ -13,6 +13,8 @@ namespace Game.Controller
         //protected PlayerStateBehaviour defaultState;
         [Header("Player Settings")]
         [SerializeField]
+        protected Animator animator;
+        [SerializeField]
         protected float baseSpeed = 3.5f;
         [SerializeField]
         protected float acceleration = 2.5f;
@@ -102,7 +104,7 @@ namespace Game.Controller
         { get => stickToGround; set => stickToGround = value; }
         public bool  IgnorePlayerInput 
         { get => ignorePlayerInput; set => ignorePlayerInput = value; }
-        public float LastVerticalVel 
+        public Vector2 LastVel 
         { get; protected set; }
 
         //State callback events.
@@ -161,7 +163,7 @@ namespace Game.Controller
         private void FixedUpdate()
         {
             RunFixedCallbacks();
-            LastVerticalVel = Body.velocity.y;
+            LastVel = Body.velocity;
         }
 
         /// <summary>
@@ -187,7 +189,7 @@ namespace Game.Controller
         /// <summary>
         /// Checks for ground in a more or less arbitrary way.
         /// </summary>
-        void CheckGround()
+        protected void CheckGround()
         {
             //RayCastGroundA();
             CheckContactsForGround();
@@ -197,7 +199,7 @@ namespace Game.Controller
         /// Checks for ground using the rigidbody contacts, or a raycast to handle slopes
         /// </summary>
         //TODO: searching the contacts should also include checking for a wall i guess.
-        void CheckContactsForGround()
+        protected void CheckContactsForGround()
         {
             int contacts = Body.GetContacts(contactPoints);
             if (contacts == 0)
@@ -234,7 +236,7 @@ namespace Game.Controller
         /// Additional check for ground, keeps the player connected to terrain on slope starts
         /// </summary>
         /// <returns></returns>
-        bool DoGroundStick()
+        protected bool DoGroundStick()
         {
             if (!StickToGround)
             {
@@ -263,9 +265,9 @@ namespace Game.Controller
             }
             return hit2D;
         }
-         
+
         ///The first solution for finding ground i tried out.
-        void RayCastGroundA()
+        protected void RayCastGroundA()
         {
 #if UNITY_EDITOR
             Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
@@ -302,7 +304,7 @@ namespace Game.Controller
         /// <summary>
         /// Delays the groundLeave callback until the next frame and checks if it is still valid at that point.
         /// </summary>
-        void GroundLeaveOnNextFrame()
+        protected void GroundLeaveOnNextFrame()
         {
             StartCoroutine(DelayCheck());
             IEnumerator DelayCheck()
@@ -315,7 +317,7 @@ namespace Game.Controller
         /// <summary>
         /// Run the callbacks based on input n such i guess.
         /// </summary>
-        void RunCallbacks()
+        protected void RunCallbacks()
         {
             if (jumpPressed)
                 OnPressJump?.Invoke();
@@ -323,7 +325,7 @@ namespace Game.Controller
                 OnHoldJump?.Invoke();
         }
 
-        void RunFixedCallbacks()
+        protected void RunFixedCallbacks()
         {
             activeState.FixedStep(movementInput, Time.deltaTime);
         }
@@ -338,6 +340,17 @@ namespace Game.Controller
             activeState.OnEnterState();
         }
 
+        public void SetAnimTrigger(string name)
+        {
+            animator.SetTrigger(name);
+        }
+
+        public void SetActiveInput(bool active)
+            => ignorePlayerInput = !active;
+        public void ToggleActiveInput()
+            => ignorePlayerInput = !ignorePlayerInput;
+
+        //TODO: find use cases for these.
         private void OnTriggerEnter2D(Collider2D collision)
         {
             
