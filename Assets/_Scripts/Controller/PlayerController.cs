@@ -327,6 +327,9 @@ namespace Game.Controller
 
         protected void RunFixedCallbacks()
         {
+            //can just be done here since its only using this input in here. - Fixes the issue with stopping after roll
+            movementInput.x = InputManager.GetAxis("Horizontal");
+            movementInput.y = InputManager.GetAxis("Vertical");
             activeState.FixedStep(movementInput, Time.deltaTime);
         }
 

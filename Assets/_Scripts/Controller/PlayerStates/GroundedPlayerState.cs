@@ -27,12 +27,18 @@ namespace Game.Controller
             //Debug.Log(controller.lastVerticalVel);
             //TODO: enter state -> roll / damage 
         }
+        /// <summary>
+        /// Pseudo deconstruct
+        /// </summary>
         public override void OnExitState()
         {
             controller.OnPressJump -= Jump;
             controller.OnLeaveGround -= OnLeaveGround;
         }
 
+        /// <summary>
+        /// Handles the landing after a fall.
+        /// </summary>
         void HandleFall()
         {
             Vector2 lastVel = controller.LastVel;
