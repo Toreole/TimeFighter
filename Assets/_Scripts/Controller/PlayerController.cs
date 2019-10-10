@@ -103,7 +103,7 @@ namespace Game.Controller
         public bool  StickToGround 
         { get => stickToGround; set => stickToGround = value; }
         public bool  IgnorePlayerInput 
-        { get => ignorePlayerInput; set => ignorePlayerInput = value; }
+        { get => ignorePlayerInput; set { ignorePlayerInput = value; } }
         public Vector2 LastVel 
         { get; protected set; }
 
@@ -348,10 +348,15 @@ namespace Game.Controller
             animator.SetTrigger(name);
         }
 
-        public void SetActiveInput(bool active)
-            => ignorePlayerInput = !active;
+        //public void SetActiveInput(bool active)
+           // => ignorePlayerInput = !active;
         public void ToggleActiveInput()
             => ignorePlayerInput = !ignorePlayerInput;
+        public void SetActiveInput(string active)
+        { 
+            ignorePlayerInput = !bool.Parse(active); //TODO: fix the animations true/false messup
+            Debug.Log(ignorePlayerInput.ToString()); 
+        }
 
         //TODO: find use cases for these.
         private void OnTriggerEnter2D(Collider2D collision)
