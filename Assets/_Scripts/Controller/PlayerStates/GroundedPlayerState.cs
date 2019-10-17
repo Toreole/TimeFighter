@@ -42,17 +42,31 @@ namespace Game.Controller
         void HandleFall()
         {
             Vector2 lastVel = controller.LastVel;
-            if(lastVel.y < controller.FallDamageThreshold)
+            if (Mathf.Abs(lastVel.x) > 0.75f) //only if there is some x velocity going on already
             {
-                //Take damage.
-                //TODO: damage system
+                if (lastVel.y <= controller.FallDamageThreshold)
+                {
+                    //Take damage.
+                    //TODO: damage system
+                }
+                else if (lastVel.y <= controller.RollFallThreshold) //prioritize y velocity
+                {
+                    //TODO: roll
+                    //Debug.Log("Ground Roll");
+                    controller.SetAnimTrigger("Grounded_Roll");
+                    Body.velocity = GetGroundRight() * Mathf.Max(controller.BaseSpeed, Mathf.Abs(lastVel.x)) * Util.Normalized(controller.LastVel.x);
+                }
+                else if(Mathf.Abs(lastVel.x) > controller.BaseSpeed) //low y vel, but x vel larger than the basespeed
+                {
+                    controller.SetAnimTrigger("Grounded_Roll");
+                    Body.velocity = GetGroundRight() * Mathf.Max(controller.BaseSpeed, Mathf.Abs(lastVel.x)) * Util.Normalized(controller.LastVel.x);
+                }
             }
-            else if (lastVel.y < controller.RollFallThreshold)
+            else //no relevant x velocity
             {
-                //TODO: roll
-                Debug.Log("Ground Roll");
-                controller.SetAnimTrigger("Grounded_Roll");
-                Body.velocity = GetGroundRight() * controller.BaseSpeed * Util.Normalized(controller.LastVel.x);
+                //Debug.Log("Grounded Land");
+                controller.SetAnimTrigger("Grounded_Land"); //TODO: grounded land doesnt reenable controls??
+                Body.velocity = Vector2.zero; //Land and dont do movement anymore.
             }
         }
 

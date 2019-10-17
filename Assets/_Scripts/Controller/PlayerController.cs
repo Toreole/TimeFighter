@@ -355,7 +355,7 @@ namespace Game.Controller
         public void SetActiveInput(string active)
         { 
             ignorePlayerInput = !bool.Parse(active); //TODO: fix the animations true/false messup
-            Debug.Log(ignorePlayerInput.ToString()); 
+            //Debug.Log(ignorePlayerInput.ToString()); 
         }
 
         //TODO: find use cases for these.

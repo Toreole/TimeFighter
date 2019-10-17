@@ -21,6 +21,14 @@ namespace Game
             }
         }
 
+        private void OnTriggerExit2D(Collider2D collision)
+        {
+            if (collision.CompareTag("Player"))
+            {
+                OnJump();
+            }
+        }
+
         //TODO: should be able to bind to other options? like instead of jumping it could just be the dash.
         /// <summary>
         /// When the player jumps in this case
@@ -31,6 +39,7 @@ namespace Game
             //Debug.Log("Time is normal again");
             Time.timeScale = 1;
             CameraController.DynamicZoom(CameraController.DefaultSize); //now back out yall
+            gameObject.SetActive(false);
         }
     }
 }
