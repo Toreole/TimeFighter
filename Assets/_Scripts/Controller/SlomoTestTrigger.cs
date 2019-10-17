@@ -21,6 +21,10 @@ namespace Game
             }
         }
 
+        //TODO: should be able to bind to other options? like instead of jumping it could just be the dash.
+        /// <summary>
+        /// When the player jumps in this case
+        /// </summary>
         void OnJump()
         {
             player.OnPressJump -= OnJump;

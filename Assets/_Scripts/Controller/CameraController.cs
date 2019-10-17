@@ -24,6 +24,7 @@ namespace Game.Controller
         [SerializeField]
         protected AnimationCurve zoomCurve;
 
+        //helper to reset zoom.
         public static float DefaultSize => _instance.defaultSize;
 
         //set up all the stuff
@@ -40,6 +41,8 @@ namespace Game.Controller
             camera.orthographicSize = defaultSize;
         }
 
+        //camera movement is done in lateupdate to not act weirdly with anything that hapens in update
+        //could potentially use fixedupdate to get the position of the target, but lateupdate should be fine on its own.
         private void LateUpdate()
         {
             if (!target)
@@ -48,8 +51,13 @@ namespace Game.Controller
             transform.position = new Vector3(pos.x, pos.y, transform.position.z);
         }
 
+        /// <summary>
+        /// private zoom function thats mainly used through the static DynamicZoom function
+        /// </summary>
         void M_DynamicZoom(float size, float time)
         {
+            if (Mathf.Approximately(size, camera.orthographicSize))
+                return; //if the size is the same as the current ortho size, dont do anything
             StopAllCoroutines(); //just to make sure
             StartCoroutine(ZoomIn());
             IEnumerator ZoomIn()
@@ -73,6 +81,5 @@ namespace Game.Controller
         {
             _instance.M_DynamicZoom(size, time);
         }
-
     }
 }
