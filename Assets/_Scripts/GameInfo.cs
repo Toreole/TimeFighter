@@ -9,7 +9,7 @@ namespace Game
 
         public static RuntimeInfo Config => gameIni;
         private static RuntimeInfo gameIni;
-
+        
         //Information about the Game during Runtime. This COULD include things such as detected OS, and other things that generally dont change
         [System.Serializable]
         public class RuntimeInfo

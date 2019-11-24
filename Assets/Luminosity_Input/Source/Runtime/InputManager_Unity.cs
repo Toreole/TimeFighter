@@ -44,7 +44,7 @@ namespace Luminosity.IO
 		public static bool touchSupported { get { return Input.touchSupported; } }
 		public static int touchCount { get { return Input.touchCount; } }
 		public static Touch[] touches { get { return Input.touches; } }
-		
+
 		public static bool compensateSensors
 		{
 			get { return Input.compensateSensors; }

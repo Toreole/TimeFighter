@@ -76,7 +76,10 @@ namespace Luminosity.IO
 		private Dictionary<string, ControlScheme> m_schemeLookupByID;
 		private Dictionary<string, Dictionary<string, InputAction>> m_actionLookup;
 
-		public List<ControlScheme> ControlSchemes
+        //!Addition by yours truly -> only set from inside the Input things, never from outside.
+        public static bool PreferController { get; internal set; } = false;
+
+        public List<ControlScheme> ControlSchemes
 		{
 			get { return m_controlSchemes; }
 		}
@@ -236,9 +239,10 @@ namespace Luminosity.IO
 
             Profiler.BeginSample("Update", this);
             UpdateControlScheme(m_playerOneScheme, PlayerID.One);
-			UpdateControlScheme(m_playerTwoScheme, PlayerID.Two);
-			UpdateControlScheme(m_playerThreeScheme, PlayerID.Three);
-			UpdateControlScheme(m_playerFourScheme, PlayerID.Four);
+            //! Removed these because they are unnecessary
+			//UpdateControlScheme(m_playerTwoScheme, PlayerID.Two);
+			//UpdateControlScheme(m_playerThreeScheme, PlayerID.Three);
+			//UpdateControlScheme(m_playerFourScheme, PlayerID.Four);
             if(!m_runScanningInLateUpdate)
             {
                 UpdateScanService();

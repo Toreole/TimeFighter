@@ -156,6 +156,7 @@ namespace Game.Controller
             CheckGround();
             FetchInput();
             RunCallbacks();
+            //Debug.Log("Using Controller: " + InputManager.PreferController); //! only testing 
         }
         /// <summary>
         /// Fixed update callbacks 

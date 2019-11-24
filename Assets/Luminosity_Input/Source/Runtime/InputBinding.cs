@@ -336,6 +336,7 @@ namespace Luminosity.IO
 					m_analogButtonState = ButtonState.JustPressed;
 				else if(m_analogButtonState == ButtonState.JustPressed)
 					m_analogButtonState = ButtonState.Pressed;
+                InputManager.PreferController = m_type == InputType.GamepadButton; //!using controller?
 			}
 			else
 			{
@@ -354,14 +355,18 @@ namespace Luminosity.IO
 			{
                 axis = axis * m_scale;
 				axis = m_invert ? -m_value : m_value;
-			}
+                if (!Mathf.Approximately(axis.Value, 0f))
+                    InputManager.PreferController = false; //!using controller 
+            }
 			else if(m_type == InputType.MouseAxis)
 			{
 				if(m_rawAxisName != null)
 				{
 					axis = Input.GetAxis(m_rawAxisName) * m_sensitivity;
 					axis = m_invert ? -axis : axis;
-				}
+                    if (!Mathf.Approximately(axis.Value, 0f))
+                        InputManager.PreferController = true; //!using controller
+                }
 			}
 			else if(m_type == InputType.AnalogAxis)
 			{
@@ -381,7 +386,9 @@ namespace Luminosity.IO
                 axis = Mathf.Clamp(axis.Value * m_sensitivity, -1, 1);
                 axis = axis * m_scale;
                 axis = m_invert ? -axis : axis;
-			}
+                if (!Mathf.Approximately(axis.Value, 0f))
+                    InputManager.PreferController = true; //!using controller
+            }
 
 			if(axis.HasValue && Mathf.Abs(axis.Value) <= 0.0f)
 				axis = null;
@@ -406,7 +413,9 @@ namespace Luminosity.IO
 				{
 					axis = m_invert ? -AXIS_NEGATIVE : AXIS_NEGATIVE;
 				}
-			}
+                if (axis.HasValue && !Mathf.Approximately(axis.Value, 0f))
+                    InputManager.PreferController = false; //!not using controller
+            }
 			else if(m_type == InputType.MouseAxis || m_type == InputType.AnalogAxis)
 			{
 				if(m_rawAxisName != null)
@@ -414,12 +423,16 @@ namespace Luminosity.IO
 					axis = Input.GetAxisRaw(m_rawAxisName);
 					axis = m_invert ? -axis : axis;
 				}
-			}
+                if (axis.HasValue && !Mathf.Approximately(axis.Value, 0f))
+                    InputManager.PreferController = false; //!not using controller
+            }
 			else if(m_type == InputType.GamepadAxis)
 			{
 				axis = GamepadState.GetAxisRaw(m_gamepadAxis, m_gamepadIndex);
 				axis = m_invert ? -axis : axis;
-			}
+                if (axis.HasValue && !Mathf.Approximately(axis.Value, 0f))
+                    InputManager.PreferController = true; //! using controller
+            }
 
 			if(axis.HasValue && Mathf.Abs(axis.Value) <= 0.0f)
 				axis = null;
@@ -434,15 +447,21 @@ namespace Luminosity.IO
 			if(m_type == InputType.Button)
 			{
 				value = Input.GetKey(m_positive);
+                if (value.Value == true)
+                    InputManager.PreferController = false; //! not using controller
             }
             else if (m_type == InputType.DigitalAxis)
             {
                 value = Input.GetKey(m_positive) || Input.GetKey(m_negative);
+                if (value.Value == true)
+                    InputManager.PreferController = false; //! not using controller
             }
             else if(m_type == InputType.GamepadButton)
 			{
 				value = GamepadState.GetButton(m_gamepadButton, m_gamepadIndex);
-			}
+                if(value.Value == true)
+                    InputManager.PreferController = true; //! using controller
+            }
 			else if(m_type == InputType.RemoteButton)
 			{
 				value = m_remoteButtonState == ButtonState.Pressed || m_remoteButtonState == ButtonState.JustPressed;
@@ -465,15 +484,21 @@ namespace Luminosity.IO
 			if(m_type == InputType.Button)
 			{
 				value = Input.GetKeyDown(m_positive);
-			}
+                if (value.Value == true)
+                    InputManager.PreferController = false; //! not using controller
+            }
             else if (m_type == InputType.DigitalAxis)
             {
                 value = Input.GetKeyDown(m_positive) || Input.GetKeyDown(m_negative);
+                if (value.Value == true)
+                    InputManager.PreferController = false; //! not using controller
             }
 			else if(m_type == InputType.GamepadButton)
 			{
 				value = GamepadState.GetButtonDown(m_gamepadButton, m_gamepadIndex);
-			}
+                if (value.Value == true)
+                    InputManager.PreferController = true; //! using controller
+            }
 			else if(m_type == InputType.RemoteButton)
 			{
 				value = m_remoteButtonState == ButtonState.JustPressed;
@@ -504,7 +529,7 @@ namespace Luminosity.IO
             else if(m_type == InputType.GamepadButton)
 			{
 				value = GamepadState.GetButtonUp(m_gamepadButton, m_gamepadIndex);
-			}
+            }
 			else if(m_type == InputType.RemoteButton)
 			{
 				value = m_remoteButtonState == ButtonState.JustReleased;
