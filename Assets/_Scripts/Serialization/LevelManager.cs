@@ -15,7 +15,8 @@ namespace Game
     public class LevelManager : MonoBehaviour
     {
         public string levelID;
-        protected Dictionary<string, SerializedMonoBehaviour> idToObject;
+        [SerializeField, HideInInspector]
+        protected ObjectDictionary idToObject = new ObjectDictionary();
 
         public void Load(LevelData data)
         {
@@ -37,11 +38,30 @@ namespace Game
             data.levelID = this.levelID;
             data.objectData = new List<ObjectData>();
             //add all serialized objects to the list.
-            foreach(var sObj in idToObject.Values)
+            foreach(var sObj in idToObject.values)
             {
                 data.objectData.Add(sObj.Serialize());
             }
             return data;
+        }
+
+        ///<summary>
+        ///level is loaded -> load the levels data if necessary.
+        /// </summary>
+        private void OnEnable()
+        {
+            if(GameManager.TryGetLevelData(levelID, out LevelData data))
+            {
+                Load(data);
+            }
+            GameManager.AddAutoSaveCall(Save);
+        }
+
+        //Level is unloaded -> save the levels data.
+        private void OnDisable()
+        {
+            GameManager.ManualSave(Save()); //manually save this scene.
+            GameManager.RemoveAutoSaveCall(Save); 
         }
 
 #if UNITY_EDITOR
@@ -102,5 +122,40 @@ namespace Game
             return id;
         }
 #endif
+    }
+
+    [System.Serializable]
+    public class ObjectDictionary
+    {
+        public List<string> keys = new List<string>();
+        public List<SerializedMonoBehaviour> values = new List<SerializedMonoBehaviour>();
+
+        public void Clear()
+        {
+            keys.Clear();
+            values.Clear();
+        }
+
+        public void Add(string key, SerializedMonoBehaviour value)
+        {
+            keys.Add(key);
+            values.Add(value);
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return keys.Contains(key);
+        }
+
+        public bool TryGetValue(string key, out SerializedMonoBehaviour value)
+        {
+            if(ContainsKey(key))
+            {
+                value = values[keys.IndexOf(key)];
+                return true;
+            }
+            value = null;
+            return false;
+        }
     }
 }

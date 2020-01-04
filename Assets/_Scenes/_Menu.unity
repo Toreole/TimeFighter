@@ -1326,7 +1326,6 @@ GameObject:
   m_Component:
   - component: {fileID: 816953023}
   - component: {fileID: 816953024}
-  - component: {fileID: 816953025}
   m_Layer: 0
   m_Name: Node:Level_1
   m_TagString: Untagged
@@ -1400,36 +1399,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &816953025
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 816953022}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492aabea1c4f36f40b79fffd5a79527a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelData:
-    levelInfo: {fileID: 0}
-    isUnlocked: 0
-    isCompleted: 0
-  neighbours:
-  - {fileID: 1708629038}
-  - {fileID: 1992432792}
-  - {fileID: 0}
-  - {fileID: 963674817}
-  depth: 1
-  connectors:
-  - {fileID: 753940076}
-  - {fileID: 1323200912}
-  - {fileID: 1933835536}
-  - {fileID: 737307596}
-  baseNodeColor: {r: 0.0980525, g: 1, b: 0, a: 1}
-  inactiveNodeColor: {r: 0.3679245, g: 0.3679245, b: 0.3679245, a: 1}
-  sprite: {fileID: 816953024}
 --- !u!1 &861724458
 GameObject:
   m_ObjectHideFlags: 0
@@ -1460,7 +1429,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa777af092bff7a41b6be6cc708c8231, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audio: {fileID: 861724461}
 --- !u!4 &861724460
 Transform:
   m_ObjectHideFlags: 0
@@ -1581,7 +1549,6 @@ GameObject:
   m_Component:
   - component: {fileID: 924750036}
   - component: {fileID: 924750037}
-  - component: {fileID: 924750035}
   m_Layer: 0
   m_Name: Node:Level_4
   m_TagString: Untagged
@@ -1589,36 +1556,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &924750035
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 924750034}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492aabea1c4f36f40b79fffd5a79527a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelData:
-    levelInfo: {fileID: 0}
-    isUnlocked: 0
-    isCompleted: 0
-  neighbours:
-  - {fileID: 963674817}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 1782610011}
-  depth: 5
-  connectors:
-  - {fileID: 1128478467}
-  - {fileID: 1508636233}
-  - {fileID: 534742358}
-  - {fileID: 1468644200}
-  baseNodeColor: {r: 0.0980525, g: 1, b: 0, a: 1}
-  inactiveNodeColor: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
-  sprite: {fileID: 924750037}
 --- !u!4 &924750036
 Transform:
   m_ObjectHideFlags: 0
@@ -1695,7 +1632,6 @@ GameObject:
   m_Component:
   - component: {fileID: 963674817}
   - component: {fileID: 963674818}
-  - component: {fileID: 963674819}
   m_Layer: 0
   m_Name: Node:Level_3
   m_TagString: Untagged
@@ -1769,36 +1705,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &963674819
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 963674816}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492aabea1c4f36f40b79fffd5a79527a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelData:
-    levelInfo: {fileID: 0}
-    isUnlocked: 0
-    isCompleted: 0
-  neighbours:
-  - {fileID: 0}
-  - {fileID: 816953023}
-  - {fileID: 924750036}
-  - {fileID: 0}
-  depth: 4
-  connectors:
-  - {fileID: 1681870505}
-  - {fileID: 813377778}
-  - {fileID: 1258015113}
-  - {fileID: 521888138}
-  baseNodeColor: {r: 0.0980525, g: 1, b: 0, a: 1}
-  inactiveNodeColor: {r: 0.31132078, g: 0.31132078, b: 0.31132078, a: 1}
-  sprite: {fileID: 963674818}
 --- !u!1 &988854778
 GameObject:
   m_ObjectHideFlags: 0
@@ -2554,7 +2460,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1708629038}
   - component: {fileID: 1708629039}
-  - component: {fileID: 1708629037}
   m_Layer: 0
   m_Name: Node:Level_2
   m_TagString: Untagged
@@ -2562,36 +2467,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1708629037
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1708629036}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492aabea1c4f36f40b79fffd5a79527a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelData:
-    levelInfo: {fileID: 0}
-    isUnlocked: 0
-    isCompleted: 0
-  neighbours:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 816953023}
-  - {fileID: 0}
-  depth: 2
-  connectors:
-  - {fileID: 243535472}
-  - {fileID: 988854780}
-  - {fileID: 354092692}
-  - {fileID: 244886996}
-  baseNodeColor: {r: 0.0980525, g: 1, b: 0, a: 1}
-  inactiveNodeColor: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 1}
-  sprite: {fileID: 1708629039}
 --- !u!4 &1708629038
 Transform:
   m_ObjectHideFlags: 0
@@ -2668,7 +2543,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1782610011}
   - component: {fileID: 1782610010}
-  - component: {fileID: 1782610009}
   m_Layer: 0
   m_Name: Node:Level_5
   m_TagString: Untagged
@@ -2676,36 +2550,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1782610009
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1782610008}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492aabea1c4f36f40b79fffd5a79527a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelData:
-    levelInfo: {fileID: 0}
-    isUnlocked: 0
-    isCompleted: 0
-  neighbours:
-  - {fileID: 0}
-  - {fileID: 924750036}
-  - {fileID: 0}
-  - {fileID: 0}
-  depth: 6
-  connectors:
-  - {fileID: 1367292054}
-  - {fileID: 330870534}
-  - {fileID: 740110674}
-  - {fileID: 1940967816}
-  baseNodeColor: {r: 0, g: 1, b: 0.0009315014, a: 1}
-  inactiveNodeColor: {r: 0.4056604, g: 0.4056604, b: 0.4056604, a: 1}
-  sprite: {fileID: 1782610010}
 --- !u!212 &1782610010
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -2861,7 +2705,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1936201143}
   - component: {fileID: 1936201142}
-  - component: {fileID: 1936201141}
   m_Layer: 0
   m_Name: Map
   m_TagString: Untagged
@@ -2869,30 +2712,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1936201141
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1936201140}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8dd83ee58a61f16459b9bde37b1d58eb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levels:
-  - {fileID: 1992432794}
-  - {fileID: 816953025}
-  - {fileID: 1708629037}
-  - {fileID: 963674819}
-  - {fileID: 924750035}
-  - {fileID: 1782610009}
-  levelNodePrefab: {fileID: 4164610049027118247, guid: 2d9c42e2f180f984eadd61921807119c,
-    type: 3}
-  defaultNode: {fileID: 1992432792}
-  player: {fileID: 1430518121}
-  speed: 0.5
 --- !u!212 &1936201142
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3050,7 +2869,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1992432792}
   - component: {fileID: 1992432793}
-  - component: {fileID: 1992432794}
   m_Layer: 0
   m_Name: Node:000_DebugTore
   m_TagString: Untagged
@@ -3124,36 +2942,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &1992432794
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1992432791}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 492aabea1c4f36f40b79fffd5a79527a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  levelData:
-    levelInfo: {fileID: 11400000, guid: fa089352e2a72c045a463c89a2caa443, type: 2}
-    isUnlocked: 1
-    isCompleted: 0
-  neighbours:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 816953023}
-  depth: 0
-  connectors:
-  - {fileID: 776177381}
-  - {fileID: 158994835}
-  - {fileID: 2126308708}
-  - {fileID: 577670956}
-  baseNodeColor: {r: 0.01960802, g: 1, b: 0, a: 1}
-  inactiveNodeColor: {r: 0.3490566, g: 0.3490566, b: 0.3490566, a: 1}
-  sprite: {fileID: 1992432793}
 --- !u!1 &2126308706
 GameObject:
   m_ObjectHideFlags: 0

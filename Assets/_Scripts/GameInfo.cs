@@ -18,6 +18,7 @@ namespace Game
             //windows only
             public bool allowControllerVibration = true;
             public bool fullscreen = true;
+            public float autoSaveInterval = 600;
             public Resolution resolution = new Resolution() {
                 width = 1920,
                 height = 1080,

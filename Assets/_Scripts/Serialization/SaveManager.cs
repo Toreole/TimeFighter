@@ -21,19 +21,19 @@ namespace Game.Serialization
             => Application.persistentDataPath;
 #endif
 
+        static string FullFilePath => Path.Combine(SaveLocation, fileName);
+
         internal static bool TryLoad(out SaveData data)
         {
             data = null;
             //default path
-            var path = Application.persistentDataPath + "/" + fileName;
-#if DISCORD
-            path = Path.Combine(discordStorageManager.GetPath(), fileName);
-#elif STEAM
-            path = "";
-#endif
+            var path = FullFilePath;
+
             if (!File.Exists(path))
                 return false;
             FileStream file = File.Open(path, FileMode.OpenOrCreate);
+            if (file.Length == 0) //check for empty stream.
+                return false;
             BinaryFormatter formatter = new BinaryFormatter();
             data = formatter.Deserialize(file) as SaveData;
             file.Flush();
@@ -43,8 +43,8 @@ namespace Game.Serialization
 
         internal static void TrySave(SaveData data)
         {
-            Debug.Log(Application.persistentDataPath + "/" + fileName);
-            FileStream file = File.Open(Application.persistentDataPath + "/" + fileName, FileMode.OpenOrCreate);
+            Debug.Log(FullFilePath);
+            FileStream file = File.Open(FullFilePath, FileMode.CreateNew);
             BinaryFormatter formatter = new BinaryFormatter();
             formatter.Serialize(file, data);
             file.Flush();
@@ -57,5 +57,11 @@ namespace Game.Serialization
     {
         public PlayerData playerData;
         public List<LevelData> levelData;
+
+        public SaveData()
+        {
+            playerData = new PlayerData();
+            levelData = new List<LevelData>();
+        }
     }
 }

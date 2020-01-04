@@ -10,10 +10,14 @@ namespace Game
 {
     public class GameManager : MonoBehaviour
     {
-        public static GameManager Instance { get => instance; }
         private static GameManager instance = null;
-        
-        private SaveData save = null;
+        private bool initialized = false;
+
+        //current active saveData.
+        private SaveData saveData = null;
+
+        //autoSave:
+        private Func<LevelData> OnAutoSave;
 
 #if DISCORD
         public static DiscordApp discord;
@@ -23,24 +27,29 @@ namespace Game
 
         private void Awake()
         {
+            if (initialized)
+                return;
 #if DISCORD
             //epic gamer hours hmmm
-            userManager = discord.GetUserManager();
-            userManager.OnCurrentUserUpdate += () =>
+            if (discord != null)
             {
-                user = userManager.GetCurrentUser();
-                Debug.Log(user.Username);
-                if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
-                    Debug.Log("BRAVERY!");
-                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
-                    Debug.Log("BRILLIANCE!");
-                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
-                    Debug.Log("BALANCE!");
-                else
-                    Debug.Log("lmao normie");
-            };
+                userManager = discord.GetUserManager();
+                userManager.OnCurrentUserUpdate += () =>
+                {
+                    user = userManager.GetCurrentUser();
+                    Debug.Log(user.Username);
+                    if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
+                        Debug.Log("BRAVERY!");
+                    else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
+                        Debug.Log("BRILLIANCE!");
+                    else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
+                        Debug.Log("BALANCE!");
+                    else
+                        Debug.Log("lmao normie");
+                };
+            }
 #endif
-            if (instance != null)
+            if (instance)
             {
                 Destroy(this.gameObject);
                 return;
@@ -48,30 +57,24 @@ namespace Game
             instance = this;
             DontDestroyOnLoad(gameObject);
             
-            if (save == null)
+            if (saveData == null)
             {
-                if (!SaveManager.TryLoad(out save))
+                if (!SaveManager.TryLoad(out saveData))
                 {   //try to load, if it cant load, create a new save
-                    save = new SaveData();
+                    saveData = new SaveData();
                     //Debug.Log("Creating New SaveData"); 
                 }
             }
         }
         private void OnGUI()
         {
-            GUILayout.Label(GameInfo.Version); 
+            GUILayout.Label(GameInfo.Version);
         }
-#if DISCORD
         private void Update()
         {
+#if DISCORD
             discord.RunCallbacks();
-        }
 #endif
-        private void Start()
-        {
-            if (instance != this)
-                return;
-            //Debug.Log("hallo");
         }
 
         /// <summary>
@@ -93,37 +96,114 @@ namespace Game
         /// <returns></returns>
         internal static SaveData FetchSave()
         {
-            if (instance == null)
+            if (!instance)
+            {
                 return null;
-            return instance.save;
+            }
+            return instance.saveData;
         }
 
+        //try saving.
         internal static bool TrySave()
         {
-            if (instance == null)
+            if (!instance)
+            {
                 return false;
-            SaveManager.TrySave(instance.save);
+            }
+            SaveManager.TrySave(instance.saveData);
             return true;
         }
-
-        internal static void SetLastLevel(string level)
-        {
-            if (instance == null)
-                return;
-        }
         
-
-        /// <summary>
-        /// Add a level to the completed ones.
-        /// </summary>
-        /// <param name="level"></param>
-        internal static void SetLevelComplete(string level)
-        { 
+        //Getting the data for this level.
+        public static bool TryGetLevelData(string levelID, out LevelData data)
+        {
+            if (!instance)
+            {
+                data = null;
+                return false;
+            }
+            return instance.M_TryGetLevelData(levelID, out data);
+        }
+        public bool M_TryGetLevelData(string levelID, out LevelData data)
+        {
+            data = null;
+            foreach (var lData in saveData.levelData)
+                if (lData.levelID == levelID)
+                {
+                    data = lData;
+                    return false;
+                }
+            return false;
         }
 
-        internal static GameManager CreateNewInstance()
+        //Manually save a level.
+        public static void ManualSave(LevelData data)
         {
-            GameObject obj = new GameObject();
+            if (!instance)
+            {
+                return;
+            }
+            instance.M_ManualSave(data);
+        }
+        public void M_ManualSave(LevelData data)
+        {
+            for (int i = 0; i < saveData.levelData.Count; i++)
+            {
+                if (saveData.levelData[i].levelID.Equals(data.levelID))
+                {
+                    //Remove the item at this index, to replace it with a new one.
+                    saveData.levelData.RemoveAt(i);
+                    break;
+                }
+            }
+            saveData.levelData.Add(data);
+            SaveManager.TrySave(saveData);
+        }
+
+        public static void AddAutoSaveCall(Func<LevelData> dataCallback)
+        {
+            if (!instance)
+            {
+                return;
+            }
+            instance.OnAutoSave += dataCallback;
+        }
+        public static void RemoveAutoSaveCall(Func<LevelData> dataCallback)
+        {
+            if (!instance)
+            {
+                return;
+            }
+            instance.OnAutoSave -= dataCallback;
+        }
+
+        //TODO: implement this in the GameManager loop.
+        void AutoSave()
+        {
+            foreach(Func<LevelData> call in OnAutoSave.GetInvocationList())
+            {
+                //get each levels data.
+                LevelData result = call();
+                //replace the data in the save, then save it.
+                for(int i = 0; i < saveData.levelData.Count; i++)
+                {
+                    if(saveData.levelData[i].levelID.Equals(result.levelID))
+                    {
+                        //Remove the item at this index, to replace it with a new one.
+                        saveData.levelData.RemoveAt(i);
+                        break;
+                    }
+                }
+                saveData.levelData.Add(result);
+            }
+            //TODO: also save player in here.
+            //saveData.playerData = Player.Save(); <- temp.
+            SaveManager.TrySave(saveData);
+        }
+
+        private static GameManager CreateNewInstance()
+        {
+            GameObject obj = Instantiate(new GameObject("_New GameManager"));
             instance = null;
             var manager = obj.AddComponent<GameManager>();
             return manager;
