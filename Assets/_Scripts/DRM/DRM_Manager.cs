@@ -1,6 +1,7 @@
 ﻿using UnityEngine.SceneManagement;
 using UnityEngine;
 using Discord;
+using Game.Serialization;
 using DiscordApp = Discord.Discord;
 
 namespace Game.DRM

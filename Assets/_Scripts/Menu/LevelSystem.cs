@@ -8,6 +8,7 @@ namespace Game.Menu
     /// <summary>
     /// The visible map in the "menu"
     /// </summary>
+    [System.Obsolete("Does not work anymore")]
     public class LevelSystem : MonoBehaviour
     {
         [SerializeField]
@@ -47,30 +48,10 @@ namespace Game.Menu
 
         private void PlacePlayerAtLastKnownNode()
         {
-            var levelName = GameManager.GetLastLevel();
-            var level = levels.Find(x => x.levelData.SceneName == levelName);
-            if (level == null || string.IsNullOrEmpty(levelName))
-            {
-                player.position = defaultNode.position;
-                currentLevel = defaultNode;
-                return;
-            }
-            player.position = level.Position;
-            currentLevel = level.transform;
         }
 
         private void RefreshMapFromSave()
         {
-            SaveData dat = GameManager.FetchSave();
-            if (dat == null)
-                return;
-            foreach(var compLevel in dat.completedLevels)
-            {
-                var l = levels.Find(x => x.TargetScene == compLevel);
-                if (l == null)
-                    continue;
-                l.SetCompleted(false);
-            }
         }
 
         private void Update()

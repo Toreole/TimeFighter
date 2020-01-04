@@ -28,6 +28,7 @@ using UnityEditor.Callbacks;
 using System;
 using System.Collections.Generic;
 using UnityEngine.Profiling;
+using Game.Serialization;
 using Game;
 
 namespace Luminosity.IO

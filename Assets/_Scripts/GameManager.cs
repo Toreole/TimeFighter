@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using Game.Controller;
 using Discord;
+using Game.Serialization;
 using DiscordApp = Discord.Discord;
 
 namespace Game
@@ -109,19 +110,15 @@ namespace Game
         {
             if (instance == null)
                 return;
-            instance.save.lastLevel = level;
         }
-
-        internal static string GetLastLevel() => (instance != null)? instance.save.lastLevel : "";
+        
 
         /// <summary>
         /// Add a level to the completed ones.
         /// </summary>
         /// <param name="level"></param>
         internal static void SetLevelComplete(string level)
-        {
-            if(!instance.save.completedLevels.Exists(x => x == level))
-                instance.save.completedLevels.Add(level);
+        { 
         }
 
         internal static GameManager CreateNewInstance()

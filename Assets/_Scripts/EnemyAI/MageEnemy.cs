@@ -18,28 +18,15 @@ namespace Game
         }
 
         //public override bool IsGrounded => throw new System.NotImplementedException();
-
-        //TODO: Enemy logic n shit
-        [System.Obsolete]
-        protected override void UpdateEnemy()
-        {
-        }
-
+        
         internal void Teleport()
         {
             Debug.Log("Teleport");
             canTeleport = false;
             transform.position = positions[posIndex].position;
             posIndex = (posIndex + 1) % positions.Length;
-            StartCoroutine(DoTeleportCooldown());
         }
-
-        IEnumerator DoTeleportCooldown()
-        {
-            yield return new WaitForSeconds(settings.MovementSpeed);
-            canTeleport = true;
-        }
-
+        
         //public override void ProcessHit(AttackHitData hitData)
         //{
         //    Debug.Log("Mage");

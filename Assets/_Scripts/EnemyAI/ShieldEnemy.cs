@@ -12,13 +12,7 @@ namespace Game
         }
 
         //public override bool IsGrounded => throw new System.NotImplementedException();
-
-        [System.Obsolete]
-        protected override void UpdateEnemy()
-        {
-            //Uhhhh spaghet
-        }
-
+        
         //public override void ProcessHit(AttackHitData hitData)
         //{
         //    //1. get the direction from the hit relative to this objects x position

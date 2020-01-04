@@ -5,20 +5,20 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Game.Controller;
 using UnityEngine;
 
-namespace Game
+namespace Game.Serialization
 {
     internal static class SaveManager
     {
         internal static Discord.StorageManager discordStorageManager;
-        const string fileName = "HalfLifeThreeWillNeverExist.noobs";
+        const string fileName = "pldata.tsd";
 
         public static string SaveLocation
 #if DISCORD
              => discordStorageManager is null ? Application.persistentDataPath : discordStorageManager.GetPath();
 #elif STEAM
-        => "default";
+            => "default";
 #else
-        => Application.persistentDataPath;
+            => Application.persistentDataPath;
 #endif
 
         internal static bool TryLoad(out SaveData data)
@@ -55,9 +55,7 @@ namespace Game
     [Serializable]
     internal class SaveData
     {
-        internal List<string> completedLevels = new List<string>();
-        internal List<string> unlockedThrowables = new List<string>();
-        internal string equippedThrowable = "";
-        internal string lastLevel = "";
+        public PlayerData playerData;
+        public List<LevelData> levelData;
     }
 }
