@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
-using Game.Controller;
+using Game.UI;
 using Discord;
 using Game.Serialization;
 using DiscordApp = Discord.Discord;
@@ -17,7 +18,8 @@ namespace Game
         private SaveData saveData = null;
 
         //autoSave:
-        private Func<LevelData> OnAutoSave;
+        private List<LevelManager> levels = new List<LevelManager>();
+        private float lastSave;
 
 #if DISCORD
         public static DiscordApp discord;
@@ -30,24 +32,24 @@ namespace Game
             if (initialized)
                 return;
 #if DISCORD
-            //epic gamer hours hmmm
-            if (discord != null)
+            //make sure that the discord connection is not null!
+            if (discord == null)
+                discord = new DiscordApp(555829001327869964, (ulong)Discord.CreateFlags.Default);
+
+            userManager = discord.GetUserManager();
+            userManager.OnCurrentUserUpdate += () =>
             {
-                userManager = discord.GetUserManager();
-                userManager.OnCurrentUserUpdate += () =>
-                {
-                    user = userManager.GetCurrentUser();
-                    Debug.Log(user.Username);
-                    if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
-                        Debug.Log("BRAVERY!");
-                    else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
-                        Debug.Log("BRILLIANCE!");
-                    else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
-                        Debug.Log("BALANCE!");
-                    else
-                        Debug.Log("lmao normie");
-                };
-            }
+                user = userManager.GetCurrentUser();
+                Debug.Log(user.Username);
+                if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse1))
+                    Debug.Log("BRAVERY!");
+                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse2))
+                    Debug.Log("BRILLIANCE!");
+                else if (userManager.CurrentUserHasFlag(UserFlag.HypeSquadHouse3))
+                    Debug.Log("BALANCE!");
+                else
+                    Debug.Log("lmao normie");
+            }; 
 #endif
             if (instance)
             {
@@ -75,6 +77,14 @@ namespace Game
 #if DISCORD
             discord.RunCallbacks();
 #endif
+            if(Time.unscaledTime - lastSave >= GameInfo.Config.autoSaveInterval)
+            {
+                PersistentUI.AutoSave(true);
+                StartCoroutine(AsyncSaveAll());
+                lastSave = Time.unscaledTime;
+            }
+            //AutoSave:
+
         }
 
         /// <summary>
@@ -160,45 +170,79 @@ namespace Game
             SaveManager.TrySave(saveData);
         }
 
-        public static void AddAutoSaveCall(Func<LevelData> dataCallback)
+        public static void AddAutoSaveLevel(LevelManager lvl)
         {
             if (!instance)
             {
                 return;
             }
-            instance.OnAutoSave += dataCallback;
+            instance.levels.Add(lvl);
         }
-        public static void RemoveAutoSaveCall(Func<LevelData> dataCallback)
+        public static void RemoveAutoSaveLevel(LevelManager lvl)
         {
-            if (!instance)
+            if (!instance || !lvl)
             {
                 return;
             }
-            instance.OnAutoSave -= dataCallback;
+            instance.levels.Remove(lvl);
         }
-
-        //TODO: implement this in the GameManager loop.
-        void AutoSave()
+        
+        /// <summary>
+        /// Saves the entire gamestate. (All open levels, and the player data).
+        /// </summary>
+        void SaveAll()
         {
-            foreach(Func<LevelData> call in OnAutoSave.GetInvocationList())
+            foreach(LevelManager level in levels)
             {
                 //get each levels data.
-                LevelData result = call();
+                LevelData data = level.Save();
                 //replace the data in the save, then save it.
                 for(int i = 0; i < saveData.levelData.Count; i++)
                 {
-                    if(saveData.levelData[i].levelID.Equals(result.levelID))
+                    if(saveData.levelData[i].levelID.Equals(data.levelID))
                     {
                         //Remove the item at this index, to replace it with a new one.
                         saveData.levelData.RemoveAt(i);
                         break;
                     }
                 }
-                saveData.levelData.Add(result);
+                saveData.levelData.Add(data);
             }
             //TODO: also save player in here.
             //saveData.playerData = Player.Save(); <- temp.
             SaveManager.TrySave(saveData);
+        }
+        /// <summary>
+        /// Saves the entire gamestate, but shows the auto-save icon if possible.
+        /// </summary>
+        /// <returns></returns>
+        IEnumerator AsyncSaveAll()
+        {
+            float startTime = Time.unscaledTime;
+            foreach (LevelManager level in levels)
+            {
+                //get each levels data.
+                LevelData data = level.Save();
+                //replace the data in the save, then save it.
+                for (int i = 0; i < saveData.levelData.Count; i++)
+                {
+                    if (saveData.levelData[i].levelID.Equals(data.levelID))
+                    {
+                        //Remove the item at this index, to replace it with a new one.
+                        saveData.levelData.RemoveAt(i);
+                        yield return null;
+                        break;
+                    }
+                }
+                yield return null;
+                saveData.levelData.Add(data);
+            }
+            //TODO: also save player in here.
+            SaveManager.TrySave(saveData);
+            float saveTime = Time.unscaledTime - startTime;
+            //Auto save icon should be there for at least 1 full second so the player can see.
+            yield return saveTime < 1.0 ? new WaitForSecondsRealtime(1 - saveTime): null;
+            PersistentUI.AutoSave(false);
         }
 
         private static GameManager CreateNewInstance()

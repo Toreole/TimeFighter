@@ -54,14 +54,14 @@ namespace Game
             {
                 Load(data);
             }
-            GameManager.AddAutoSaveCall(Save);
+            GameManager.AddAutoSaveLevel(this);
         }
 
         //Level is unloaded -> save the levels data.
         private void OnDisable()
         {
             GameManager.ManualSave(Save()); //manually save this scene.
-            GameManager.RemoveAutoSaveCall(Save); 
+            GameManager.RemoveAutoSaveLevel(this);
         }
 
 #if UNITY_EDITOR
@@ -90,16 +90,16 @@ namespace Game
             foreach (var serializedObject in objects)
             {
                 //if the string is Null or Empty it means that it does no have an ID yet.
-                if (string.IsNullOrEmpty(serializedObject.objectID))
+                if (string.IsNullOrEmpty(serializedObject.ObjectID))
                 {
-                    serializedObject.objectID = GetUniqueID(manager);
+                    serializedObject.OverrideID( GetUniqueID(manager));
                     EditorUtility.SetDirty(serializedObject); //mark the object for saving in the editor.
                 }
             }
             //clear the dictionary ones.
             manager.idToObject.Clear();
             foreach (var sObject in objects)
-                manager.idToObject.Add(sObject.objectID, sObject);
+                manager.idToObject.Add(sObject.ObjectID, sObject);
 
             EditorUtility.SetDirty(manager);//mark the manager for saving in the editor.
         }

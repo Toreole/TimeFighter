@@ -23,6 +23,11 @@ namespace Game.Serialization
 
         static string FullFilePath => Path.Combine(SaveLocation, fileName);
 
+        /// <summary>
+        /// try loading the save.
+        /// </summary>
+        /// <param name="data">The data to get</param>
+        /// <returns>returns true if there was a file to load.</returns>
         internal static bool TryLoad(out SaveData data)
         {
             data = null;
@@ -32,36 +37,44 @@ namespace Game.Serialization
             if (!File.Exists(path))
                 return false;
             FileStream file = File.Open(path, FileMode.OpenOrCreate);
-            if (file.Length == 0) //check for empty stream.
+            if (file.Length < 10) //check for empty stream. 
+            {
+                file.Close();
                 return false;
-            BinaryFormatter formatter = new BinaryFormatter();
-            data = formatter.Deserialize(file) as SaveData;
+            }
+            byte[] buffer = new byte[file.Length]; //adapt the buffer size to be equal to the files length.
+            file.Read(buffer, 0, (int)file.Length);
+            string json = System.Text.Encoding.UTF8.GetString(buffer);
+            data = JsonUtility.FromJson<SaveData>(json);
+            //BinaryFormatter formatter = new BinaryFormatter();
+            //data = formatter.Deserialize(file) as SaveData;
             file.Flush();
             file.Dispose();
+            file.Close();
             return true;
         }
-
+        //TODO: encryption for the json files. 
+        //Tries to save. Doesnt return anything tho.
         internal static void TrySave(SaveData data)
         {
-            Debug.Log(FullFilePath);
-            FileStream file = File.Open(FullFilePath, FileMode.CreateNew);
-            BinaryFormatter formatter = new BinaryFormatter();
-            formatter.Serialize(file, data);
+            var path = FullFilePath;
+            //data to json
+            var json = JsonUtility.ToJson(data);
+            //json to byte[]
+            byte[] buffer = System.Text.Encoding.UTF8.GetBytes(json);
+            Debug.Log(path);
+            //check if the file exists, delete it
+            if (File.Exists(path))
+                File.Delete(path);
+            //create a new file.
+            FileStream file = File.Open(path, FileMode.CreateNew);
+            //write the buffer to the file.
+            file.Write(buffer, 0, buffer.Length);
+            //BinaryFormatter formatter = new BinaryFormatter();
+            //formatter.Serialize(file, data);
             file.Flush();
             file.Dispose();
-        }
-    }
-
-    [Serializable]
-    internal class SaveData
-    {
-        public PlayerData playerData;
-        public List<LevelData> levelData;
-
-        public SaveData()
-        {
-            playerData = new PlayerData();
-            levelData = new List<LevelData>();
+            file.Close();
         }
     }
 }

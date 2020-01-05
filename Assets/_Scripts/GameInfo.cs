@@ -18,18 +18,20 @@ namespace Game
             //windows only
             public bool allowControllerVibration = true;
             public bool fullscreen = true;
-            public float autoSaveInterval = 600;
+            public float autoSaveInterval = 600; //auto saves every 600 seconds (10 minutes)
             public Resolution resolution = new Resolution() {
                 width = 1920,
                 height = 1080,
                 refreshRate = 60
-                };
+            };
         }
 
         static GameInfo()
         {
+            //TODO: use JSON for this.
             TextAsset textAsset = Resources.Load<TextAsset>("Settings/Version");
             Version = textAsset.text;
+            gameIni = new RuntimeInfo(); //default for now.
             Debug.Log(Version); 
         }
     }

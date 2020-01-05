@@ -9,10 +9,4 @@ namespace Game.Serialization
         public string levelID;
         public List<ObjectData> objectData;
     }
-
-    public abstract class ObjectData
-    {
-        public string objectID;
-        Dictionary<string, int> dic;
-    }
 }
