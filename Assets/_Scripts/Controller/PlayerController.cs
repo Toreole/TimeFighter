@@ -36,7 +36,9 @@ namespace Game.Controller
         protected float groundedTolerance = 0.1f;
         [SerializeField]
         protected int airJumps = 1;
-
+        [SerializeField, Header("Rendering")]
+        protected new SpriteRenderer renderer;
+        
         //public settings properties.
         public float BaseSpeed => baseSpeed;
         public float BaseSpeedSqr { get; protected set; }
@@ -61,6 +63,8 @@ namespace Game.Controller
         { get => dashSpeed; }
         public float RollFallThreshold => rollFallThreshold;
         public float FallDamageThreshold => fallDamageThreshold;
+
+        public bool FlipX { get => renderer.flipX; set => renderer.flipX = value; }
 
         //Active State Controls
         PlayerStateBehaviour activeState;
@@ -348,6 +352,12 @@ namespace Game.Controller
         {
             animator.SetTrigger(name);
         }
+        public void SetAnimFloat(string name, float value)
+        { 
+            animator.SetFloat(name, value);
+        }
+        public void SetAnimBool(string name, bool value)
+            => animator.SetBool(name, value);
 
         //public void SetActiveInput(bool active)
            // => ignorePlayerInput = !active;
@@ -370,6 +380,11 @@ namespace Game.Controller
             
         }
         
+        public enum FloatAnimParam
+        {
+            XVelocity, YVelocity
+        }
+
         #region OLD_ControllerSystem
         //[Header("Renderer")]
         //[SerializeField]

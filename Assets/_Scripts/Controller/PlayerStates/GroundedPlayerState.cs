@@ -20,6 +20,7 @@ namespace Game.Controller
         /// </summary>
         public override void OnEnterState()
         {
+            controller.SetAnimBool("Grounded", true);
             controller.OnPressJump += Jump;
             controller.OnLeaveGround += OnLeaveGround;
             controller.StickToGround = true;
@@ -119,6 +120,10 @@ namespace Game.Controller
 
             //baseline for the following calculations
             Vector2 velocity = Body.velocity;
+            //send x velocity to the animator
+            controller.SetAnimFloat("XVelocity", Mathf.Abs(velocity.x)); //TODO: THIS IS VERY HACKY I DONT LIKE IT. 
+            //flip the renderer on the Y axis (mirror) if youre going left
+            controller.FlipX = Mathf.Approximately(velocity.x, 0)? controller.FlipX : velocity.x < 0;
 
             AddGroundCounterForce();
 
