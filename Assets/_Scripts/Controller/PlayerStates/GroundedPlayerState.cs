@@ -20,13 +20,9 @@ namespace Game.Controller
         /// </summary>
         public override void OnEnterState()
         {
-            controller.SetAnimBool("Grounded", true);
             controller.OnPressJump += Jump;
             controller.OnLeaveGround += OnLeaveGround;
             controller.StickToGround = true;
-            HandleFall();
-            //Debug.Log(controller.lastVerticalVel);
-            //TODO: enter state -> roll / damage 
         }
         /// <summary>
         /// Pseudo deconstruct
@@ -36,41 +32,7 @@ namespace Game.Controller
             controller.OnPressJump -= Jump;
             controller.OnLeaveGround -= OnLeaveGround;
         }
-
-        /// <summary>
-        /// Handles the landing after a fall.
-        /// </summary>
-        void HandleFall()
-        {
-            Vector2 lastVel = controller.LastVel;
-            if (Mathf.Abs(lastVel.x) > 0.75f) //only if there is some x velocity going on already
-            {
-                if (lastVel.y <= controller.FallDamageThreshold)
-                {
-                    //Take damage.
-                    //TODO: damage system
-                }
-                else if (lastVel.y <= controller.RollFallThreshold) //prioritize y velocity
-                {
-                    //TODO: roll
-                    //Debug.Log("Ground Roll");
-                    controller.SetAnimTrigger("Grounded_Roll");
-                    Body.velocity = GetGroundRight() * Mathf.Max(controller.BaseSpeed, Mathf.Abs(lastVel.x)) * Util.Normalized(controller.LastVel.x);
-                }
-                else if(Mathf.Abs(lastVel.x) > controller.BaseSpeed) //low y vel, but x vel larger than the basespeed
-                {
-                    controller.SetAnimTrigger("Grounded_Roll");
-                    Body.velocity = GetGroundRight() * Mathf.Max(controller.BaseSpeed, Mathf.Abs(lastVel.x)) * Util.Normalized(controller.LastVel.x);
-                }
-            }
-            else //no relevant x velocity
-            {
-                //Debug.Log("Grounded Land");
-                controller.SetAnimTrigger("Grounded_Land"); //TODO: grounded land doesnt reenable controls??
-                Body.velocity = Vector2.zero; //Land and dont do movement anymore.
-            }
-        }
-
+        
         /// <summary>
         /// Old jump.
         /// </summary> 
@@ -87,20 +49,7 @@ namespace Game.Controller
             Body.velocity = force;
             //Body.AddForce(force, ForceMode2D.Impulse);
         }
-
-        Vector2 GetGroundRight()
-        {
-            float groundAngle = Vector2.SignedAngle(controller.GroundNormal, Vector2.up);
-            Vector2 right = Util.RotateVector2D(Vector2.right, -groundAngle);
-            return right;
-        }
-        Vector2 GetGroundRight(out float angle)
-        {
-            angle = Vector2.SignedAngle(controller.GroundNormal, Vector2.up);
-            Vector2 right = Util.RotateVector2D(Vector2.right, -angle);
-            return right;
-        }
-
+        
         /// <summary>
         /// Movement for the base ground
         /// </summary>
@@ -120,8 +69,6 @@ namespace Game.Controller
 
             //baseline for the following calculations
             Vector2 velocity = Body.velocity;
-            //send x velocity to the animator
-            controller.SetAnimFloat("XVelocity", Mathf.Abs(velocity.x)); //TODO: THIS IS VERY HACKY I DONT LIKE IT. 
             //flip the renderer on the Y axis (mirror) if youre going left
             controller.FlipX = Mathf.Approximately(velocity.x, 0)? controller.FlipX : velocity.x < 0;
 

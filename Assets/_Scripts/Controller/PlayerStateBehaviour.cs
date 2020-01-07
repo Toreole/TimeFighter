@@ -23,5 +23,20 @@ namespace Game.Controller
         /// </summary>
         public abstract void OnEnterState();
         public abstract void OnExitState();
+
+
+        //Helpers:
+        protected Vector2 GetGroundRight()
+        {
+            float groundAngle = Vector2.SignedAngle(controller.GroundNormal, Vector2.up);
+            Vector2 right = Util.RotateVector2D(Vector2.right, -groundAngle);
+            return right;
+        }
+        protected Vector2 GetGroundRight(out float angle)
+        {
+            angle = Vector2.SignedAngle(controller.GroundNormal, Vector2.up);
+            Vector2 right = Util.RotateVector2D(Vector2.right, -angle);
+            return right;
+        }
     }
 }

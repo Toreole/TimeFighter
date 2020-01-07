@@ -94,7 +94,9 @@ namespace Game.Controller
             set
             {
                 if (!IsGrounded && value)
-                    OnEnterGround?.Invoke();
+                    OnEnterGround?.Invoke(
+                        (Mathf.Abs(LastVel.x) > BaseSpeed || Mathf.Abs(Body.velocity.x) > RollFallThreshold ) //high speed or fall?
+                        && LastVel.y <= FallDamageThreshold); //needs to NOT take damage from the fall.
                 else if (IsGrounded && !value)
                     GroundLeaveOnNextFrame();
                 isGrounded = value;
@@ -113,21 +115,23 @@ namespace Game.Controller
 
         //State callback events.
         #region events
-        public delegate void ControllerCallback();
 
-        public event ControllerCallback OnPressJump;
-        public event ControllerCallback OnHoldJump;
+        public event System.Action OnPressJump;
+        public event System.Action OnHoldJump;
 
-        public event ControllerCallback OnSpecialA;
-        public event ControllerCallback OnSpecialB;
+        public event System.Action OnSpecialA;
+        public event System.Action OnSpecialB;
 
-        public event ControllerCallback OnAttackA;
-        public event ControllerCallback OnAttackB;
+        public event System.Action OnAttackA;
+        public event System.Action OnAttackB;
 
-        public event ControllerCallback OnTakeDamage;
+        public event System.Action OnTakeDamage;
 
-        public event ControllerCallback OnEnterGround;
-        public event ControllerCallback OnLeaveGround;
+        /// <summary>
+        /// the bool dictates whether the player performs a roll
+        /// </summary>
+        public event System.Action<bool> OnEnterGround;
+        public event System.Action OnLeaveGround;
         #endregion
 
         /// <summary>
@@ -267,6 +271,7 @@ namespace Game.Controller
                 }
                 pos.y = hit2D.centroid.y;
                 Body.position = pos;
+                groundNormal = hit2D.normal;
             }
             return hit2D;
         }
@@ -348,17 +353,6 @@ namespace Game.Controller
             activeState.OnEnterState();
         }
 
-        public void SetAnimTrigger(string name)
-        {
-            animator.SetTrigger(name);
-        }
-        public void SetAnimFloat(string name, float value)
-        { 
-            animator.SetFloat(name, value);
-        }
-        public void SetAnimBool(string name, bool value)
-            => animator.SetBool(name, value);
-
         //public void SetActiveInput(bool active)
            // => ignorePlayerInput = !active;
         public void ToggleActiveInput()
@@ -380,11 +374,6 @@ namespace Game.Controller
             
         }
         
-        public enum FloatAnimParam
-        {
-            XVelocity, YVelocity
-        }
-
         #region OLD_ControllerSystem
         //[Header("Renderer")]
         //[SerializeField]
