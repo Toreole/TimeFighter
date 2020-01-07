@@ -9,11 +9,9 @@ namespace Game.Controller
     /// <summary>
     /// The thing that controls which animation plays on the player (middle-translator for the Animator and PlayerController).
     /// </summary>
-    public class PlayerAnimator : AnimatorController<Player, PlayerParameterLink, PlayerAnimation>
+    public class PlayerAnimator : AnimatorController<PlayerParameterLink, PlayerAnimation>
     {
         protected PlayerController controller;
-        [SerializeField]
-        protected Animator animator;
 
         public void DisableControls() => controller.IgnorePlayerInput = true;
         public void EnableControls() => controller.IgnorePlayerInput = false;
@@ -23,7 +21,7 @@ namespace Game.Controller
         protected override void Awake()
         {
             base.Awake();
-            controller = GetComponentInParent<PlayerController>();
+            controller = entity.GetComponent<PlayerController>();
         }
 
         private void OnEnable()

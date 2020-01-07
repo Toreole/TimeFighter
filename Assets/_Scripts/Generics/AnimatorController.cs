@@ -5,10 +5,12 @@ using Game.Misc;
 
 namespace Game.Generics
 {
-    public abstract class AnimatorController<TEntity, TParam, TEnum> : MonoBehaviour where TEntity : Entity where TParam : AnimatorParameterLink<TEnum> where TEnum : Enum
+    public abstract class AnimatorController<TParam, TEnum> : MonoBehaviour where TParam : AnimatorParameterLink<TEnum> where TEnum : Enum
     {
         [SerializeField]
-        protected TEntity entity;
+        protected Entity entity;
+        [SerializeField]
+        protected Animator animator; 
         [SerializeField]
         protected List<TParam> parameters;
 
@@ -24,5 +26,7 @@ namespace Game.Generics
                 if(!enumToID.ContainsKey(param.purpose))
                     enumToID.Add(param.purpose, Animator.StringToHash(param.paramName));
         }
+
+        public List<TParam> GetParams() => parameters; //bruh
     }
 }

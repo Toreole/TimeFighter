@@ -11,11 +11,14 @@ namespace Game.Misc
         /// the name of the parameter in the animator
         /// </summary>
         public string paramName;
-        
+        public AnimatorParameterLink()
+        {
+            paramName = "";
+        }
     }
     [Serializable]
-    public class AnimatorParameterLink<T> : AnimatorParameterLink where T: Enum
+    public class AnimatorParameterLink<T> : AnimatorParameterLink where T : Enum
     {
-        public T purpose;
+        public T purpose; 
     }
 }
