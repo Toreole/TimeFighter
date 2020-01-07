@@ -94,9 +94,7 @@ namespace Game.Controller
             set
             {
                 if (!IsGrounded && value)
-                    OnEnterGround?.Invoke(
-                        (Mathf.Abs(LastVel.x) > BaseSpeed || Mathf.Abs(Body.velocity.x) > RollFallThreshold ) //high speed or fall?
-                        && LastVel.y <= FallDamageThreshold); //needs to NOT take damage from the fall.
+                    OnEnterGround?.Invoke( HandleLanding()); 
                 else if (IsGrounded && !value)
                     GroundLeaveOnNextFrame();
                 isGrounded = value;
@@ -130,7 +128,7 @@ namespace Game.Controller
         /// <summary>
         /// the bool dictates whether the player performs a roll
         /// </summary>
-        public event System.Action<bool> OnEnterGround;
+        public event System.Action<LandingType> OnEnterGround;
         public event System.Action OnLeaveGround;
         #endregion
 
@@ -193,6 +191,20 @@ namespace Game.Controller
             movementRaw.y   = InputManager.GetAxisRaw("Vertical");
             jumpPressed     = InputManager.GetButtonDown("Jump");
             jumpHold        = InputManager.GetButton("Jump");
+        }
+
+        LandingType HandleLanding()
+        {
+            if(LastVel.y <= FallDamageThreshold)
+            {
+                //TODO: take damage
+                return LandingType.HardLanding;
+            }
+            if(LastVel.y <= RollFallThreshold || Mathf.Abs(LastVel.x) > BaseSpeed)
+            {
+                return LandingType.Roll;
+            }
+            return LandingType.LightLanding;
         }
 
         /// <summary>

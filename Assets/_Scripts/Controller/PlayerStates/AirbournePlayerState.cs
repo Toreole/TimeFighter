@@ -22,10 +22,10 @@ namespace Game.Controller
             controller.OnPressJump -= Jump;
         }
 
-        void EnterGround(bool roll)
+        void EnterGround(LandingType landing)
         {
             controller.CanAirJump = true;
-            HandleFall(roll);
+            HandleFall(landing);
             //Debug.Log(controller.lastVerticalVel); <-- this actually seems to get the correct one
             controller.SwitchToState<GroundedPlayerState>();
         }
@@ -70,13 +70,13 @@ namespace Game.Controller
         /// Handles the landing after a fall.
         /// </summary>
         //Air state needs to handle fall before the groundbehaviour enters.
-        void HandleFall(bool roll)
+        void HandleFall(LandingType landing)
         {
             Vector2 lastVel = controller.LastVel;
 
-            if (roll) //prioritize y velocity
+            if (landing == LandingType.Roll) //prioritize y velocity
                 Body.velocity = GetGroundRight() * Mathf.Max(controller.BaseSpeed, Mathf.Abs(lastVel.x)) * Util.Normalized(lastVel.x);
-            else
+            else if (landing == LandingType.HardLanding)
             {
                 //TODO: take fall damage in here aswell.
                 Body.velocity = Vector2.zero; //Land and dont do movement anymore.
