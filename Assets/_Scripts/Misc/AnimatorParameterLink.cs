@@ -13,6 +13,7 @@ namespace Game.Misc
         public string paramName;
         
     }
+    [Serializable]
     public class AnimatorParameterLink<T> : AnimatorParameterLink where T: Enum
     {
         public T purpose;
