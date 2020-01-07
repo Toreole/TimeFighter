@@ -202,6 +202,8 @@ namespace Game.Controller
             }
             if(LastVel.y <= RollFallThreshold || Mathf.Abs(LastVel.x) > BaseSpeed)
             {
+                if (Mathf.Approximately(LastVel.x, 0))
+                    return LandingType.HardLanding;
                 return LandingType.Roll;
             }
             return LandingType.LightLanding;
