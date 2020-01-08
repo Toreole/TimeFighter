@@ -14,6 +14,11 @@ namespace Game.Generics
         [SerializeField]
         protected List<TParam> parameters;
 
+#if UNITY_EDITOR
+        public Entity Entity { get => entity; set => entity = value; }
+        public Animator Animator { get => animator; set => animator = value;  }
+#endif
+
         /// <summary>
         /// The dictionary that maps the Enum values from the parameters to the IDs in the animator.
         /// </summary>

@@ -2127,20 +2127,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   entity: {fileID: 1263488362}
+  animator: {fileID: 802207985}
   parameters:
-  - paramName: Grounded
-    purpose: 0
-  - paramName: Slide
-    purpose: 1
   - paramName: Grounded_Roll
     purpose: 2
   - paramName: Grounded_Land
     purpose: 3
+  - paramName: Grounded
+    purpose: 0
   - paramName: XVelocity
     purpose: 4
   - paramName: YVelocity
     purpose: 5
-  animator: {fileID: 802207985}
+  - paramName: Slide
+    purpose: 1
 --- !u!1 &807464107
 GameObject:
   m_ObjectHideFlags: 0
