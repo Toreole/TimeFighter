@@ -86,20 +86,7 @@ namespace Game
             //AutoSave:
 
         }
-
-        /// <summary>
-        /// forcefully save before quitting.
-        /// </summary>
-        private void OnApplicationQuit()
-        {
-            bool isCrash = !Input.GetKey(KeyCode.F4); //alt f4 pressed hmmm
-            if(isCrash)
-            {
-                //TODO: maybe try and give some error stuff idk wtf. probably: opened scenes, last known player state, player x/y, OS version, similar stuff.
-            }
-            TrySave();
-        }
-
+        
         /// <summary>
         /// Try to fetch the SaveData
         /// </summary>
