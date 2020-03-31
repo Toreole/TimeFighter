@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace Game.Controller.Input.UI
 {
-    public class KeyUI : MonoBehaviour, IPointerClickHandler
+    public class KeyUI : MonoBehaviour //,IPointerClickHandler
     {
         [SerializeField]
         protected BindingUI binding;
@@ -16,10 +16,10 @@ namespace Game.Controller.Input.UI
         [SerializeField]
         protected Image background;
 
-        public void OnPointerClick(PointerEventData eventData)
-        {
-            binding.Rebind(this);
-        }
+        //public void OnPointerClick(PointerEventData eventData)
+        //{
+        //    binding.Rebind(this);
+        //}
 
         //public setters
         public void Set(string key)

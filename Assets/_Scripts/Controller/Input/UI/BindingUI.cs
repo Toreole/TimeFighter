@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
-using Luminosity.IO;
+using UnityEngine.InputSystem;
 
 namespace Game.Controller.Input.UI
 {
@@ -15,21 +15,22 @@ namespace Game.Controller.Input.UI
         public UserInputMapper mapper;
         public string myBind;
 
-        public void Rebind(KeyUI key)
-        {
-            bool isPositive = key.Equals(posKey);
-            if (isPositive)
-            {
-                posKey.SetColor(mapper.ActiveKeyColor);
-                mapper.GetNewKey(myBind,  true, (string nKey) => { posKey.Set(nKey); posKey.SetColor(mapper.InactiveKeyColor); }); 
-            }
-            else
-            {
-                negKey.SetColor(mapper.ActiveKeyColor);
-                //mapper.GetNewKey(myBind, false, (string nKey) => { negKey.Set(nKey); negKey.SetColor(mapper.InactiveKeyColor); });
-            }
-        }
+        //public void Rebind(KeyUI key)
+        //{
+        //    bool isPositive = key.Equals(posKey);
+        //    if (isPositive)
+        //    {
+        //        posKey.SetColor(mapper.ActiveKeyColor);
+        //        mapper.GetNewKey(myBind,  true, (string nKey) => { posKey.Set(nKey); posKey.SetColor(mapper.InactiveKeyColor); }); 
+        //    }
+        //    else
+        //    {
+        //        negKey.SetColor(mapper.ActiveKeyColor);
+        //        //mapper.GetNewKey(myBind, false, (string nKey) => { negKey.Set(nKey); negKey.SetColor(mapper.InactiveKeyColor); });
+        //    }
+        //}
 
+        /**
         //Initialize the binding on the UI
         public void InitFor(InputBinding binding, string actionName)
         {
@@ -48,7 +49,7 @@ namespace Game.Controller.Input.UI
                 negKey.gameObject.SetActive(false);
             }
             bindName.text = (myBind = actionName);
-        }
+        }*/
 
         public void SetColor(bool positiveKey, bool negativeKey, Color c)
         {

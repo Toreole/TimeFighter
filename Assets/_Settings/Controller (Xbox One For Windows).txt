@@ -1,4 +1,0 @@
-Controller (Xbox One For Windows)
-Controller (Xbox 360 Wireless Receiver for Windows)
-
-Same input buttons & Axes (Windows)

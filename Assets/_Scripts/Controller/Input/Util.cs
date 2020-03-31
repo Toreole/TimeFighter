@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Game.Controller.Input;
-using Luminosity.IO;
 using UnityEngine;
 
 namespace Game
@@ -77,67 +76,67 @@ namespace Game
             return key.ToString();
         }
 
-        public static bool HasDuplicates(this ControlScheme scheme, out List<DuplicateKeyBind> duplicates)
-        {
-            duplicates = new List<DuplicateKeyBind>();
-            for (int i = 0; i < scheme.Actions.Count; i++)
-            {
-                //check for skip?
-                InputBinding bind = scheme.Actions[i].Bindings[0];
-                if (bind.Type != InputType.Button && bind.Type != InputType.DigitalAxis)
-                    continue;
-                //Debug.Log(bind.Positive.GetString() + " - " + bind.Negative.GetString());
-                DuplicateKeyBind dupe = new DuplicateKeyBind();
-                dupe.bindName = scheme.Actions[i].Name;
-                for(int j = 0; j < scheme.Actions.Count; j++)
-                {
-                    //dont compare to yourself
-                    if (i == j)
-                        continue;
-                    //type skip condition
-                    InputBinding other = scheme.Actions[j].Bindings[0];
-                    if (other.Type != InputType.Button && other.Type != InputType.DigitalAxis)
-                        continue;
+        //public static bool HasDuplicates(this ControlScheme scheme, out List<DuplicateKeyBind> duplicates)
+        //{
+        //    duplicates = new List<DuplicateKeyBind>();
+        //    for (int i = 0; i < scheme.Actions.Count; i++)
+        //    {
+        //        //check for skip?
+        //        InputBinding bind = scheme.Actions[i].Bindings[0];
+        //        if (bind.Type != InputType.Button && bind.Type != InputType.DigitalAxis)
+        //            continue;
+        //        //Debug.Log(bind.Positive.GetString() + " - " + bind.Negative.GetString());
+        //        DuplicateKeyBind dupe = new DuplicateKeyBind();
+        //        dupe.bindName = scheme.Actions[i].Name;
+        //        for(int j = 0; j < scheme.Actions.Count; j++)
+        //        {
+        //            //dont compare to yourself
+        //            if (i == j)
+        //                continue;
+        //            //type skip condition
+        //            InputBinding other = scheme.Actions[j].Bindings[0];
+        //            if (other.Type != InputType.Button && other.Type != InputType.DigitalAxis)
+        //                continue;
 
-                    if(other.Type == InputType.Button)
-                    {
-                        if(bind.Type == InputType.Button)
-                        {
-                            //both are buttons
-                            dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive;
-                            dupe.negativeKeyIsDuplicate = false;
-                        }
-                        else
-                        {
-                            //only bind is axis
-                            dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive;
-                            dupe.negativeKeyIsDuplicate |= bind.Negative == other.Positive;
-                        }
-                    }
-                    else
-                    {
-                        if (bind.Type == InputType.Button)
-                        {
-                            //only other is axis
-                            dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive || bind.Positive == other.Negative;
-                            dupe.negativeKeyIsDuplicate = false;
-                        }
-                        else
-                        {
-                            //both are axis
-                            dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive || bind.Positive == other.Negative;
-                            dupe.negativeKeyIsDuplicate |= bind.Negative == other.Positive || bind.Negative == other.Negative;
-                        }
-                    }
-                    if (dupe.BothAre)
-                        break;
-                }
-                //Debug.Log(dupe.positiveKeyIsDuplicate + "-" + dupe.negativeKeyIsDuplicate);
-                //if dupe has been marked, 
-                if (dupe.EitherIsDuplicate)
-                    duplicates.Add(dupe);
-            }
-            return duplicates.Count > 0;
-        }
+        //            if(other.Type == InputType.Button)
+        //            {
+        //                if(bind.Type == InputType.Button)
+        //                {
+        //                    //both are buttons
+        //                    dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive;
+        //                    dupe.negativeKeyIsDuplicate = false;
+        //                }
+        //                else
+        //                {
+        //                    //only bind is axis
+        //                    dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive;
+        //                    dupe.negativeKeyIsDuplicate |= bind.Negative == other.Positive;
+        //                }
+        //            }
+        //            else
+        //            {
+        //                if (bind.Type == InputType.Button)
+        //                {
+        //                    //only other is axis
+        //                    dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive || bind.Positive == other.Negative;
+        //                    dupe.negativeKeyIsDuplicate = false;
+        //                }
+        //                else
+        //                {
+        //                    //both are axis
+        //                    dupe.positiveKeyIsDuplicate |= bind.Positive == other.Positive || bind.Positive == other.Negative;
+        //                    dupe.negativeKeyIsDuplicate |= bind.Negative == other.Positive || bind.Negative == other.Negative;
+        //                }
+        //            }
+        //            if (dupe.BothAre)
+        //                break;
+        //        }
+        //        //Debug.Log(dupe.positiveKeyIsDuplicate + "-" + dupe.negativeKeyIsDuplicate);
+        //        //if dupe has been marked, 
+        //        if (dupe.EitherIsDuplicate)
+        //            duplicates.Add(dupe);
+        //    }
+        //    return duplicates.Count > 0;
+        //}
     }
 }

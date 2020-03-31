@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
-using Luminosity.IO;
+using UnityEngine.InputSystem;
 
 using static Game.Util;
 
@@ -12,8 +12,6 @@ namespace Game.Controller
         //[SerializeField]
         //protected PlayerStateBehaviour defaultState;
         [Header("Player Settings")]
-        [SerializeField]
-        protected Animator animator;
         [SerializeField]
         protected float baseSpeed = 3.5f;
         [SerializeField]
@@ -36,6 +34,11 @@ namespace Game.Controller
         protected float groundedTolerance = 0.1f;
         [SerializeField]
         protected int airJumps = 1;
+        [Header("Input")]
+        [SerializeField]
+        protected InputActionReference movementAction;
+        [SerializeField]
+        protected InputActionReference jumpAction;
         [SerializeField, Header("Rendering")]
         protected new SpriteRenderer renderer;
         
@@ -185,12 +188,19 @@ namespace Game.Controller
                 jumpPressed = false;
                 return;
             }
-            movementInput.x = InputManager.GetAxis("Horizontal");
-            movementInput.y = InputManager.GetAxis("Vertical");
-            movementRaw.x   = InputManager.GetAxisRaw("Horizontal");
-            movementRaw.y   = InputManager.GetAxisRaw("Vertical");
-            jumpPressed     = InputManager.GetButtonDown("Jump");
-            jumpHold        = InputManager.GetButton("Jump");
+            if (movementAction.action != null)
+            {
+                movementInput = movementAction.action.ReadValue<Vector2>();
+                movementRaw.x = movementInput.x > 0.0f ? 1 : (movementInput.x < 0.0f? -1 : 0);
+            }
+            if (jumpAction.action != null)
+                jumpPressed = jumpAction.action.triggered;
+            //movementInput.x = InputManager.GetAxis("Horizontal");
+            //movementInput.y = InputManager.GetAxis("Vertical");
+            //movementRaw.x   = InputManager.GetAxisRaw("Horizontal");
+            //movementRaw.y   = InputManager.GetAxisRaw("Vertical");
+            //jumpPressed     = InputManager.GetButtonDown("Jump");
+            //jumpHold        = InputManager.GetButton("Jump");
         }
 
         LandingType HandleLanding()
@@ -352,8 +362,8 @@ namespace Game.Controller
         protected void RunFixedCallbacks()
         {
             //can just be done here since its only using this input in here. - Fixes the issue with stopping after roll
-            movementInput.x = InputManager.GetAxis("Horizontal");
-            movementInput.y = InputManager.GetAxis("Vertical");
+            //movementInput.x = InputManager.GetAxis("Horizontal");
+            //movementInput.y = InputManager.GetAxis("Vertical");
             activeState.FixedStep(movementInput, Time.deltaTime);
         }
 
