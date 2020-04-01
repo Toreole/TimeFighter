@@ -39,12 +39,12 @@ namespace Game.Controller
         private void Jump()
         {
             //TODO: only be able to jump when slipping (slope) and a certain speed is reached ???
-            if (controller.GroundFriction <= controller.SlipThreshold)
+            if (controller.CurrentGround.HasFlag(GroundFlags.Slippery))
                 if(Body.velocity.magnitude < 4f)
                     return; 
             controller.StickToGround = false;
-            var force = Vector2.zero;
-            force.y = Mathf.Sqrt(controller.JumpHeight * Util.g2);
+            var force = Vector2.zero; //technically not a force, but a velocity.
+            force.y = controller.JumpForce; 
             force.x = Body.velocity.x;
             Body.velocity = force;
             //Body.AddForce(force, ForceMode2D.Impulse);
@@ -61,7 +61,7 @@ namespace Game.Controller
             float absAngle = Mathf.Abs(groundAngle);
             //Test against the max angle to walk.
             //if the friction is low on this piece of ground, slide, otherwise stay
-            if (absAngle >= controller.MaxSteepAngle || controller.GroundFriction < 0.3f)
+            if (absAngle >= controller.MaxSteepAngle || controller.GroundHasFlag(GroundFlags.Slippery))
             {
                 //"sliding"
                 return;

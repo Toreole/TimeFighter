@@ -36,7 +36,7 @@ namespace Game.Serialization
 
             if (!File.Exists(path))
                 return false;
-            FileStream file = File.Open(path, FileMode.OpenOrCreate);
+            FileStream file = File.Open(path, FileMode.Open);
             if (file.Length < 10) //check for empty stream. 
             {
                 file.Close();

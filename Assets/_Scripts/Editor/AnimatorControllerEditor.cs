@@ -50,6 +50,12 @@ namespace GameEditor
                 link.purpose = (TEnum)EditorGUILayout.EnumPopup("Enum Value", link.purpose); //yes
                 EditorGUILayout.EndVertical();
             }
+            //add another animator param connector
+            if(GUILayout.Button("Add Param"))
+            {
+                links.Add(new TParam());
+            }
+            //populate the list with the enum values as strings.
             if (GUILayout.Button("Populate from Enum"))
             {
                 links.Clear();
@@ -62,6 +68,7 @@ namespace GameEditor
                     links.Add(x);
                 }
             }
+            //populate the list with the animator parameter names.
             if (GUILayout.Button("Popupate from Parameters"))
             {
                 links.Clear();

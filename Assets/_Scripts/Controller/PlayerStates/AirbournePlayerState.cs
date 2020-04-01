@@ -8,18 +8,24 @@ namespace Game.Controller
         public override void FixedStep(Vector2 input, float deltaTime)
         {
             //TODO: think about some usecases for this, atm its just dead lol.
+            if(controller.IsTouchingWall && controller.JumpBeingHeld)
+            {
+                controller.SwitchToState<WallPlayerState>();
+            }
         }
 
         public override void OnEnterState()
         {
             controller.OnEnterGround += EnterGround;
             controller.OnPressJump += Jump;
+            //controller.OnEnterWall += EnterWall;
         }
 
         public override void OnExitState()
         {
             controller.OnEnterGround -= EnterGround;
             controller.OnPressJump -= Jump;
+            //controller.OnEnterWall -= EnterWall;
         }
 
         void EnterGround(LandingType landing)
@@ -29,6 +35,16 @@ namespace Game.Controller
             //Debug.Log(controller.lastVerticalVel); <-- this actually seems to get the correct one
             controller.SwitchToState<GroundedPlayerState>();
         }
+
+        //this is pretty janky
+        //void EnterWall(GroundData wallData, bool jumpHeld)
+        //{
+        //    //high velocity on y (greater than 0) should not cause the player to enter the climbing state.
+        //    if (wallData.HasFlag(GroundFlags.Climbable) && jumpHeld)
+        //    {
+        //        controller.SwitchToState(new WallPlayerState());
+        //    }
+        //}
 
         /// <summary>
         /// For mid-air jumps

@@ -48,6 +48,9 @@ namespace Game.Controller
                 animator.SetFloat(paramID, Mathf.Abs(controller.LastVel.x));
             if (enumToID.TryGetValue(PlayerAnimation.YVelFloat, out paramID))
                 animator.SetFloat(paramID, controller.LastVel.y);
+            //update the wall touch bool.. maybe this should rather be the wall state...
+            if (enumToID.TryGetValue(PlayerAnimation.WallTouchBool, out paramID))
+                animator.SetBool(paramID, controller.IsTouchingWall);
         }
 
         /// <summary>
@@ -81,7 +84,7 @@ namespace Game.Controller
     [Serializable]
     public enum PlayerAnimation
     {
-        GroundedBool, SlideBool,
+        GroundedBool, SlideBool, WallTouchBool,
         RollTrigger, LandTrigger,
         XVelFloat, YVelFloat,
     }

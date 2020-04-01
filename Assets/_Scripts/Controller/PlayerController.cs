@@ -23,7 +23,7 @@ namespace Game.Controller
         [SerializeField] //TODO: everything around dashing in the state behaviours
         protected float dashDistance = 4f, dashCost = 25f, dashSpeed = 9f;
         [SerializeField]
-        protected float maxSteepAngle = 37.5f, slipThreshold = 0.25f;
+        protected float maxSteepAngle = 37.5f;//, slipThreshold = 0.25f;
         [SerializeField]
         protected float jumpHeight = 2.5f, airJumpHeight = 1.75f;
         [SerializeField]
@@ -41,7 +41,7 @@ namespace Game.Controller
         protected InputActionReference jumpAction;
         [SerializeField, Header("Rendering")]
         protected new SpriteRenderer renderer;
-        
+
         //public settings properties.
         public float BaseSpeed => baseSpeed;
         public float BaseSpeedSqr { get; protected set; }
@@ -49,7 +49,9 @@ namespace Game.Controller
         public float AirJumpHeight => airJumpHeight;
         public float Acceleration => acceleration;
         public float MaxSteepAngle => maxSteepAngle;
-        public float SlipThreshold => slipThreshold;
+        public float JumpForce { get; private set; } //the force the player jumps with.
+
+        //public float SlipThreshold => slipThreshold; // !! deprecated in favor of ground flags.
         public int AvailableAirJumps 
         { get => availableAirJumps; set => availableAirJumps = Mathf.Clamp(value, 0, airJumps); }
         public bool CanAirJump 
@@ -81,17 +83,26 @@ namespace Game.Controller
         public Vector2 MoveInput => movementInput;
         public Vector2 MoveInputRaw => movementRaw;
 
+        public bool JumpBeingHeld => jumpHold;
+
         //other variables
         protected bool isGrounded = true;
         protected bool stickToGround = true;
         protected bool ignorePlayerInput = false;
         protected int availableAirJumps;
         protected float stamina;
+        protected bool isTouchingWall = false;
+        /// <summary>
+        /// Info about the ground material and its connected sounds.
+        /// </summary>
+        protected GroundData currentGround = null;
+        protected GroundData currentWall = null;
 
         protected ContactPoint2D[] contactPoints = new ContactPoint2D[16];
         protected ContactFilter2D filter;
 
         //other properties
+        //grounded property, handles event callback
         public bool IsGrounded {
             get => isGrounded;
             set
@@ -103,10 +114,25 @@ namespace Game.Controller
                 isGrounded = value;
             }
         }
-        protected Vector2 groundNormal = Vector2.up;
+
+        //wall touch property, ?handles event callback?
+        public bool IsTouchingWall
+        {
+            get => isTouchingWall;
+            set
+            {
+                //if (!isTouchingWall && value)
+                //    OnEnterWall?.Invoke(currentWall, jumpHold);
+                isTouchingWall = value;
+            }
+        }
+
+        protected Vector2 groundNormal = Vector2.up; 
         public Vector2 GroundNormal => groundNormal;
-        public float GroundFriction 
-        { get; protected set; } = 0.4f;
+        public GroundData CurrentGround => currentGround;
+        public GroundData CurrentWall => currentWall;
+        //public float GroundFriction 
+        //{ get; protected set; } = 0.4f;
         public bool  StickToGround 
         { get => stickToGround; set => stickToGround = value; }
         public bool  IgnorePlayerInput 
@@ -133,6 +159,12 @@ namespace Game.Controller
         /// </summary>
         public event System.Action<LandingType> OnEnterGround;
         public event System.Action OnLeaveGround;
+
+        /// <summary>
+        /// Params: GroundData: Wall Information
+        /// bool: is the jump button held down?
+        /// </summary>
+        //public event System.Action<GroundData, bool> OnEnterWall;
         #endregion
 
         /// <summary>
@@ -143,6 +175,9 @@ namespace Game.Controller
             availableAirJumps = airJumps;
             BaseSpeedSqr = baseSpeed * baseSpeed;
             stamina = maxStamina;
+
+            //calculate the standard jump force (needs to be recalculated in case the gravity changes.
+            JumpForce = Mathf.Sqrt(jumpHeight * Util.g2);
 
             filter = new ContactFilter2D
             {
@@ -194,7 +229,10 @@ namespace Game.Controller
                 movementRaw.x = movementInput.x > 0.0f ? 1 : (movementInput.x < 0.0f? -1 : 0);
             }
             if (jumpAction.action != null)
+            {
                 jumpPressed = jumpAction.action.triggered;
+                jumpHold = jumpAction.action.phase == InputActionPhase.Started;
+            }
             //movementInput.x = InputManager.GetAxis("Horizontal");
             //movementInput.y = InputManager.GetAxis("Vertical");
             //movementRaw.x   = InputManager.GetAxisRaw("Horizontal");
@@ -241,14 +279,14 @@ namespace Game.Controller
                 return;
             }
             Vector2 normals = Vector2.zero;
-            float frictions = 0f;
+            //float frictions = 0f;
             for (int i = 0; i < contacts && i < 16; i++)
             {
                 var contact = contactPoints[i];
                 if (contact.normal.y > 0.4)
                 {
                     normals += contact.normal;
-                    frictions += contact.collider.friction;
+                    //frictions += contact.collider.friction;
                 }
             }
             if (normals.Equals(Vector2.zero))
@@ -257,8 +295,10 @@ namespace Game.Controller
                 IsGrounded = false;
                 return;
             }
-            //WOULD BE FUCKING COOL IF UNITY COULD JUST FUCKING COMPILE
-            GroundFriction = frictions / contacts;
+            //Try getting the grounddata, if it doesnt exist just stick with the current one.
+            currentGround = contactPoints[0].collider.GetComponent<GroundData>() ?? currentGround;
+            //? remove this in favor of grounddata.
+            //GroundFriction = frictions / contacts;
 
             normals.Normalize();
             groundNormal = normals;
@@ -311,7 +351,8 @@ namespace Game.Controller
             RaycastHit2D hit2D;
             if (hit2D = Physics2D.Raycast(rayOrigin, Vector2.down, halfHeight + groundedTolerance, groundMask))
             {
-                GroundFriction = hit2D.collider.friction;
+                //GroundFriction = hit2D.collider.friction;
+                currentGround = hit2D.transform.GetComponent<GroundData>() ?? currentGround; //Update grounddata.
                 groundNormal = hit2D.normal;
                 IsGrounded = true;
                 //If necessary, "stick" to the ground.
@@ -327,9 +368,11 @@ namespace Game.Controller
             //If that failed, do a box cast
             Vector2 boxCenter = Body.position - Vector2.up * halfHeight;
             Vector2 boxSize = new Vector2(halfWidth * 0.6f, groundedTolerance);
-            if (Physics2D.OverlapBox(boxCenter, boxSize, 0f, groundMask))
+            Collider2D col;
+            if (col = Physics2D.OverlapBox(boxCenter, boxSize, 0f, groundMask))
             {
                 //? maybe stick to the ground using the data in here? but how tho?
+                currentGround = col.GetComponent<GroundData>() ?? currentGround;
                 IsGrounded = true;
                 return;
             }
@@ -364,17 +407,59 @@ namespace Game.Controller
             //can just be done here since its only using this input in here. - Fixes the issue with stopping after roll
             //movementInput.x = InputManager.GetAxis("Horizontal");
             //movementInput.y = InputManager.GetAxis("Vertical");
+            CheckForWall();
             activeState.FixedStep(movementInput, Time.deltaTime);
         }
 
-        //TODO: This should be the new way to switch states. no enums,
-        //TODO: no weird storing. the PlayerStateBehaviours dont create a lot of garbage anyway
+        /// <summary>
+        /// Checks for a wall on the "forward" direction.
+        /// Slopes with an incline of less than 10° are considered a wall (Abs(normal.x) >= 0.985f)
+        /// </summary>
+        void CheckForWall()
+        {
+            float length = halfWidth + groundedTolerance; //standard procedure.
+            Vector2 direction = FlipX ? Vector2.left : Vector2.right;
+            RaycastHit2D hit;
+#if UNITY_EDITOR
+            Debug.DrawRay(Body.position, direction, Color.cyan);
+#endif
+            //check for a collider
+            if(hit = Physics2D.Raycast(Body.position, direction, length, groundMask))
+            {
+                //verify angle limit.
+                if (Mathf.Abs(hit.normal.x) >= 0.98f)
+                {
+#if UNITY_EDITOR
+                    Debug.Log($"touching wall {hit.collider.name}", hit.collider);
+#endif
+                    currentWall = hit.collider.GetComponent<GroundData>() ?? currentWall;
+                    IsTouchingWall = true; //use property, this can call the event
+                    return;
+                }
+            }
+            isTouchingWall = false; //directly write to the field, there is no exit wall event.
+        }
+
+        /// <summary>
+        /// Switch to another State using a generic method
+        /// </summary>
+        /// <typeparam name="T">state type</typeparam>
         public void SwitchToState<T>() where T : PlayerStateBehaviour, new()
         {
             activeState.OnExitState();
             activeState = new T();
             activeState.controller = this;
             activeState.OnEnterState();
+        }
+        /// <summary>
+        /// Switch to a given state.
+        /// </summary>
+        public void SwitchToState(PlayerStateBehaviour state)
+        {
+            activeState.OnExitState();
+            activeState = state;
+            activeState.controller = this;
+            state.OnEnterState();
         }
 
         //public void SetActiveInput(bool active)
@@ -387,6 +472,21 @@ namespace Game.Controller
             //Debug.Log(ignorePlayerInput.ToString()); 
         }
 
+        /// <summary>
+        /// A safe way of checking for Ground flags (handles null)
+        /// </summary>
+        public bool GroundHasFlag(GroundFlags flag)
+        {
+            return (currentGround) ? currentGround.HasFlag(flag) : false;
+        }
+        /// <summary>
+        /// A safe way of checking for Wall flags (handles null)
+        /// </summary>
+        public bool WallHasFlag(GroundFlags flag)
+        {
+            return currentWall ? currentWall.HasFlag(flag) : false;
+        }
+
         //TODO: find use cases for these.
         private void OnTriggerEnter2D(Collider2D collision)
         {
@@ -397,626 +497,5 @@ namespace Game.Controller
         {
             
         }
-        
-        #region OLD_ControllerSystem
-        //[Header("Renderer")]
-        //[SerializeField]
-        //protected new SpriteRenderer renderer;
-        //[Header("Camera Stuff")]
-        //[SerializeField]
-        //protected new Camera camera = null;
-        //protected int facingDirection = 1;
-        //protected Vector2 directionToMouse = Vector2.zero;
-
-        //[Header("Physics And Movement")]
-        //[SerializeField, Tooltip("The empty transform child, will be automatically set in Start()")]
-        //protected Transform ground;
-        //[SerializeField, Tooltip("The collision layer used to check for ground")]
-        //protected LayerMask groundLayer;
-        //[SerializeField, Tooltip("Settings for movement and that")]
-        //protected PlayerControllerSettings controllerSettings = PlayerControllerSettings.DefaultSettings;
-        //#region setting_properties
-        //    float PlayerWidth  => controllerSettings.playerWidth;
-        //    float Acceleration => controllerSettings.acceleration;
-        //    float PlayerHeight => controllerSettings.playerHeight;
-        //    float JumpHeight   => controllerSettings.jumpHeight;
-        //    float TargetSpeed  => controllerSettings.targetSpeed;
-        //    float WallJumpStrength   => controllerSettings.wallJumpStrength;
-        //    float AirControlStrength => controllerSettings.airControlStrength;
-        //    int   MaxDashCharges => controllerSettings.dashCharges;
-        //    float DashCooldown => controllerSettings.dashCooldown;
-        //    float DashLength => controllerSettings.dashLength;
-        //    float MaxAdhereDistance => controllerSettings.maxAdhereDist;
-        //    float LedgeClimbBoost => controllerSettings.ledgeClimbBoost;
-        //#endregion
-
-        ////This could depend on different weapons?
-        //[Header("Combat Stats")]
-
-        //[SerializeField, Tooltip("The attack damage of normal attacks")]
-        //protected float attackDamage = 1;
-        //[SerializeField, Tooltip("The time between attacks")]
-        //protected float attackCooldown = 0.75f;
-
-        //[Header("UI")]
-        //[SerializeField]
-        //protected PlayerUIManager uIManager;
-
-        //protected bool canAttack = true;
-        ////public bool IsDead { get { return currentHealth <= 0f; } }
-
-        ////Input
-        //protected float xMove = 0f;
-        //protected float yMove = 0;
-        //protected bool jump;
-        //protected bool attack;
-        //protected bool shouldThrow;
-        //protected float mouseScroll;
-        //protected bool actionPersist;
-        //protected bool frameAction;
-        //protected bool dash;
-
-        ////Actions
-        //protected int selectedAction;
-        //protected float actionOffset;
-        //protected int dashCharges;
-        //protected bool dashing = false;
-        //protected bool isRecharging = false;
-        //protected float remainDashCd = 0f;
-
-        //public float RelativeDashCD => remainDashCd / DashCooldown;
-        //public int AvailableDashes => dashCharges;
-
-        ////other runtime variables
-        //protected Vector3 startPos = Vector3.zero;
-        //protected bool isGrounded = false;
-        //protected EntityState state = EntityState.Idle;
-        //protected bool isOnWall  = false;
-        //protected Vector2 wallNormal = Vector2.right;
-        //protected bool isOnLedge = false;
-        //protected bool doLedgeCheck = true;
-        //protected Vector2 ledgePosition = Vector2.zero;
-
-        ////public override bool IsGrounded { get { return isGrounded; } }
-
-        //private const float raycastError = 0.05f;
-        //private const float g = 9.81f;
-
-        //public void OnStart()
-        //{
-        //    print("playerController onStart");
-        //}
-        /// <summary>
-        /// Start! bruh unity gae
-        /// </summary>
-        //protected void Start()
-        //{
-        //    //IsPlayer = true;
-        //    startPos = transform.position;
-        //    dashCharges = MaxDashCharges;
-
-        //    if (camera == null)
-        //        camera = FindObjectOfType<Camera>();
-        //    if (ground == null)
-        //        ground = transform.GetChild(0);
-        //    //if (body == null)
-        //    //    body = GetComponent<Rigidbody2D>();
-        //    if (uIManager == null)
-        //        uIManager = FindObjectOfType<PlayerUIManager>();
-        //    //setup events
-        //    //LevelManager.OnLevelStart    += OnLevelStart;
-        //    //LevelManager.OnLevelFail     += OnLevelFail;
-        //    //LevelManager.OnLevelComplete += OnLevelComplete;
-        //}
-
-        //protected override void OnLevelStart()
-        //{
-        //    Debug.Log("Player Level Start");
-        //    active = true;
-        //}
-
-        //protected override void OnLevelFail()
-        //{
-        //    Debug.Log("Player level Fail");
-        //    active = false;
-        //    state  = EntityState.Dead;
-        //}
-
-        //protected override void OnLevelComplete()
-        //{
-        //    Debug.Log("Player level Complete");
-        //    active = false;
-        //}
-        /// <summary>
-        /// Input & mouse dependent stuff
-        /// </summary>
-        //TODO: make a good system for figuring out which way to look. probably velocity and wall check.
-        //private void Update()
-        //{
-        //    //if (!active)
-        //        return;
-        //    //FaceMouse();
-        //    GetInput();
-        //    UpdateState();
-        //    PerformActions();
-        //}
-
-        /// <summary>
-        /// Basically everything that should run after Update
-        /// </summary>
-        //TODO: Send data to animator
-        //private void LateUpdate()
-        //{
-        //    //if (!active)
-        //        return;
-        //    //Debug.DrawLine(transform.position, transform.position + (Vector3)(directionToMouse * (attackRange + PlayerWidth /2f)), Color.blue);
-        //}
-
-        /// <summary>
-        /// Gets relevant input
-        /// </summary>
-        //TODO: check for more input if needed
-        //private void GetInput()
-        //{
-        //    xMove  = Input.GetAxis("Horizontal");
-        //    yMove  = Input.GetAxis("Vertical");
-        //    jump   = (Input.GetButtonDown("Jump") || jump) && (isGrounded || isOnWall || isOnLedge); //include grounded check lmao idk, kind redundant but it works
-        //    attack = Input.GetButtonDown("LeftClick") || attack; //Maybe this should stay true until the action is performed
-        //    shouldThrow   = Input.GetButtonDown("MiddleClick") || shouldThrow;
-        //    actionPersist = Input.GetButton("RightClick");
-        //    frameAction   = Input.GetButtonDown("RightClick");
-        //    dash = Input.GetButtonDown("Dash");
-
-        //    //Swap actions
-        //    //TODO: have all actions displayed at once, animate the swapping on the UI
-        //    //if(Input.GetButtonDown("ActionSwap") && !actions[selectedAction].IsPerforming)
-        //    //{
-        //    //    actions[selectedAction].IsSelected = false;
-        //    //    selectedAction += (int)Input.GetAxisRaw("ActionSwap");
-        //    //    //!this is nicer code now yay
-        //    //    selectedAction = (selectedAction + actions.Count) % actions.Count;
-        //    //    uIManager.SetAction(actions[selectedAction]);
-        //    //    actions[selectedAction].IsSelected = true;
-        //    //}
-
-        //    //mouse position
-        //    var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
-        //    directionToMouse = (mousePos - (Vector2)transform.position).normalized;
-        //}
-
-        //private void OnTriggerEnter2D(Collider2D collision)
-        //{
-        //    print("lmao");
-        //}
-        //TODO: rework attacking
-        //private void PerformActions()
-        //{
-        //    if (dash && dashCharges > 0 && !dashing)
-        //    {
-        //        dashCharges--;
-        //        dash = false;
-        //        StartCoroutine(DoDash());
-        //        return;
-        //    }
-        //    //if (attack && canAttack)
-        //    //    Attack();
-
-        //    //var act = actions[selectedAction];
-        //    //act.TargetDirection = directionToMouse;
-        //    //if (frameAction && act.CanPerform)
-        //    //{
-        //    //    frameAction = false;
-        //    //    act.PerformAction();
-        //    //}
-        //    //act.ShouldPerform = actionPersist;
-        //}
-
-        /// <summary>
-        /// Update the PlayerState
-        /// </summary>
-        //TODO: constant WIP, 1. Add Attack state
-        //private void UpdateState()
-        //{
-        //    if (isGrounded)
-        //    {
-        //        if (xMove != 0 && !jump)
-        //            state = EntityState.Run;
-        //        else if (jump)
-        //            state = EntityState.Jump;
-        //        else 
-        //            state = EntityState.Idle;
-        //    }
-        //    else
-        //    {
-        //        //if(body.velocity.y > 0)
-        //        //{
-        //        //    state = EntityState.Jump;
-        //        //}
-        //        //else if (body.velocity.y < 0)
-        //        //{
-        //        //    state = EntityState.Fall;
-        //        //}
-        //    }
-        //    //bruh
-        //}
-
-        /// <summary>
-        /// YEAH, SCIENCE, BITCH!
-        /// </summary>
-        //private void FixedUpdate()
-        //{
-        //    //if (!active)
-        //    //    return;
-        //    CheckGrounded();
-        //    CheckWall();
-        //    CheckLedge();
-        //    Move();
-        //}
-
-        /// <summary>
-        /// Does what the name says lol
-        /// </summary>
-        //protected void CheckGrounded()
-        //{
-        //    //if(body.velocity.y > 2)
-        //    //{
-        //    //    isGrounded = false;
-        //    //    return;
-        //    //}
-        //    RaycastHit2D hit;
-        //    var raycastPos = transform.position;
-        //    var rayLength = PlayerHeight / 1.5f + raycastError;
-
-        //    Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-        //    if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
-        //    {
-        //        SetGround(hit);
-        //    }
-        //    else
-        //    {
-        //        raycastPos += Vector3.right * PlayerWidth / 3f;
-        //        Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-        //        if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
-        //        {
-        //            SetGround(hit);
-        //        }
-        //        else
-        //        {
-        //            raycastPos -= Vector3.right * PlayerWidth / 3f * 2f;
-        //            Debug.DrawRay(raycastPos, Vector3.down * rayLength, Color.red);
-        //            if (hit = Physics2D.Raycast(raycastPos, Vector2.down, rayLength, groundLayer))
-        //            {
-        //                SetGround(hit);
-        //            }
-        //            else
-        //                isGrounded = false;
-        //        }
-        //    }
-        //}
-        //protected void SetGround(RaycastHit2D hit)
-        //{
-        //    Quaternion rot = Quaternion.LookRotation(Vector3.forward, hit.normal);
-        //    ground.rotation = rot;
-        //    isGrounded = true;
-        //    var nPoint = hit.point + Vector2.up * PlayerHeight / 2f;
-        //    var dist = Vector2.Distance(nPoint, transform.position);
-        //    //stick to the ground instead of flying off
-        //    if (dist < MaxAdhereDistance && dist > 0.05f)
-        //    {
-        //        //body.position = nPoint;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Check for a wall for walljumps.
-        ///// </summary>
-        //protected void CheckWall()
-        //{
-        //    if (isGrounded)
-        //    {
-        //        isOnWall = false;
-        //        return;
-        //    }
-        //    var dist = PlayerWidth / 2f + raycastError;
-        //    Debug.DrawRay(transform.position, Vector3.right * dist, Color.blue);
-        //    Debug.DrawRay(transform.position, -Vector3.right * dist, Color.blue);
-        //    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.right, dist, groundLayer);
-        //    if (hit)
-        //    {
-        //        //bruh
-        //        wallNormal = hit.normal;
-        //        isOnWall = true;
-        //    }
-        //    else if(hit = Physics2D.Raycast(transform.position, -Vector2.right, dist, groundLayer))
-        //    {
-        //        wallNormal = hit.normal;
-        //        isOnWall = true;
-        //    }
-        //    else
-        //    {
-        //        isOnWall = false;
-        //    }
-        //}
-
-        /// <summary>
-        /// check for a ledge to hang onto. presumably only in the direction the player is facing. 
-        /// </summary>
-        //protected void CheckLedge()
-        //{
-        //    if (isGrounded || !doLedgeCheck)
-        //        return;
-        //    var xDir = (renderer.flipX) ? -1f: 1f;
-        //    Vector2 topCornerOffset = new Vector2(PlayerWidth / 2f * xDir, PlayerHeight / 2f);
-        //    Vector2 rayOffset = Vector2.right * (PlayerWidth / 4f * xDir) + Vector2.up * (PlayerHeight / 4f);
-        //    //Vector2 rayOrigin = this.Position + rayOffset + topCornerOffset;
-        //    float rayDistance = PlayerHeight / 4f;
-
-        //    Debug.DrawRay(rayOrigin, Vector3.down * rayDistance, Color.red);
-        //    RaycastHit2D hit;
-        //    if(hit = Physics2D.Raycast(rayOrigin, Vector2.down, rayDistance, groundLayer))
-        //    {
-        //        isOnLedge = true;
-        //        ledgePosition = hit.point;
-        //        //Try to move closer to the ledge: 
-        //        //1. towards "wall"
-        //        //2. allign top of the player with detected edge.
-        //    }
-        //    else
-        //    {
-        //        isOnLedge = false;
-        //    }
-        //}
-
-        //! I fixed the movement partially. Further Improve this later on.
-        /// <summary>
-        /// Use the input to move the player character.
-        /// </summary>
-        //private void Move()
-        //{
-        //    //adjust the curent "look direction"
-        //    renderer.flipX = (Mathf.Abs(body.velocity.x) < 0.1f) ? renderer.flipX : body.velocity.x < 0;
-        //    LookDirection = Vector2.right * (renderer.flipX ? 1 : -1);
-        //    if (dashing)
-        //        return;
-
-        //    //Ledge hang behaviour
-        //    if (isOnLedge)
-        //    {
-        //        LedgeBehaviour();
-        //        return;
-        //    }
-        //    //normal behaviour
-        //    body.gravityScale = (isOnWall && body.velocity.y <= 0f) ? 0.3f : 1f;
-
-        //    //TODO: this part of the code is pretty dang ugly, fix that please!
-        //    if (isGrounded)
-        //    {
-        //        //Prevent slopes from interfering with movement.
-        //        body.AddForce(-GetGroundForce());
-        //        if (!Mathf.Approximately(xMove, 0f))
-        //        {
-        //            //move left/right
-        //            var vel = body.velocity;
-        //            var stepAcc = Acceleration * (Vector2)ground.right * Time.fixedDeltaTime * xMove;
-        //            var nextVel = vel + stepAcc;
-        //            if (nextVel.magnitude > TargetSpeed && nextVel.magnitude > vel.magnitude)
-        //                nextVel = vel - stepAcc;
-        //            body.velocity = nextVel;
-        //        }
-        //    }
-        //    else
-        //    {
-        //        //air movement
-        //        var airControl = xMove * Acceleration * AirControlStrength * Vector2.right;
-        //        body.velocity += airControl * Time.fixedDeltaTime;
-        //    }
-
-        //    //jump last.
-        //    if (jump)
-        //        Jump();
-        //}
-
-        /// <summary>
-        /// How the player should behave when hanging onto a ledge
-        /// </summary>
-        //protected void LedgeBehaviour()
-        //{
-        //    body.gravityScale = 0f;
-        //    if (body.velocity.y <= 0.1f && body.velocity.magnitude < 2f)
-        //        body.velocity = Vector2.zero;
-        //    if (jump)
-        //        ClimbLedge();
-        //    if (yMove < 0)
-        //    {
-        //        doLedgeCheck = false;
-        //        isOnLedge = false;
-        //        Delay(this, () => { doLedgeCheck = true; }, 0.5f);
-        //    }
-        //    DrawCross(ledgePosition, 0.2f);
-        //}
-
-        /// <summary>
-        /// Do a dash lol
-        /// </summary>
-        //protected IEnumerator DoDash()
-        //{
-        //    //if (actions[selectedAction].IsPerforming)
-        //    //    actions[selectedAction].CancelAction();
-        //    dashing = true;
-        //    isInvincible = true;
-        //    var dashTime = 0.2f;
-        //    var newVel = directionToMouse * (DashLength / dashTime);
-        //    body.velocity = newVel;
-        //    body.gravityScale = 0f;
-        //    yield return new WaitForSeconds(dashTime);
-        //    body.gravityScale = 1f;
-        //    body.velocity = newVel / 2f;
-        //    dashing = false;
-        //    isInvincible = false;
-
-        //    if (!isRecharging)
-        //        StartCoroutine(RechargeDash());
-        //}
-
-        /// <summary>
-        /// recharge dashes if needed
-        /// </summary>
-        //protected IEnumerator RechargeDash()
-        //{
-        //    if (isRecharging)
-        //        yield break;
-        //    isRecharging = true;
-        //    while( dashCharges < MaxDashCharges )
-        //    {
-        //        for(remainDashCd = DashCooldown; remainDashCd > 0f; remainDashCd -= Time.deltaTime)
-        //        {
-        //            yield return null;
-        //        }
-        //        dashCharges++;
-        //    }
-        //    isRecharging = false;
-        //}
-
-        /// <summary>
-        /// The resulting force of the (sloped) ground and gravity, that accelerates the body towards the lower ground.
-        /// </summary>
-        //protected Vector2 GetGroundForce()
-        //{
-        //    if (ground.up.y > 0.95)
-        //        return Vector2.zero;
-        //    var Fg = body.gravityScale * body.mass * Physics2D.gravity;
-        //    var groundNormal = ground.up;
-        //    var alpha = Vector2.Angle(groundNormal, -Fg);
-        //    var sinAlpha = Mathf.Sin(alpha * Mathf.Deg2Rad);
-        //        //Debug.Log(alpha + "-- sin: " + sinAlpha);
-        //    var groundOffsetDirection = (groundNormal.x >= 0) ? ground.right: -ground.right;
-        //    var Fh = groundOffsetDirection * sinAlpha * Fg.magnitude;
-        //    return Fh;
-        //}
-
-        /// <summary>
-        /// physics fuck yeah. my brain hurts now.
-        /// The player ALWAYS jumps jumpHeight units high no matter what.
-        /// </summary>
-        //! this is like the only thing that works nicely.
-        //private void Jump()
-        //{
-        //    jump = false;
-        //    var jumpDir = isOnWall? (wallNormal + Vector2.up).normalized : ((Vector2)ground.up + Vector2.up).normalized;
-        //    float v0 = Mathf.Sqrt((JumpHeight) * (2 * g) * (isOnWall? WallJumpStrength : 1f));
-        //    var velocity = jumpDir * v0;
-        //        velocity.x += body.velocity.x; //Test to see if this fixes some weird issues
-        //    body.velocity = velocity;
-        //}
-
-        /// <summary>
-        /// Climb the ledge youre holding onto 
-        /// </summary>
-        //private void ClimbLedge()
-        //{
-        //    var finalPos = ledgePosition + Vector2.up * PlayerHeight / 2f;
-        //    var tempPos = new Vector2(body.position.x, finalPos.y);
-        //    var delta = Normalized(finalPos.x - tempPos.x);
-        //    body.MovePosition(tempPos);
-
-        //    DelayPhysicsFrame(this, () => 
-        //    {
-        //        body.MovePosition(finalPos);
-        //        jump = false;
-        //        if(Mathf.Abs(xMove) > 0.1f)
-        //            body.velocity = Vector2.right * delta * LedgeClimbBoost;
-        //    });
-        //}
-
-        //TODO: process knockback and that kind of stuff.
-        /// <summary>
-        /// Process a hit.
-        /// </summary>
-        /// <param name="hitData"></param>
-        //public override void ProcessHit(AttackHitData hitData)
-        //{
-        //    if(!isInvincible)
-        //        currentHealth -= hitData.Damage;
-        //}
-        //public override void ProcessHit(AttackHitData hitData, bool isOnlyDamage)
-        //{
-        //    if (isOnlyDamage && !isInvincible)
-        //        currentHealth -= hitData.Damage;
-        //    else
-        //        ProcessHit(hitData);
-        //}
-
-        /// <summary>
-        /// Reset the Player to his start values.
-        /// </summary>
-        //internal override void ResetEntity()
-        //{
-        //    transform.position = startPos;
-        //    body.velocity = Vector2.zero;
-        //}
-
-
-        /// <summary>
-        /// Makes the player face towards the mouse
-        /// </summary>
-        //[System.Obsolete("This doesnt make sense in the long run. really. Use X-Velocity and wall-detection a factor in look direction.")]
-        //private void FaceMouse()
-        //{
-        //    var myX = transform.position.x;
-        //    var mousePos = (Vector2)camera.ScreenToWorldPoint(Input.mousePosition);
-        //    directionToMouse = (mousePos - (Vector2)transform.position).normalized;
-        //    int newFacingDirection = NormalizeInt(mousePos.x - myX);
-        //    if (newFacingDirection == facingDirection)
-        //        return;
-        //    facingDirection = newFacingDirection;
-        //    transform.localScale = new Vector3(facingDirection, 1.0f, 1.0f);
-        //}
-        //[System.Serializable]
-        //public struct PlayerControllerSettings
-        //{
-        //    [SerializeField, Tooltip("height of the players hitbox")]
-        //    internal float playerHeight;
-        //    [SerializeField, Tooltip("width of the players hitbox")]
-        //    internal float playerWidth;
-        //    [SerializeField, Tooltip("The fixed height the player can jump (in Units).")]
-        //    internal float jumpHeight;
-        //    [SerializeField, Tooltip("how fast the player usually moves on the ground.")]
-        //    internal float targetSpeed;
-        //    [SerializeField, Tooltip("how fast the speed of the player changes while on ground.")]
-        //    internal float acceleration;
-        //    [SerializeField, Tooltip("how fast should the player change momentum while mid-air")]
-        //    internal float airControlStrength;
-        //    [SerializeField, Tooltip("strength of wall jumps")]
-        //    internal float wallJumpStrength;
-        //    [SerializeField, Tooltip("length of the dash")]
-        //    internal float dashLength;
-        //    [SerializeField, Tooltip("dash cooldown")]
-        //    internal float dashCooldown;
-        //    [SerializeField, Tooltip("amount of max charges")]
-        //    internal int dashCharges;
-        //    [SerializeField, Tooltip("The max distance to stick to the ground")]
-        //    internal float maxAdhereDist;
-        //    [SerializeField, Tooltip("The speed the player gains after climbing a ledge")]
-        //    internal float ledgeClimbBoost;
-
-        //    public static PlayerControllerSettings DefaultSettings 
-        //        => new PlayerControllerSettings()
-        //        {
-        //            playerHeight = 0.8f,
-        //            playerWidth = 0.8f,
-        //            jumpHeight = 1.0f,
-        //            targetSpeed = 1.0f,
-        //            acceleration = 2.0f,
-        //            airControlStrength = 0.25f,
-        //            wallJumpStrength = 0.75f,
-        //            dashLength = 3.5f,
-        //            dashCooldown = 2.5f,
-        //            dashCharges = 2,
-        //            maxAdhereDist = 0.1f,
-        //            ledgeClimbBoost = 4f
-        //        };
-
-        //}
-        #endregion
     }
 }

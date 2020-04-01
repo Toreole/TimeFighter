@@ -14,8 +14,8 @@ namespace Game
         protected GroundSoundPack soundPack;
         [SerializeField, EnumFlags]
         protected GroundFlags info;
-
-        public bool IsClimbable => info.HasFlag(GroundFlags.Climbable);
+        
+        public bool HasFlag(GroundFlags flag) => info.HasFlag(flag);
     }
 
     [System.Flags]
