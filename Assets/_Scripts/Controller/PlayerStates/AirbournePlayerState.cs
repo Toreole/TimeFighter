@@ -7,8 +7,11 @@ namespace Game.Controller
     {
         public override void FixedStep(Vector2 input, float deltaTime)
         {
-            //TODO: think about some usecases for this, atm its just dead lol.
-            if(controller.IsTouchingWall && controller.JumpBeingHeld)
+            Vector2 lastVel = controller.LastVel;
+            //Update the facing direction.
+            controller.FlipX = lastVel.x > 0 ? false : lastVel.x < 0 ? true : controller.FlipX;
+            //check for entering wall.
+            if(controller.IsTouchingWall && controller.JumpBeingHeld && lastVel.y <= 0)
             {
                 controller.SwitchToState<WallPlayerState>();
             }

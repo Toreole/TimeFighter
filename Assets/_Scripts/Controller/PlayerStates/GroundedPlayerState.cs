@@ -70,7 +70,7 @@ namespace Game.Controller
             //baseline for the following calculations
             Vector2 velocity = Body.velocity;
             //flip the renderer on the Y axis (mirror) if youre going left
-            controller.FlipX = Mathf.Approximately(velocity.x, 0)? controller.FlipX : velocity.x < 0;
+            controller.FlipX = Mathf.Abs(velocity.x) < 0.01? controller.FlipX : velocity.x < 0;
 
             AddGroundCounterForce();
 

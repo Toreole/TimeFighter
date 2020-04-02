@@ -68,6 +68,7 @@ namespace Game.Controller
         { get => dashSpeed; }
         public float RollFallThreshold => rollFallThreshold;
         public float FallDamageThreshold => fallDamageThreshold;
+        public float HalfWidth => halfWidth; //i need this for climbing.
 
         public bool FlipX { get => renderer.flipX; set => renderer.flipX = value; }
 
@@ -96,7 +97,7 @@ namespace Game.Controller
         /// Info about the ground material and its connected sounds.
         /// </summary>
         protected GroundData currentGround = null;
-        protected GroundData currentWall = null;
+        protected WallInfo currentWall = default;
 
         protected ContactPoint2D[] contactPoints = new ContactPoint2D[16];
         protected ContactFilter2D filter;
@@ -130,7 +131,7 @@ namespace Game.Controller
         protected Vector2 groundNormal = Vector2.up; 
         public Vector2 GroundNormal => groundNormal;
         public GroundData CurrentGround => currentGround;
-        public GroundData CurrentWall => currentWall;
+        public WallInfo CurrentWall => currentWall;
         //public float GroundFriction 
         //{ get; protected set; } = 0.4f;
         public bool  StickToGround 
@@ -417,7 +418,7 @@ namespace Game.Controller
         /// </summary>
         void CheckForWall()
         {
-            float length = halfWidth + groundedTolerance; //standard procedure.
+            float length = halfWidth + 0.1f; //standard procedure.
             Vector2 direction = FlipX ? Vector2.left : Vector2.right;
             RaycastHit2D hit;
 #if UNITY_EDITOR
@@ -429,10 +430,9 @@ namespace Game.Controller
                 //verify angle limit.
                 if (Mathf.Abs(hit.normal.x) >= 0.98f)
                 {
-#if UNITY_EDITOR
-                    Debug.Log($"touching wall {hit.collider.name}", hit.collider);
-#endif
-                    currentWall = hit.collider.GetComponent<GroundData>() ?? currentWall;
+                    currentWall.materialInfo = hit.collider.GetComponent<GroundData>() ?? currentWall.materialInfo;
+                    currentWall.normal = hit.normal;
+                    currentWall.point = hit.point;
                     IsTouchingWall = true; //use property, this can call the event
                     return;
                 }
@@ -484,7 +484,7 @@ namespace Game.Controller
         /// </summary>
         public bool WallHasFlag(GroundFlags flag)
         {
-            return currentWall ? currentWall.HasFlag(flag) : false;
+            return currentWall.materialInfo ? currentWall.materialInfo.HasFlag(flag) : false;
         }
 
         //TODO: find use cases for these.
@@ -497,5 +497,12 @@ namespace Game.Controller
         {
             
         }
+    }
+
+    public struct WallInfo
+    {
+        public GroundData materialInfo;
+        public Vector2 point;
+        public Vector2 normal;
     }
 }

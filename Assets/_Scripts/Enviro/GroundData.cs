@@ -28,5 +28,6 @@ namespace Game
         Hookable = 1 << 3,
         Fragile = 1 << 4,
         Transparent = 1 << 5,
+        Moving = 1 << 6,
     }
 }

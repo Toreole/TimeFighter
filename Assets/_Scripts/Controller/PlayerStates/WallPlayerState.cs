@@ -4,25 +4,57 @@ namespace Game.Controller
 {
     public class WallPlayerState : PlayerStateBehaviour
     {
+        bool completeEnter = false;
+
         public override void FixedStep(Vector2 input, float deltaTime)
         {
-            //notes: movement is limited to up/down along the wall.
-            //down: depending on friction / slippery?
-            //lastvel.y needs to be slowed down to +-0 at the beginning?
+            if (completeEnter)
+            {
+                //notes: movement is limited to up/down along the wall.
+                //down: depending on friction / slippery?
+                //stick to wall -> rotate 
+
+                //default: no input for now
+                Body.velocity = Vector2.zero;
+                Debug.Log("ree");
+            }
+            else //enter: slow down
+            {
+                //lastvel.y needs to be slowed down to +-0 at the beginning?
+                Vector2 nextVel = Vector2.MoveTowards(Body.velocity, Vector2.zero, deltaTime * controller.BaseSpeed / 2f);
+                if(nextVel.sqrMagnitude < 0.4)
+                {
+                    nextVel = Vector2.zero;
+                    completeEnter = true;
+                }
+                Body.velocity = nextVel;
+            }
+            //Body.rotation = Vector2.SignedAngle(controller.CurrentWall.normal)
+            //Align the player with the wall. 
+            var wall = controller.CurrentWall;
+            var normal = wall.normal; //temp the normal of the wall.
+            Body.rotation = Vector2.SignedAngle((normal.x >= 0 ? Vector2.right : Vector2.left), normal);
+            //Move towards the wall
+            Vector2 offset = (normal.x >= 0 ? Vector2.right : Vector2.left) * (controller.HalfWidth + 0.02f);
+            Body.position = wall.point + offset; 
         }
 
         public override void OnEnterState()
         {
             controller.OnPressJump += Jump;
-            Body.velocity = Vector2.zero;
+            //Body.velocity = Vector2.zero;
+            controller.OnEnterGround += EnterGround;
             Body.gravityScale = 0f;
+            controller.FlipX = controller.CurrentWall.normal.x > 0;
             Debug.Log("Wall State Enter");
         }
 
         public override void OnExitState()
         {
             controller.OnPressJump -= Jump;
+            controller.OnEnterGround -= EnterGround;
             Body.gravityScale = 1f;
+            Body.rotation = 0f;
         }
 
         //leave the wall with a jump
@@ -38,6 +70,11 @@ namespace Game.Controller
             controller.FlipX = !controller.FlipX;
             //switch to airbourne controls.
             controller.SwitchToState<AirbournePlayerState>();
+        }
+
+        void EnterGround(LandingType ignored)
+        {
+            controller.SwitchToState<GroundedPlayerState>(); //Grounded state overrides this.
         }
     }
 }
