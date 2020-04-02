@@ -418,7 +418,7 @@ namespace Game.Controller
         /// </summary>
         void CheckForWall()
         {
-            float length = halfWidth + 0.1f; //standard procedure.
+            float length = halfWidth + 0.12f; //standard procedure.
             Vector2 direction = FlipX ? Vector2.left : Vector2.right;
             RaycastHit2D hit;
 #if UNITY_EDITOR

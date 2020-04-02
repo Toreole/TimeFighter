@@ -16,7 +16,8 @@ namespace Game.Controller
 
                 //default: no input for now
                 Body.velocity = Vector2.zero;
-                Debug.Log("ree");
+                Body.velocity = Vector2.up * Util.Normalized(input.y) * controller.BaseSpeed / 2f;
+                //Debug.Log("ree");
             }
             else //enter: slow down
             {
