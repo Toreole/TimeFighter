@@ -317,7 +317,7 @@ namespace Game.Controller
                 //Debug.Log("Dont stick");
                 return false;
             }
-            //Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
+            Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
             float xOffset = Body.velocity.x * Time.deltaTime;
             Vector2 rayOrigin = Body.position + new Vector2(xOffset, 0f);
             
@@ -329,11 +329,10 @@ namespace Game.Controller
 
                 var pos = Body.position;
                 //If there is a big enough change in surface angle, adjust the velocity of the player to walk along it
-                if (Vector2.Dot(groundNormal, hit2D.normal) < 0.95)
-                {
+                
                     float alpha = Vector2.SignedAngle(groundNormal, hit2D.normal);
                     Body.velocity = RotateVector2D(Body.velocity, alpha);
-                }
+                //print(alpha);
                 pos.y = hit2D.centroid.y;
                 Body.position = pos;
                 groundNormal = hit2D.normal;
@@ -359,6 +358,7 @@ namespace Game.Controller
                 //If necessary, "stick" to the ground.
                 if (stickToGround)
                 {
+                    print("cocks");
                     Vector2 newPos = Body.position;
                     newPos.y = hit2D.point.y + halfHeight;
                     Body.position = newPos;
