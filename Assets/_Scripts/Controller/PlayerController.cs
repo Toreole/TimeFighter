@@ -317,27 +317,46 @@ namespace Game.Controller
                 //Debug.Log("Dont stick");
                 return false;
             }
-            Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
             float xOffset = Body.velocity.x * Time.deltaTime;
             Vector2 rayOrigin = Body.position + new Vector2(xOffset, 0f);
-            
+
             //TODO its not 100% accurate at times.
             RaycastHit2D hit2D;
-            if (hit2D = Physics2D.CircleCast(rayOrigin, halfHeight, Vector2.down, groundedTolerance, groundMask))
+            //! EDIT: Changed CircleCast for standard Ray
+            if (hit2D = Physics2D.Raycast(rayOrigin, Vector2.down, halfHeight + groundedTolerance, groundMask))
             {
                 float oldVel = Body.velocity.magnitude;
+                //print("kekw");
 
-                var pos = Body.position;
-                //If there is a big enough change in surface angle, adjust the velocity of the player to walk along it
-                
-                    float alpha = Vector2.SignedAngle(groundNormal, hit2D.normal);
-                    Body.velocity = RotateVector2D(Body.velocity, alpha);
-                //print(alpha);
-                pos.y = hit2D.centroid.y;
+                //re-set the velocity to be along the ground.
+                //print($"Old: {Body.velocity.x} , {Body.velocity.y}");
+                float alpha = Vector2.SignedAngle(Vector2.up, hit2D.normal);
+                if (Mathf.Abs(alpha) > maxSteepAngle)
+                    return false;
+                //TODO: This correctly fixes the speed, but prevents the character from accelerating when going down slopes...
+                float currSpeed = Body.velocity.magnitude;
+                Vector2 velocity = new Vector2(Util.Normalized(Body.velocity.x) * currSpeed, 0);
+                velocity = RotateVector2D(velocity, alpha);
+                Debug.DrawLine(Body.position, Body.position + velocity, Color.green, 5f);
+                Body.velocity = velocity;
+
+                //Vector2 tempVel = RotateVector2D(Body.velocity, alpha);
+                //Debug.DrawLine(Body.position, Body.position + tempVel, Color.green, 5f);
+                //Body.velocity = RotateVector2D(Body.velocity, alpha);
+
+                //get the ground data right here.
+                currentGround = hit2D.collider.GetComponent<GroundData>() ?? currentGround;
+
+                //set the position.
+                Vector2 pos = Body.position;
+                pos.y = hit2D.point.y + halfHeight; //edit: add halfheight instead of setting this to the centroid?
                 Body.position = pos;
                 groundNormal = hit2D.normal;
+                return true;
             }
-            return hit2D;
+            print("could not find ground because im retarded");
+            Debug.DrawRay(rayOrigin, Vector2.down * (halfHeight + groundedTolerance), Color.blue, 10f);
+            return false;
         }
 
         ///The first solution for finding ground i tried out.

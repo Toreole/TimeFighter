@@ -31,6 +31,7 @@ namespace Game.Controller
         {
             controller.OnPressJump -= Jump;
             controller.OnLeaveGround -= OnLeaveGround;
+            controller.StickToGround = false;
         }
         
         /// <summary>
@@ -120,6 +121,7 @@ namespace Game.Controller
         
         private void OnLeaveGround()
         {
+            Debug.DrawLine(Body.position, Body.position + Vector2.up, Color.red, duration: 200f);
             Debug.Log("Left Ground"); 
             controller.StickToGround = false;
             controller.SwitchToState<AirbournePlayerState>();

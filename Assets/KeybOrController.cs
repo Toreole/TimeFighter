@@ -14,6 +14,7 @@ public class KeybOrController : MonoBehaviour
     private void Start()
     {
         input.onControlsChanged += ControlChange;
+        image.sprite = input.currentControlScheme == "Gamepad" ? controller : keyb;
     }
 
     private void ControlChange(PlayerInput obj)

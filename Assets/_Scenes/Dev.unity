@@ -3668,7 +3668,7 @@ MonoBehaviour:
     m_Bits: 1
   halfHeight: 0.5
   halfWidth: 0.25
-  groundedTolerance: 0.25
+  groundedTolerance: 0.24
   airJumps: 1
   movementAction: {fileID: 5672190668058900007, guid: a9108a9613b38dd43aa04bde90e289c2,
     type: 3}
