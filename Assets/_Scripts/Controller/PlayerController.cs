@@ -227,7 +227,8 @@ namespace Game.Controller
             if (movementAction.action != null)
             {
                 movementInput = movementAction.action.ReadValue<Vector2>();
-                movementRaw.x = movementInput.x > 0.0f ? 1 : (movementInput.x < 0.0f? -1 : 0);
+                movementRaw.x = Normalized(movementInput.x);
+                movementRaw.y = Normalized(movementInput.y);
             }
             if (jumpAction.action != null)
             {
@@ -326,24 +327,19 @@ namespace Game.Controller
             if (hit2D = Physics2D.Raycast(rayOrigin, Vector2.down, halfHeight + groundedTolerance, groundMask))
             {
                 float oldVel = Body.velocity.magnitude;
-                //print("kekw");
 
                 //re-set the velocity to be along the ground.
-                //print($"Old: {Body.velocity.x} , {Body.velocity.y}");
                 float alpha = Vector2.SignedAngle(Vector2.up, hit2D.normal);
                 if (Mathf.Abs(alpha) > maxSteepAngle)
                     return false;
-                //TODO: This correctly fixes the speed, but prevents the character from accelerating when going down slopes...
+
+                //yeet
                 float currSpeed = Body.velocity.magnitude;
                 Vector2 velocity = new Vector2(Util.Normalized(Body.velocity.x) * currSpeed, 0);
                 velocity = RotateVector2D(velocity, alpha);
                 Debug.DrawLine(Body.position, Body.position + velocity, Color.green, 5f);
                 Body.velocity = velocity;
-
-                //Vector2 tempVel = RotateVector2D(Body.velocity, alpha);
-                //Debug.DrawLine(Body.position, Body.position + tempVel, Color.green, 5f);
-                //Body.velocity = RotateVector2D(Body.velocity, alpha);
-
+                
                 //get the ground data right here.
                 currentGround = hit2D.collider.GetComponent<GroundData>() ?? currentGround;
 
@@ -452,6 +448,8 @@ namespace Game.Controller
                     currentWall.materialInfo = hit.collider.GetComponent<GroundData>() ?? currentWall.materialInfo;
                     currentWall.normal = hit.normal;
                     currentWall.point = hit.point;
+                    Vector2 tangent = Vector3.Cross(currentWall.normal, Vector3.forward);
+                    currentWall.upTangent = tangent.y < 0 ? -tangent : tangent;
                     IsTouchingWall = true; //use property, this can call the event
                     return;
                 }
@@ -523,5 +521,6 @@ namespace Game.Controller
         public GroundData materialInfo;
         public Vector2 point;
         public Vector2 normal;
+        public Vector2 upTangent;
     }
 }

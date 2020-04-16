@@ -33,7 +33,7 @@ namespace Game.Controller
             controller.OnLeaveGround -= OnLeaveGround;
             controller.StickToGround = false;
         }
-        
+
         /// <summary>
         /// Old jump.
         /// </summary> 

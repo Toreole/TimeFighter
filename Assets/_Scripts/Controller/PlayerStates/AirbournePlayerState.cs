@@ -10,8 +10,8 @@ namespace Game.Controller
             Vector2 lastVel = controller.LastVel;
             //Update the facing direction.
             controller.FlipX = lastVel.x > 0 ? false : lastVel.x < 0 ? true : controller.FlipX;
-            //check for entering wall.
-            if(controller.IsTouchingWall && controller.JumpBeingHeld && lastVel.y <= 0)
+            //check for entering wall. moveinput and wall normal should be in opposite direction (move against the wall) to auto-enter the wall state.
+            if(controller.IsTouchingWall && controller.MoveInputRaw.x * controller.CurrentWall.normal.x < 0)//old: && controller.JumpBeingHeld && lastVel.y <= 0)
             {
                 controller.SwitchToState<WallPlayerState>();
             }
@@ -58,22 +58,31 @@ namespace Game.Controller
             if(controller.CanAirJump)
             {
                 controller.AvailableAirJumps--;
-                float x = controller.MoveInputRaw.x;
-                x = Mathf.Abs(x) < 0.02f ? 0 : Util.Normalized(x);
+                float xInput = controller.MoveInputRaw.x;
+                xInput = Mathf.Abs(xInput) < 0.02f ? 0 : Util.Normalized(xInput);
                 //this determines the direction of the jump. -1 = left; 0 = unchanged; 1 = right;
                 float xVel = Body.velocity.x;
                 Vector2 tVelocity = Vector2.zero;
                 //directional jumps should keep a certain base speed, neutral jumps go straight up
-                var minXspeed = x * controller.BaseSpeed * 0.7f;
-                if (x > 0f ) //positive
+                var minXspeed = xInput * controller.BaseSpeed * 0.7f;
+                if (xInput > 0f ) //positive
                     tVelocity.x = Mathf.Max(xVel, minXspeed);
-                else if (x < 0f) //negative
+                else if (xInput < 0f) //negative
                     tVelocity.x = Mathf.Min(tVelocity.x, minXspeed);
                 else //neutral
                     tVelocity.x = 0;
                 //simple copy pasta from groundedstate jump lol
                 tVelocity.y = Mathf.Sqrt(controller.AirJumpHeight * Util.g2);
                 Body.velocity = tVelocity;
+                return;
+            }
+            if(controller.IsTouchingWall) //simple wall jumps.
+            {
+                WallInfo wall = controller.CurrentWall;
+                Vector2 direction = wall.normal.x > 0 ? new Vector2(0.707f, 0.707f)  : new Vector2(-0.707f, 0.707f); //spooky magic numbers.
+                //direction.Normalize(); //normalize jump vector. - no longer needed since hardcoded normalized vectors lmao.
+                Body.velocity = direction * controller.JumpForce;
+                controller.FlipX = direction.x > 0; //adjust sprite direction just in case.
             }
         }
 

@@ -8,6 +8,9 @@ namespace Game.Controller
 
         public override void FixedStep(Vector2 input, float deltaTime)
         {
+            if (!controller.IsTouchingWall)
+                Debug.Log("ledge?"); //TODO: this APPEARS to correctly detect ledges. do some more testing on it and then make player climb up the ledge when pressing up?
+            WallInfo wall = controller.CurrentWall;
             if (completeEnter)
             {
                 //notes: movement is limited to up/down along the wall.
@@ -16,7 +19,7 @@ namespace Game.Controller
 
                 //default: no input for now
                 Body.velocity = Vector2.zero;
-                Body.velocity = Vector2.up * Util.Normalized(input.y) * controller.BaseSpeed / 2f;
+                Body.velocity = wall.upTangent * Util.Normalized(input.y) * controller.BaseSpeed / 2f;
                 //Debug.Log("ree");
             }
             else //enter: slow down
@@ -32,7 +35,6 @@ namespace Game.Controller
             }
             //Body.rotation = Vector2.SignedAngle(controller.CurrentWall.normal)
             //Align the player with the wall. 
-            var wall = controller.CurrentWall;
             var normal = wall.normal; //temp the normal of the wall.
             Body.rotation = Vector2.SignedAngle((normal.x >= 0 ? Vector2.right : Vector2.left), normal);
             //Move towards the wall
@@ -46,6 +48,14 @@ namespace Game.Controller
             //Body.velocity = Vector2.zero;
             controller.OnEnterGround += EnterGround;
             Body.gravityScale = 0f;
+
+            //make sure that the velocity on X is 0
+            var startVelocity = Body.velocity;
+            startVelocity.x = 0;
+            Body.velocity = startVelocity;
+            //only do the "slide when the enter y vel is negative!
+            completeEnter = startVelocity.y >= 0;
+
             controller.FlipX = controller.CurrentWall.normal.x > 0;
             Debug.Log("Wall State Enter");
         }
