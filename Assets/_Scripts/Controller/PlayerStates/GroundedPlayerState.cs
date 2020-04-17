@@ -12,6 +12,8 @@ namespace Game.Controller
             controller.Stamina += deltaTime * controller.StaminaRegen;
             if (controller.IgnorePlayerInput)
                 return; //it shouldnt move when the player input is ignored anyway.
+            if (controller.GroundHasFlag(GroundFlags.Slippery))
+                return;
             Move(input, deltaTime);
         }
 

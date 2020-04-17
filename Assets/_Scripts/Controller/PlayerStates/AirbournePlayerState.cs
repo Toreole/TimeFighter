@@ -10,6 +10,11 @@ namespace Game.Controller
             Vector2 lastVel = controller.LastVel;
             //Update the facing direction.
             controller.FlipX = lastVel.x > 0 ? false : lastVel.x < 0 ? true : controller.FlipX;
+
+            //better falling / drag
+            lastVel.x = Mathf.Lerp(lastVel.x, 0, 10 * Time.deltaTime);
+            //Debug.DrawLine(Body.position, Body.position + Body.velocity, Color.blue, 10);
+
             //check for entering wall. moveinput and wall normal should be in opposite direction (move against the wall) to auto-enter the wall state.
             if(controller.IsTouchingWall && controller.MoveInputRaw.x * controller.CurrentWall.normal.x < 0)//old: && controller.JumpBeingHeld && lastVel.y <= 0)
             {
@@ -39,16 +44,6 @@ namespace Game.Controller
             controller.SwitchToState<GroundedPlayerState>();
         }
 
-        //this is pretty janky
-        //void EnterWall(GroundData wallData, bool jumpHeld)
-        //{
-        //    //high velocity on y (greater than 0) should not cause the player to enter the climbing state.
-        //    if (wallData.HasFlag(GroundFlags.Climbable) && jumpHeld)
-        //    {
-        //        controller.SwitchToState(new WallPlayerState());
-        //    }
-        //}
-
         /// <summary>
         /// For mid-air jumps
         /// </summary>
@@ -71,14 +66,17 @@ namespace Game.Controller
                     tVelocity.x = Mathf.Min(tVelocity.x, minXspeed);
                 else //neutral
                     tVelocity.x = 0;
-                //simple copy pasta from groundedstate jump lol
-                tVelocity.y = Mathf.Sqrt(controller.AirJumpHeight * Util.g2);
+                //jump
+                tVelocity.y = controller.JumpForce;
                 Body.velocity = tVelocity;
                 return;
             }
             if(controller.IsTouchingWall) //simple wall jumps.
             {
                 WallInfo wall = controller.CurrentWall;
+                //cant climb - cant walljump.
+                if (!wall.materialInfo.HasFlag(GroundFlags.Climbable))
+                    return; 
                 Vector2 direction = wall.normal.x > 0 ? new Vector2(0.707f, 0.707f)  : new Vector2(-0.707f, 0.707f); //spooky magic numbers.
                 //direction.Normalize(); //normalize jump vector. - no longer needed since hardcoded normalized vectors lmao.
                 Body.velocity = direction * controller.JumpForce;

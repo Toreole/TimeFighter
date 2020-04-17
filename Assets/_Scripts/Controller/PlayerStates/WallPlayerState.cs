@@ -19,7 +19,7 @@ namespace Game.Controller
 
                 //default: no input for now
                 Body.velocity = Vector2.zero;
-                Body.velocity = wall.upTangent * Util.Normalized(input.y) * controller.BaseSpeed / 2f;
+                Body.velocity = wall.upTangent * input.y * controller.BaseSpeed * 0.5f;
                 //Debug.Log("ree");
             }
             else //enter: slow down

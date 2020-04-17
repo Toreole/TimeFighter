@@ -331,8 +331,10 @@ namespace Game.Controller
                 //re-set the velocity to be along the ground.
                 float alpha = Vector2.SignedAngle(Vector2.up, hit2D.normal);
                 if (Mathf.Abs(alpha) > maxSteepAngle)
+                {
+                    print("TOO STEEP");
                     return false;
-
+                }
                 //yeet
                 float currSpeed = Body.velocity.magnitude;
                 Vector2 velocity = new Vector2(Util.Normalized(Body.velocity.x) * currSpeed, 0);
