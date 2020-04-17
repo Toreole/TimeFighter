@@ -97,7 +97,7 @@ namespace Game.Controller
         /// Info about the ground material and its connected sounds.
         /// </summary>
         protected GroundData currentGround = null;
-        protected WallInfo currentWall = default;
+        protected WallInfo currentWall = new WallInfo();
 
         protected ContactPoint2D[] contactPoints = new ContactPoint2D[16];
         protected ContactFilter2D filter;
@@ -176,7 +176,7 @@ namespace Game.Controller
             availableAirJumps = airJumps;
             BaseSpeedSqr = baseSpeed * baseSpeed;
             stamina = maxStamina;
-
+            
             //calculate the standard jump force (needs to be recalculated in case the gravity changes.
             JumpForce = Mathf.Sqrt(jumpHeight * Util.g2);
 
@@ -252,7 +252,7 @@ namespace Game.Controller
             }
             if(LastVel.y <= RollFallThreshold || Mathf.Abs(LastVel.x) > BaseSpeed)
             {
-                if (Mathf.Approximately(LastVel.x, 0))
+                if (Mathf.Abs(LastVel.x) < 0.1f)
                     return LandingType.HardLanding;
                 return LandingType.Roll;
             }
@@ -518,7 +518,8 @@ namespace Game.Controller
         }
     }
 
-    public struct WallInfo
+    //EDIT: class instead of struct.
+    public class WallInfo
     {
         public GroundData materialInfo;
         public Vector2 point;

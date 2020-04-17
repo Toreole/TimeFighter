@@ -8,38 +8,79 @@ namespace Game.Controller
 
         public override void FixedStep(Vector2 input, float deltaTime)
         {
-            if (!controller.IsTouchingWall)
-                Debug.Log("ledge?"); //TODO: this APPEARS to correctly detect ledges. do some more testing on it and then make player climb up the ledge when pressing up?
             WallInfo wall = controller.CurrentWall;
             if (completeEnter)
             {
-                //notes: movement is limited to up/down along the wall.
-                //down: depending on friction / slippery?
-                //stick to wall -> rotate 
-
-                //default: no input for now
-                Body.velocity = Vector2.zero;
-                Body.velocity = wall.upTangent * input.y * controller.BaseSpeed * 0.5f;
-                //Debug.Log("ree");
+                DoWallMovement(input, wall);
             }
             else //enter: slow down
             {
-                //lastvel.y needs to be slowed down to +-0 at the beginning?
-                Vector2 nextVel = Vector2.MoveTowards(Body.velocity, Vector2.zero, deltaTime * controller.BaseSpeed / 2f);
-                if(nextVel.sqrMagnitude < 0.4)
-                {
-                    nextVel = Vector2.zero;
-                    completeEnter = true;
-                }
-                Body.velocity = nextVel;
+                WaitEnterWall(deltaTime);
             }
-            //Body.rotation = Vector2.SignedAngle(controller.CurrentWall.normal)
+            //Last step that should always be done.
+            AdjustWallOffset(wall);
+        }
+
+        /// <summary>
+        /// Rotates the player along the wall and adjusts the position.
+        /// </summary>
+        /// <param name="wall"></param>
+        void AdjustWallOffset(WallInfo wall)
+        {
             //Align the player with the wall. 
-            var normal = wall.normal; //temp the normal of the wall.
+            Vector2 normal = wall.normal; //temp the normal of the wall.
             Body.rotation = Vector2.SignedAngle((normal.x >= 0 ? Vector2.right : Vector2.left), normal);
             //Move towards the wall
             Vector2 offset = (normal.x >= 0 ? Vector2.right : Vector2.left) * (controller.HalfWidth + 0.02f);
-            Body.position = wall.point + offset; 
+            Body.position = wall.point + offset;
+        }
+
+        /// <summary>
+        /// Wait for the character to slow down before doing anything.
+        /// </summary>
+        /// <param name="deltaTime"></param>
+        void WaitEnterWall(float deltaTime)
+        {
+            //lastvel.y needs to be slowed down to +-0 at the beginning?
+            Vector2 nextVel = Vector2.MoveTowards(Body.velocity, Vector2.zero, deltaTime * controller.BaseSpeed * 2f);
+            if (nextVel.sqrMagnitude < 0.4)
+            {
+                nextVel = Vector2.zero;
+                completeEnter = true;
+            }
+            Body.velocity = nextVel;
+        }
+
+        /// <summary>
+        /// Move along the wall.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="wall"></param>
+        void DoWallMovement(Vector2 input, WallInfo wall)
+        {
+            //notes: movement is limited to up/down along the wall.
+            //down: depending on friction / slippery?
+            //stick to wall -> rotate 
+            if (!controller.IsTouchingWall)
+            {
+                if (wall.point.y > Body.position.y)
+                {
+                    //go airborne and drop down pog.
+                    if (input.y < -0.8f)
+                    {
+                        controller.SwitchToState<AirbournePlayerState>();
+                        return;
+                    }
+                    //Debug.Log("lower ledge");
+                }
+                else
+                {
+                    //TODO: climb up the ledge
+                }
+            } 
+            //Update velocity.
+            //Body.velocity = Vector2.zero;
+            Body.velocity = wall.upTangent * input.y * controller.BaseSpeed * 0.5f;
         }
 
         public override void OnEnterState()
