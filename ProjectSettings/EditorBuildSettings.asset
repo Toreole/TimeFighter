@@ -6,15 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Scenes/Dev.unity
+    guid: 28fbf5bd366d9f14e8c172c337fa1d22
+  - enabled: 0
     path: Assets/_Scenes/Game_Preload/_PreloadScene.unity
     guid: 20244b8070ca3444b9838fbbad3eb61d
-  - enabled: 1
-    path: Assets/_Scenes/Game_Preload/_Input.unity
-    guid: 2513ed21a77a02a439c2302697abc340
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/Game_Preload/_DiscordRPC_Loader.unity
     guid: b1cb5f697e396204582441bde00d5e86
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Scenes/Game_Preload/_DRM_Check.unity
     guid: 3f70405371b53cd479d52d3f42603f19
   - enabled: 0
@@ -23,9 +23,6 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_Scenes/001_TestArea.unity
     guid: c1647465a5d27b045acd332e4c4eaf82
-  - enabled: 1
-    path: Assets/_Scenes/Dev.unity
-    guid: 28fbf5bd366d9f14e8c172c337fa1d22
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: a2cebfcd20672ae489523b52fa13c58b,
       type: 2}

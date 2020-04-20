@@ -113,9 +113,11 @@ namespace Game.Controller
         //TODO: multiple ways (see Trello)
         void Jump()
         {
+            float vertical = controller.MoveInputRaw.y;
             //uhh how do i rotate text in ms paint?
             //the X Flip should coincide with the direction the player is facing, so X in this case should be the opposite of that.
-            Vector2 direction = new Vector2(controller.FlipX ? 1 : -1, 1).normalized;
+            Vector2 direction = new Vector2(controller.FlipX ? 1 : -1, vertical);
+            direction.Normalize();
             //Apply the jump "force" (velocity).
             Body.velocity = direction * controller.JumpForce;
             //turn around

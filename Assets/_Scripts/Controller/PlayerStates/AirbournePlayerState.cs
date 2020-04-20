@@ -16,7 +16,7 @@ namespace Game.Controller
             //Debug.DrawLine(Body.position, Body.position + Body.velocity, Color.blue, 10);
 
             //check for entering wall. moveinput and wall normal should be in opposite direction (move against the wall) to auto-enter the wall state.
-            if(controller.IsTouchingWall && controller.MoveInputRaw.x * controller.CurrentWall.normal.x < 0)//old: && controller.JumpBeingHeld && lastVel.y <= 0)
+            if(controller.IsTouchingWall && controller.WallHasFlag(GroundFlags.Climbable) && controller.MoveInputRaw.x * controller.CurrentWall.normal.x < 0)//old: && controller.JumpBeingHeld && lastVel.y <= 0)
             {
                 controller.SwitchToState<WallPlayerState>();
             }
@@ -74,9 +74,9 @@ namespace Game.Controller
             if(controller.IsTouchingWall) //simple wall jumps.
             {
                 WallInfo wall = controller.CurrentWall;
-                //cant climb - cant walljump.
-                if (!wall.materialInfo.HasFlag(GroundFlags.Climbable))
-                    return; 
+                //cant climb - cant walljump.?
+                //if (!wall.materialInfo.HasFlag(GroundFlags.Climbable))
+                    //return; 
                 Vector2 direction = wall.normal.x > 0 ? new Vector2(0.707f, 0.707f)  : new Vector2(-0.707f, 0.707f); //spooky magic numbers.
                 //direction.Normalize(); //normalize jump vector. - no longer needed since hardcoded normalized vectors lmao.
                 Body.velocity = direction * controller.JumpForce;

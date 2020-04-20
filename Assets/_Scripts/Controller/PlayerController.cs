@@ -435,28 +435,35 @@ namespace Game.Controller
         /// </summary>
         void CheckForWall()
         {
-            float length = halfWidth + 0.12f; //standard procedure.
-            Vector2 direction = FlipX ? Vector2.left : Vector2.right;
-            RaycastHit2D hit;
-#if UNITY_EDITOR
-            Debug.DrawRay(Body.position, direction, Color.cyan);
-#endif
-            //check for a collider
-            if(hit = Physics2D.Raycast(Body.position, direction, length, groundMask))
+            Vector2 dir = FlipX ? Vector2.left : Vector2.right;
+            if (!PerformWallCheck(dir))
+                PerformWallCheck(-dir);
+
+            bool PerformWallCheck(Vector2 direction)
             {
-                //verify angle limit.
-                if (Mathf.Abs(hit.normal.x) >= 0.98f)
+                float length = halfWidth + 0.12f; //standard procedure.
+                RaycastHit2D hit;
+#if UNITY_EDITOR
+                Debug.DrawRay(Body.position, direction, Color.cyan);
+#endif
+                //check for a collider
+                if (hit = Physics2D.Raycast(Body.position, direction, length, groundMask))
                 {
-                    currentWall.materialInfo = hit.collider.GetComponent<GroundData>() ?? currentWall.materialInfo;
-                    currentWall.normal = hit.normal;
-                    currentWall.point = hit.point;
-                    Vector2 tangent = Vector3.Cross(currentWall.normal, Vector3.forward);
-                    currentWall.upTangent = tangent.y < 0 ? -tangent : tangent;
-                    IsTouchingWall = true; //use property, this can call the event
-                    return;
+                    //verify angle limit.
+                    if (Mathf.Abs(hit.normal.x) >= 0.98f)
+                    {
+                        currentWall.materialInfo = hit.collider.GetComponent<GroundData>() ?? currentWall.materialInfo;
+                        currentWall.normal = hit.normal;
+                        currentWall.point = hit.point;
+                        Vector2 tangent = Vector3.Cross(currentWall.normal, Vector3.forward);
+                        currentWall.upTangent = tangent.y < 0 ? -tangent : tangent;
+                        IsTouchingWall = true; //use property, this can call the event
+                        return true;
+                    }
                 }
+                isTouchingWall = false; //directly write to the field, there is no exit wall event.
+                return false;
             }
-            isTouchingWall = false; //directly write to the field, there is no exit wall event.
         }
 
         /// <summary>
