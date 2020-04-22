@@ -8,13 +8,15 @@ namespace Game
     /// <summary>
     /// Additional Data of ground/wall colliders.
     /// </summary>
-    public class GroundData : MonoBehaviour
+    public class GroundData : MonoBehaviour, Game.Controller.IHookTarget
     {
         [SerializeField]
         protected GroundSoundPack soundPack;
         [SerializeField, EnumFlags]
         protected GroundFlags info;
-        
+
+        public bool Valid => HasFlag(GroundFlags.Hookable);
+
         public bool HasFlag(GroundFlags flag) => info.HasFlag(flag);
     }
 
@@ -29,5 +31,6 @@ namespace Game
         Fragile = 1 << 4,
         Transparent = 1 << 5,
         Moving = 1 << 6,
+        Bouncy = 1 << 7
     }
 }

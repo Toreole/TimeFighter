@@ -13,6 +13,7 @@ namespace Game.Controller
     {
         //protected instance so it can be used in a static context
         protected static CameraController _instance;
+        public static Camera Current => _instance.camera;
 
         //The actual camera object
         protected new Camera camera;

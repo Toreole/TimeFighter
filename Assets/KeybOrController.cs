@@ -4,21 +4,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class KeybOrController : MonoBehaviour
+namespace Game.Controller.Utility
 {
-    public Sprite controller;
-    public Sprite keyb;
-    public UnityEngine.UI.Image image;
-    public PlayerInput input;
-
-    private void Start()
+    public class KeybOrController : MonoBehaviour
     {
-        input.onControlsChanged += ControlChange;
-        image.sprite = input.currentControlScheme == "Gamepad" ? controller : keyb;
-    }
+        public Sprite controller;
+        public Sprite keyb;
+        public UnityEngine.UI.Image image;
+        public PlayerInput input;
 
-    private void ControlChange(PlayerInput obj)
-    {
-        image.sprite = obj.currentControlScheme == "Gamepad" ? controller : keyb;
+        public static bool UseController { get; private set; } = false;
+
+        private void Start()
+        {
+            input.onControlsChanged += ControlChange;
+            image.sprite = input.currentControlScheme == "Gamepad" ? controller : keyb;
+        }
+
+        private void ControlChange(PlayerInput obj)
+        {
+            image.sprite = (UseController = obj.currentControlScheme == "Gamepad") ? controller : keyb;
+        }
     }
 }

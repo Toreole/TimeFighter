@@ -26,6 +26,7 @@ namespace Game.Controller
         {
             controller.OnEnterGround += EnterGround;
             controller.OnPressJump += Jump;
+            controller.OnSpecialA += controller.StartHook; //hooking!!!!
             //controller.OnEnterWall += EnterWall;
         }
 
@@ -33,14 +34,22 @@ namespace Game.Controller
         {
             controller.OnEnterGround -= EnterGround;
             controller.OnPressJump -= Jump;
+            controller.OnSpecialA -= controller.StartHook; //hooking!!!!
             //controller.OnEnterWall -= EnterWall;
         }
 
         void EnterGround(LandingType landing)
         {
             controller.CanAirJump = true;
-            HandleFall(landing);
             //Debug.Log(controller.lastVerticalVel); <-- this actually seems to get the correct one
+            if (controller.GroundHasFlag(GroundFlags.Bouncy)) //ground is bouncy as hell man, jump and dont land like a lazy ass.
+            {
+                var velocity = controller.LastVel;
+                velocity.y *= -1;
+                Body.velocity = velocity;
+                return;
+            }
+            HandleFall(landing);
             controller.SwitchToState<GroundedPlayerState>();
         }
 
@@ -49,8 +58,20 @@ namespace Game.Controller
         /// </summary>
         void Jump()
         {
+            if (controller.IsTouchingWall) //simple wall jumps. -> have priority over air-jumps!
+            {
+                WallInfo wall = controller.CurrentWall;
+                //cant climb - cant walljump.?
+                //if (!wall.materialInfo.HasFlag(GroundFlags.Climbable))
+                //return; 
+                Vector2 direction = wall.normal.x > 0 ? new Vector2(0.707f, 0.707f) : new Vector2(-0.707f, 0.707f); //spooky magic numbers.
+                //direction.Normalize(); //normalize jump vector. - no longer needed since hardcoded normalized vectors lmao.
+                Body.velocity = direction * controller.JumpForce;
+                controller.FlipX = direction.x > 0; //adjust sprite direction just in case.
+                return;
+            }
             //obviously only if you can jump
-            if(controller.CanAirJump)
+            if (controller.CanAirJump)
             {
                 controller.AvailableAirJumps--;
                 float xInput = controller.MoveInputRaw.x;
@@ -70,17 +91,6 @@ namespace Game.Controller
                 tVelocity.y = controller.JumpForce;
                 Body.velocity = tVelocity;
                 return;
-            }
-            if(controller.IsTouchingWall) //simple wall jumps.
-            {
-                WallInfo wall = controller.CurrentWall;
-                //cant climb - cant walljump.?
-                //if (!wall.materialInfo.HasFlag(GroundFlags.Climbable))
-                    //return; 
-                Vector2 direction = wall.normal.x > 0 ? new Vector2(0.707f, 0.707f)  : new Vector2(-0.707f, 0.707f); //spooky magic numbers.
-                //direction.Normalize(); //normalize jump vector. - no longer needed since hardcoded normalized vectors lmao.
-                Body.velocity = direction * controller.JumpForce;
-                controller.FlipX = direction.x > 0; //adjust sprite direction just in case.
             }
         }
 

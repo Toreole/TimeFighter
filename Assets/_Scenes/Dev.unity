@@ -372,7 +372,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: f078282394db12442a9232f16d60f26c, type: 3}
-  m_Color: {r: 0.46226418, g: 0.2150415, b: 0, a: 1}
+  m_Color: {r: 0.024341453, g: 0.4627451, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
@@ -390,7 +390,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 23998457}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 26.627, y: -20.87, z: 0.72}
+  m_LocalPosition: {x: 27.99, y: -18.64, z: 0.72}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -409,7 +409,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPack: {fileID: 0}
-  info: 9
+  info: 128
 --- !u!1 &41146911
 GameObject:
   m_ObjectHideFlags: 0
@@ -3901,6 +3901,7 @@ GameObject:
   - component: {fileID: 1263488360}
   - component: {fileID: 1263488362}
   - component: {fileID: 1263488363}
+  - component: {fileID: 1263488364}
   - component: {fileID: 1263488361}
   m_Layer: 8
   m_Name: PlayerBrain
@@ -4012,11 +4013,33 @@ MonoBehaviour:
   halfWidth: 0.25
   groundedTolerance: 0.24
   airJumps: 1
+  hookController: {fileID: 1263488364}
   movementAction: {fileID: 5672190668058900007, guid: a9108a9613b38dd43aa04bde90e289c2,
     type: 3}
   jumpAction: {fileID: 335763634227698153, guid: a9108a9613b38dd43aa04bde90e289c2,
     type: 3}
+  specialAction: {fileID: -8888745304648998724, guid: a9108a9613b38dd43aa04bde90e289c2,
+    type: 3}
   renderer: {fileID: 802207984}
+--- !u!114 &1263488364
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1263488359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1f1d346c1bfc265498fb4a87db9a9e5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hookPrefab: {fileID: 1328023451071090194, guid: 5cd9a85a0ee56e54791545d5dca6402b,
+    type: 3}
+  throwSpeed: 13
+  maxDistance: 6
+  hitMask:
+    serializedVersion: 2
+    m_Bits: 1
 --- !u!1 &1303972182
 GameObject:
   m_ObjectHideFlags: 0

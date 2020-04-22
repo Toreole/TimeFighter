@@ -34,11 +34,13 @@ namespace Game.Controller
         protected float groundedTolerance = 0.1f;
         [SerializeField]
         protected int airJumps = 1;
+        [SerializeField]
+        protected GrapHookController hookController;
         [Header("Input")]
         [SerializeField]
         protected InputActionReference movementAction;
         [SerializeField]
-        protected InputActionReference jumpAction;
+        protected InputActionReference jumpAction, specialAction;
         [SerializeField, Header("Rendering")]
         protected new SpriteRenderer renderer;
 
@@ -217,30 +219,29 @@ namespace Game.Controller
         /// </summary>
         void FetchInput()
         { 
-            if(ignorePlayerInput)
+            if(ignorePlayerInput) //if ignored, reset to defaults.
             {
                 movementInput = Vector2.zero;
                 jumpHold = false;
                 jumpPressed = false;
                 return;
             }
-            if (movementAction.action != null)
+            if (movementAction.action != null) //moving
             {
                 movementInput = movementAction.action.ReadValue<Vector2>();
                 movementRaw.x = Normalized(movementInput.x);
                 movementRaw.y = Normalized(movementInput.y);
             }
-            if (jumpAction.action != null)
+            if (jumpAction.action != null) //jumping 
             {
                 jumpPressed = jumpAction.action.triggered;
                 jumpHold = jumpAction.action.phase == InputActionPhase.Started;
             }
-            //movementInput.x = InputManager.GetAxis("Horizontal");
-            //movementInput.y = InputManager.GetAxis("Vertical");
-            //movementRaw.x   = InputManager.GetAxisRaw("Horizontal");
-            //movementRaw.y   = InputManager.GetAxisRaw("Vertical");
-            //jumpPressed     = InputManager.GetButtonDown("Jump");
-            //jumpHold        = InputManager.GetButton("Jump");
+            if(specialAction.action != null) // special action
+            {
+                if (specialAction.action.triggered)
+                    OnSpecialA?.Invoke();
+            }
         }
 
         LandingType HandleLanding()
@@ -522,6 +523,13 @@ namespace Game.Controller
         private void OnTriggerStay(Collider other)
         {
             
+        }
+
+        public void StartHook()
+        {
+            //print("start hook");
+            if (hookController)
+                hookController.Throw();
         }
     }
 

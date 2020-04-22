@@ -1,164 +1,103 @@
 ﻿using UnityEngine;
+using System;
+using Game.Controller.Utility;
 using System.Collections;
-using System.Collections.Generic;
+using Game.Controller.PlayerStates;
+using UnityEngine.InputSystem;
 
 namespace Game.Controller
 {
-    public class GrapHookController : GenericHook 
+    [RequireComponent(typeof(PlayerController))]
+    public class GrapHookController : MonoBehaviour
     {
-        [Header("Grapling Hook Fields")]
         [SerializeField]
-        protected float pullSpeed = 5f;
+        protected GameObject hookPrefab;
         [SerializeField]
-        protected float gravity = -9.81f;
+        protected float throwSpeed = 20, maxDistance = 8;
         [SerializeField]
-        protected float minSquareDist = 3f;
-        [SerializeField]
-        protected CircleCollider2D triggerCollider;
-        [Header("Extra Display")]
-        [SerializeField]
-        protected GameObject displayPrefab;
-        protected GameObject activeDisplay;
+        protected LayerMask hitMask;
+        
+        SpriteRenderer activeHookRenderer;
+        Transform activeHook;
+        PlayerController controller;
 
-        protected Vector2 hookOffset;
-        protected List<IHookable> hookables = new List<IHookable>();
-        protected Transform preferredTarget;
+        //true => away from player | false => towards player.
+        bool goingOutward = true;
+        bool ongoing = false;
+        float currentDistance = 0f;
 
-#if UNITY_EDITOR
-        private void Update()
+        //some initial setup.
+        private void Start()
         {
-            triggerCollider.radius = maxDistance;
-        }
-#endif
-
-        //This basically acts as the Start() so instantiate the prefab in here
-        public override void ClaimOwnership(Entity target)
-        {
-            base.ClaimOwnership(target);
-
-            activeDisplay = Instantiate(displayPrefab);
-            activeDisplay.SetActive(false);
+            controller = GetComponent<PlayerController>();
         }
 
-        //
-        private void OnTriggerEnter2D(Collider2D collision)
+        //Throw the hook hotward.
+        public void Throw()
         {
-            if(collision.CompareTag(targetTag))
-            {
-                //Debug.Log("found hookable");
-                var temp = collision.GetComponent<IHookable>();
-                if (temp != null)
-                    if(temp.HasFlag(this.hookType))
-                        hookables.Add(temp);
-            }
-        }
-        private void OnTriggerExit2D(Collider2D collision)
-        {
-            if (collision.CompareTag(targetTag))
-            {
-                var temp = collision.GetComponent<IHookable>();
-                if (temp != null)
-                    hookables.Remove(temp);
-            }
-        }
-
-        //draw the currently optimal target and display it i guess
-        private void OnTriggerStay2D(Collider2D collision)
-        {
-            if (!IsSelected || hookables.Count == 0)
-            {
-                activeDisplay.SetActive(false);
+            if (ongoing)
                 return;
+            //Instantiate a new hook.
+            GameObject instance = Instantiate(hookPrefab);
+            activeHook = instance.transform;
+            activeHookRenderer = instance.GetComponent<SpriteRenderer>();
+
+            Vector2 direction;
+            //TODO: maybe find a nicer way to do this.
+            if(KeybOrController.UseController)
+            {
+                var gamepad = Gamepad.current;
+                direction = gamepad.leftStick.ReadValue();
+                direction.Normalize();
             }
-            FindPreferredTarget();
+            else
+            {
+                var mouse = Mouse.current;
+                Vector2 screenPos = mouse.position.ReadValue();
+                Vector3 worldPos = CameraController.Current.ScreenToWorldPoint(screenPos);
+                direction = worldPos - transform.position;
+                direction.Normalize();
+            }
+            //Start the damn thing.
+            StartCoroutine(DoUpdate(direction));
         }
 
-        /// <summary>
-        /// Find the preferred hook target, then display it.
-        /// </summary>
-        private void FindPreferredTarget()
+        //move forward.
+        IEnumerator DoUpdate(Vector2 direction)
         {
-            //! TargetDirection
-            float lastDot = -1000f;
-            Vector2 dist;
-            preferredTarget = null;
-            foreach(var hookable in hookables)
+            //0. correct rotation and reset distance counter
+            activeHook.up = direction;
+            currentDistance = 0f;
+            RaycastHit2D hit;
+            for (; currentDistance < maxDistance; currentDistance += Time.deltaTime * throwSpeed)
             {
-                var offset = hookable.Position - entity.Position;
-                dist = (hookable.Position - entity.Position).normalized;
-                var dot = Vector2.Dot(TargetDirection, dist);
-                if(dot > lastDot && offset.sqrMagnitude >= minSquareDist)
+                //1. Move to center.
+                activeHook.position = (Vector2)transform.position + direction * (currentDistance * 0.5f);
+                //2. adjust size of hook sprite.
+                activeHookRenderer.size = new Vector2(1, currentDistance);
+                //3. check for valid hit
+                if(hit = Physics2D.Raycast(transform.position, direction, currentDistance, hitMask))
                 {
-                    preferredTarget = hookable.M_Transform;
-                    lastDot = dot;
+                    if (hit.transform.GetComponent<IHookTarget>() != null)
+                        controller.SwitchToState(new HookFlyPlayerState(hit.point, activeHookRenderer));
+                    else
+                        Destroy(activeHook.gameObject);
+                    ongoing = false;
+                    yield break;
                 }
-            }
-            if (preferredTarget == null)
-            {
-                activeDisplay.SetActive(false);
-                return;
-            }
-
-            activeDisplay.SetActive(true);
-            activeDisplay.transform.position = preferredTarget.position;
-        }
-
-        /// <summary>
-        /// Do Hook yay
-        /// </summary>
-        //TODO: this handles everything as static anchor right now, pulling movable objects should be implemented soon (tm)
-        protected override IEnumerator DoHook()
-        {
-            if (!preferredTarget)
-            {
-                yield break;
-            }
-            //yikes
-            var sqrDistance = Vector2.SqrMagnitude((Vector2)preferredTarget.position - entity.Position);
-            if (sqrDistance < minSquareDist || sqrDistance > maxDistance*maxDistance)
-                yield break;
-            CanPerform   = false;
-            IsPerforming = true;
-
-            //hook "animation"
-            ropeRenderer.gameObject.SetActive(true);
-            yield return ShootHook(preferredTarget.position);
-
-            AddHookForce();
-
-            for(float t = 0f; t < 0.1f; t += Time.deltaTime)
-            {
-                UpdateChain(preferredTarget.position);
                 yield return null;
             }
-
-            BreakChain();
-            yield return DoCooldown();
+            //no target, destroy.
+            Destroy(activeHook.gameObject);
         }
 
-        /// <summary>
-        /// Add the hook force needed to get the player to the needed position
-        /// </summary>
-        //TODO: vary speed based on distance? (min, max, lerp)
-        void AddHookForce()
+        //cancel the ongoing hook.
+        void Interrupt()
         {
-            //distance 
-            var ds = (Vector2)preferredTarget.position - entity.Position;
-            //required time for the diagonal
-            var dt = ds.magnitude / pullSpeed;
-
-            //linear yVelocity
-            var vy = ds.y / dt;
-            //inverse square yVelocity for curve
-            var vy0 = 0.5f * gravity * dt;
-            //combined velocity on y
-            var yVel = vy - vy0;
-
-            //velocity on x
-            var xVel = ds.x / dt;
-
-            //apply the velocity to the entity
-            entity.Body.velocity = new Vector2(xVel, yVel);
+            StopAllCoroutines();
+            ongoing = false;
+            //not sure what else huh.
         }
+
     }
 }
