@@ -327,6 +327,9 @@ namespace Game.Controller
             //! EDIT: Changed CircleCast for standard Ray
             if (hit2D = Physics2D.Raycast(rayOrigin, Vector2.down, halfHeight + groundedTolerance, groundMask))
             {
+                if (hit2D.collider.usedByEffector)
+                    return false; //probably not a good idea but this might be a temporary fix for platforms.
+
                 float oldVel = Body.velocity.magnitude;
 
                 //re-set the velocity to be along the ground.
@@ -357,46 +360,7 @@ namespace Game.Controller
             Debug.DrawRay(rayOrigin, Vector2.down * (halfHeight + groundedTolerance), Color.blue, 10f);
             return false;
         }
-
-        ///The first solution for finding ground i tried out.
-        protected void RayCastGroundA()
-        {
-#if UNITY_EDITOR
-            Debug.DrawRay(Body.position, Vector2.down * (halfHeight + groundedTolerance), Color.red);
-#endif
-            //TODO: test out with multi raycast again 
-            Vector2 rayOrigin = Body.position;
-            RaycastHit2D hit2D;
-            if (hit2D = Physics2D.Raycast(rayOrigin, Vector2.down, halfHeight + groundedTolerance, groundMask))
-            {
-                //GroundFriction = hit2D.collider.friction;
-                currentGround = hit2D.transform.GetComponent<GroundData>() ?? currentGround; //Update grounddata.
-                groundNormal = hit2D.normal;
-                IsGrounded = true;
-                //If necessary, "stick" to the ground.
-                if (stickToGround)
-                {
-                    print("cocks");
-                    Vector2 newPos = Body.position;
-                    newPos.y = hit2D.point.y + halfHeight;
-                    Body.position = newPos;
-                }
-                return;
-            }
-
-            //If that failed, do a box cast
-            Vector2 boxCenter = Body.position - Vector2.up * halfHeight;
-            Vector2 boxSize = new Vector2(halfWidth * 0.6f, groundedTolerance);
-            Collider2D col;
-            if (col = Physics2D.OverlapBox(boxCenter, boxSize, 0f, groundMask))
-            {
-                //? maybe stick to the ground using the data in here? but how tho?
-                currentGround = col.GetComponent<GroundData>() ?? currentGround;
-                IsGrounded = true;
-                return;
-            }
-            IsGrounded = false;
-        }
+        
         /// <summary>
         /// Delays the groundLeave callback until the next frame and checks if it is still valid at that point.
         /// </summary>

@@ -78,7 +78,8 @@ namespace Game.Controller
                 //3. check for valid hit
                 if(hit = Physics2D.Raycast(transform.position, direction, currentDistance, hitMask))
                 {
-                    if (hit.transform.GetComponent<IHookTarget>() != null)
+                    IHookTarget target = hit.transform.GetComponent<IHookTarget>();
+                    if (target != null && target.Valid)
                         controller.SwitchToState(new HookFlyPlayerState(hit.point, activeHookRenderer));
                     else
                         Destroy(activeHook.gameObject);
