@@ -1681,7 +1681,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPack: {fileID: 0}
-  info: 0
+  info: 256
 --- !u!61 &623955481
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -5789,7 +5789,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPack: {fileID: 0}
-  info: 0
+  info: 256
 --- !u!61 &2103572141
 BoxCollider2D:
   m_ObjectHideFlags: 0

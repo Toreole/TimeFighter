@@ -111,7 +111,10 @@ namespace Game.Controller
             set
             {
                 if (!IsGrounded && value)
-                    OnEnterGround?.Invoke( HandleLanding()); 
+                {
+                    OnEnterGround?.Invoke(HandleLanding());
+                    Debug.Log("Entered Ground.");
+                }
                 else if (IsGrounded && !value)
                     GroundLeaveOnNextFrame();
                 isGrounded = value;
@@ -273,6 +276,7 @@ namespace Game.Controller
         /// Checks for ground using the rigidbody contacts, or a raycast to handle slopes
         /// </summary>
         //TODO: searching the contacts should also include checking for a wall i guess.
+        //! THIS IS WEIRD I GUESS
         protected void CheckContactsForGround()
         {
             int contacts = Body.GetContacts(contactPoints);
@@ -300,6 +304,15 @@ namespace Game.Controller
             }
             //Try getting the grounddata, if it doesnt exist just stick with the current one.
             currentGround = contactPoints[0].collider.GetComponent<GroundData>() ?? currentGround;
+
+            //if the platform contact point is too far up, and im going up, this shouldnt be ground.
+            if (currentGround.HasFlag(GroundFlags.Platform) && LastVel.y > 0.1f)
+            {
+                //False positive ground check.
+                //Debug.Log("False positive for ground via contacts");
+                IsGrounded = false;
+                return;
+            }
             //? remove this in favor of grounddata.
             //GroundFriction = frictions / contacts;
 
@@ -339,7 +352,7 @@ namespace Game.Controller
                     print("TOO STEEP");
                     return false;
                 }
-                //yeet
+                //make the velocity parallel to the ground.
                 float currSpeed = Body.velocity.magnitude;
                 Vector2 velocity = new Vector2(Util.Normalized(Body.velocity.x) * currSpeed, 0);
                 velocity = RotateVector2D(velocity, alpha);
@@ -348,7 +361,7 @@ namespace Game.Controller
                 
                 //get the ground data right here.
                 currentGround = hit2D.collider.GetComponent<GroundData>() ?? currentGround;
-
+                
                 //set the position.
                 Vector2 pos = Body.position;
                 pos.y = hit2D.point.y + halfHeight; //edit: add halfheight instead of setting this to the centroid?
@@ -356,7 +369,6 @@ namespace Game.Controller
                 groundNormal = hit2D.normal;
                 return true;
             }
-            print("could not find ground because im retarded");
             Debug.DrawRay(rayOrigin, Vector2.down * (halfHeight + groundedTolerance), Color.blue, 10f);
             return false;
         }
@@ -443,7 +455,7 @@ namespace Game.Controller
             activeState.OnEnterState();
         }
         /// <summary>
-        /// Switch to a given state.
+        /// Switch to a given state. Required when a state needs extra info passed in from previous state.
         /// </summary>
         public void SwitchToState(PlayerStateBehaviour state)
         {
@@ -477,18 +489,7 @@ namespace Game.Controller
         {
             return currentWall.materialInfo ? currentWall.materialInfo.HasFlag(flag) : false;
         }
-
-        //TODO: find use cases for these.
-        private void OnTriggerEnter2D(Collider2D collision)
-        {
-            
-        }
-
-        private void OnTriggerStay(Collider other)
-        {
-            
-        }
-
+        
         public void StartHook()
         {
             //print("start hook");

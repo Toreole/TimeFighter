@@ -28,6 +28,7 @@ namespace Game.Controller.PlayerStates
             Body.velocity = controller.BaseSpeed * 4f * direction;
             //1.5 adjust the sprite.
             hook.size = new Vector2(1, currentDist);
+
             //2. enter wall if required.
             if (controller.IsTouchingWall)
                 controller.SwitchToState<WallPlayerState>();

@@ -69,5 +69,7 @@ namespace Game
             end = start + Vector2.up * width;
             Debug.DrawLine(start, end, color);
         }
+
+        public static float Power(this float b, float power) => Mathf.Pow(b, power);
     }
 }

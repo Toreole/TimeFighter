@@ -31,6 +31,7 @@ namespace Game
         Fragile = 1 << 4,
         Transparent = 1 << 5,
         Moving = 1 << 6,
-        Bouncy = 1 << 7
+        Bouncy = 1 << 7,
+        Platform = 1 << 8
     }
 }
