@@ -24,6 +24,24 @@ namespace Game.Controller
         protected float defaultSize = 9.5f;
         [SerializeField]
         protected AnimationCurve zoomCurve;
+        [SerializeField]
+        protected float maxSpeed = 5f;
+        [SerializeField]
+        protected float minSpeed = 1f;
+        [SerializeField, Range(0f, 0.49f)]
+        protected float criticalDistance = 0.1f; //onscreen viewport distance from the edges of the screen.
+        [SerializeField]
+        protected float criticalAcceleration = 100f; //multiplier for acceleration rate when at the edge of the screen.
+        [SerializeField]
+        protected float criticalDistanceSpeedMultiplier = 4f;
+        [SerializeField]
+        protected float accelDistance = 2f;
+        [SerializeField]
+        protected float idleDistance = 0.4f;
+        [SerializeField]
+        protected float acceleration = 4f;
+
+        private float currentSpeed = 0f;
 
         //helper to reset zoom.
         public static float DefaultSize => _instance.defaultSize;
@@ -49,7 +67,43 @@ namespace Game.Controller
             if (!target)
                 return;
             Vector2 pos = target.position;
-            transform.position = new Vector3(pos.x, pos.y, transform.position.z);
+
+            //1. speed for the camera
+            var targetPos = new Vector3(pos.x, pos.y, transform.position.z);
+            var distanceToTarget = Vector3.Distance(targetPos, transform.position);
+
+            //check if the player is close to the edge of the screen, if so accelerate much faster.
+            Vector2 viewportTarget = camera.WorldToViewportPoint(target.position);
+            if (viewportTarget.x <= criticalDistance || viewportTarget.x >= 1f-criticalDistance
+                || viewportTarget.y <= criticalDistance || viewportTarget.y >= 1f-criticalDistance)
+            {
+                //the camera should accelerate a LOT when the player is at the edge of the screen.
+                currentSpeed = Mathf.MoveTowards(currentSpeed, distanceToTarget * criticalDistanceSpeedMultiplier, acceleration * criticalAcceleration * Time.deltaTime);
+            }
+            else if(distanceToTarget >= accelDistance)
+            {
+                //large distance from the player, should accelerate to a given limit to go behind the player.
+                if(currentSpeed > maxSpeed)
+                    currentSpeed = Mathf.MoveTowards(currentSpeed, maxSpeed, acceleration * criticalAcceleration * Time.deltaTime);
+                else 
+                    currentSpeed = Mathf.MoveTowards(currentSpeed, maxSpeed, acceleration * Time.deltaTime);
+            }
+            else if(distanceToTarget >= idleDistance)
+            {
+                //camera should slow down because its catching up.
+                currentSpeed = Mathf.MoveTowards(currentSpeed, minSpeed, acceleration * Time.deltaTime);
+            }
+            else
+            {
+                //camera should move to idle.
+                currentSpeed = Mathf.MoveTowards(currentSpeed, 0, acceleration / 2f * Time.deltaTime);
+            }
+
+            //2. move the camera towards the target.
+            Vector3 newPosition = Vector3.MoveTowards(transform.position, targetPos, currentSpeed * Time.deltaTime);
+            
+            transform.position = newPosition;
+            //transform.position = new Vector3(pos.x, pos.y, transform.position.z);
         }
 
         /// <summary>
