@@ -38,7 +38,7 @@ namespace Game
             player.OnPressJump -= OnJump;
             //Debug.Log("Time is normal again");
             Time.timeScale = 1;
-            CameraController.DynamicZoom(CameraController.DefaultSize); //now back out yall
+            CameraController.ResetZoom(); //now back out yall
             gameObject.SetActive(false);
         }
     }

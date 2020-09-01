@@ -24,6 +24,7 @@ namespace Game.Controller
         protected float defaultSize = 9.5f;
         [SerializeField]
         protected AnimationCurve zoomCurve;
+
         [SerializeField]
         protected float maxSpeed = 5f;
         [SerializeField]
@@ -40,11 +41,16 @@ namespace Game.Controller
         protected float idleDistance = 0.4f;
         [SerializeField]
         protected float acceleration = 4f;
-
+        [SerializeField]
+        protected float lookAheadTimeX = 0.5f, lookAheadTimeY = 0.1f;
+        [SerializeField]
+        protected Vector3 cameraOffset = Vector3.up;
+        
         private float currentSpeed = 0f;
+        private Vector3 previousTargetPosition;
 
         //helper to reset zoom.
-        public static float DefaultSize => _instance.defaultSize;
+        //public static float DefaultSize => _instance.defaultSize;
 
         //set up all the stuff
         void Start()
@@ -66,29 +72,47 @@ namespace Game.Controller
         {
             if (!target)
                 return;
-            Vector2 pos = target.position;
+
+            Move();
+        }
+
+        /// <summary>
+        /// Move the camera. Also handles acceleration and all that connected garbage.
+        /// </summary>
+        private void Move()
+        {
+            Vector3 pos = target.position;
+
+            //look ahead vector.
+            Vector3 targetMovement = pos - previousTargetPosition;
+            float targetSpeed = (targetMovement / Time.deltaTime).magnitude;
+            Vector3 targetDirection = targetMovement.normalized;
+
+            Vector3 lookAhead = targetDirection * targetSpeed;
+            lookAhead.x *= lookAheadTimeX;
+            lookAhead.y *= lookAheadTimeY;
 
             //1. speed for the camera
-            var targetPos = new Vector3(pos.x, pos.y, transform.position.z);
+            var targetPos = new Vector3(pos.x, pos.y, transform.position.z) + lookAhead + cameraOffset;
             var distanceToTarget = Vector3.Distance(targetPos, transform.position);
 
             //check if the player is close to the edge of the screen, if so accelerate much faster.
             Vector2 viewportTarget = camera.WorldToViewportPoint(target.position);
-            if (viewportTarget.x <= criticalDistance || viewportTarget.x >= 1f-criticalDistance
-                || viewportTarget.y <= criticalDistance || viewportTarget.y >= 1f-criticalDistance)
+            if (viewportTarget.x <= criticalDistance || viewportTarget.x >= 1f - criticalDistance
+                || viewportTarget.y <= criticalDistance || viewportTarget.y >= 1f - criticalDistance)
             {
                 //the camera should accelerate a LOT when the player is at the edge of the screen.
                 currentSpeed = Mathf.MoveTowards(currentSpeed, distanceToTarget * criticalDistanceSpeedMultiplier, acceleration * criticalAcceleration * Time.deltaTime);
             }
-            else if(distanceToTarget >= accelDistance)
+            else if (distanceToTarget >= accelDistance)
             {
                 //large distance from the player, should accelerate to a given limit to go behind the player.
-                if(currentSpeed > maxSpeed)
+                if (currentSpeed > maxSpeed)
                     currentSpeed = Mathf.MoveTowards(currentSpeed, maxSpeed, acceleration * criticalAcceleration * Time.deltaTime);
-                else 
+                else
                     currentSpeed = Mathf.MoveTowards(currentSpeed, maxSpeed, acceleration * Time.deltaTime);
             }
-            else if(distanceToTarget >= idleDistance)
+            else if (distanceToTarget >= idleDistance)
             {
                 //camera should slow down because its catching up.
                 currentSpeed = Mathf.MoveTowards(currentSpeed, minSpeed, acceleration * Time.deltaTime);
@@ -101,9 +125,12 @@ namespace Game.Controller
 
             //2. move the camera towards the target.
             Vector3 newPosition = Vector3.MoveTowards(transform.position, targetPos, currentSpeed * Time.deltaTime);
-            
+
             transform.position = newPosition;
             //transform.position = new Vector3(pos.x, pos.y, transform.position.z);
+
+            //set back the target position for caching
+            previousTargetPosition = target.position;
         }
 
         /// <summary>
@@ -136,5 +163,7 @@ namespace Game.Controller
         {
             _instance.M_DynamicZoom(size, time);
         }
+
+        public static void ResetZoom(float time = 0.4f) => _instance.M_DynamicZoom(_instance.defaultSize, time);
     }
 }
