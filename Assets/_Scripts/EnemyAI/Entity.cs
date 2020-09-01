@@ -21,6 +21,7 @@ namespace Game
         protected bool isInvincible = false;
 
         public float Health { get => currentHealth; }
+        public float MaxHealth => maxHealth;
         public bool IsInvincible => isInvincible;
         public Rigidbody2D Body => body;
         public Vector2 Position => transform.position;

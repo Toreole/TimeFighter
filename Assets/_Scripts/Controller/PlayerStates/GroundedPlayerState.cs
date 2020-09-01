@@ -9,7 +9,8 @@ namespace Game.Controller
     {
         public override void FixedStep(Vector2 input, float deltaTime)
         {
-            controller.Stamina += deltaTime * controller.StaminaRegen;
+            //regenerate stamina while on the ground. regeneration is amplified while standing still.
+            controller.Stamina += deltaTime * controller.StaminaRegen * (Mathf.Abs(controller.LastVel.x) < 0.1f ? 2.5f : 1f );
             if (controller.IgnorePlayerInput)
                 return; //it shouldnt move when the player input is ignored anyway.
             if (controller.GroundHasFlag(GroundFlags.Slippery))

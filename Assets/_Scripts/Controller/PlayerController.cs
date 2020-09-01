@@ -61,7 +61,7 @@ namespace Game.Controller
         public float Stamina 
         { get => stamina; set => stamina = Mathf.Clamp(value, 0f, maxStamina); }
         public float StaminaRegen 
-        { get => staminaRegen; protected set => staminaRegen = value; }
+        { get => staminaRegen; private set => staminaRegen = value; }
         public float DashDistance 
         { get => dashDistance; }
         public float DashCost 
