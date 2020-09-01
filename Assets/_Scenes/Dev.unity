@@ -4406,6 +4406,7 @@ MonoBehaviour:
   halfWidth: 0.25
   groundedTolerance: 0.24
   airJumps: 1
+  airControl: 0.6
   hookController: {fileID: 1263488364}
   movementAction: {fileID: 5672190668058900007, guid: a9108a9613b38dd43aa04bde90e289c2,
     type: 3}
@@ -4540,7 +4541,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1320740710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4554,6 +4555,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   zoom: 10
+  zoomInTime: 1
+  zoomOutTime: 1
 --- !u!60 &1320740711
 PolygonCollider2D:
   m_ObjectHideFlags: 0

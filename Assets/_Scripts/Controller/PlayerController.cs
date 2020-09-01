@@ -35,6 +35,10 @@ namespace Game.Controller
         [SerializeField]
         protected int airJumps = 1;
         [SerializeField]
+        protected float airControl = 1f;
+        [SerializeField]
+        protected float terminalVelocityY = -50f;
+        [SerializeField]
         protected GrapHookController hookController;
         [Header("Input")]
         [SerializeField]
@@ -58,6 +62,8 @@ namespace Game.Controller
         { get => availableAirJumps; set => availableAirJumps = Mathf.Clamp(value, 0, airJumps); }
         public bool CanAirJump 
         { get => availableAirJumps > 0; set { availableAirJumps = value ? airJumps : 0; } }
+        public float AirControl => airControl;
+        public float TerminalVelocityY => terminalVelocityY;
         public float Stamina 
         { get => stamina; set => stamina = Mathf.Clamp(value, 0f, maxStamina); }
         public float StaminaRegen 

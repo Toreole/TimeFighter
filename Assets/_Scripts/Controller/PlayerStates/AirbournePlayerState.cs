@@ -11,12 +11,27 @@ namespace Game.Controller
             //Update the facing direction.
             controller.FlipX = lastVel.x > 0 ? false : lastVel.x < 0 ? true : controller.FlipX;
 
-            //better falling / drag
-            lastVel.x = Mathf.Lerp(lastVel.x, 0, 10 * Time.deltaTime);
+            float xAccel = Mathf.Abs(input.x) * deltaTime * controller.Acceleration;
+            float xMovement = Mathf.MoveTowards(lastVel.x, Util.Normalized(input.x) * controller.BaseSpeed, xAccel * controller.AirControl);
+            
+            Vector2 velocity = new Vector2(xMovement, Body.velocity.y);
+            if(input.y < -0.1f)
+                velocity.y += input.y * Time.deltaTime * controller.AirControl * controller.Acceleration;
+            velocity.y = Mathf.Max(controller.TerminalVelocityY, velocity.y);
+            Body.velocity = velocity;
+
+            //better falling 
+            //drag
+            //lastVel.x = Mathf.Lerp(lastVel.x, 0, 10 * Time.deltaTime);
+            //if (lastVel.y < 0)
+            //    Body.gravityScale = 2;
+            //else
+            //    Body.gravityScale = 1;
+
             //Debug.DrawLine(Body.position, Body.position + Body.velocity, Color.blue, 10);
 
-            //check for entering wall. moveinput and wall normal should be in opposite direction (move against the wall) to auto-enter the wall state.
-            if(controller.IsTouchingWall && controller.WallHasFlag(GroundFlags.Climbable) && controller.MoveInputRaw.x * controller.CurrentWall.normal.x < 0)//old: && controller.JumpBeingHeld && lastVel.y <= 0)
+                //check for entering wall. moveinput and wall normal should be in opposite direction (move against the wall) to auto-enter the wall state.
+            if (controller.IsTouchingWall && controller.WallHasFlag(GroundFlags.Climbable) && controller.MoveInputRaw.x * controller.CurrentWall.normal.x < 0)//old: && controller.JumpBeingHeld && lastVel.y <= 0)
             {
                 controller.SwitchToState<WallPlayerState>();
             }
@@ -35,6 +50,7 @@ namespace Game.Controller
             controller.OnEnterGround -= EnterGround;
             controller.OnPressJump -= Jump;
             controller.OnSpecialA -= controller.StartHook; //hooking!!!!
+            //Body.gravityScale = 1;
             //controller.OnEnterWall -= EnterWall;
         }
 
@@ -45,7 +61,7 @@ namespace Game.Controller
             if (controller.GroundHasFlag(GroundFlags.Bouncy)) //ground is bouncy as hell man, jump and dont land like a lazy ass.
             {
                 var velocity = controller.LastVel;
-                velocity.y *= -1;
+                velocity.y *= -0.9f;
                 Body.velocity = velocity;
                 return;
             }
