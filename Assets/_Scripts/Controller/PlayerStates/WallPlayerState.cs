@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
+using Game.Controller;
 
-namespace Game.Controller
+namespace Game.Controller.PlayerStates
 {
     public class WallPlayerState : PlayerStateBehaviour
     {

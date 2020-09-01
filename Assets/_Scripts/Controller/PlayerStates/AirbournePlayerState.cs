@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using Game;
+using Game.Controller;
 
-namespace Game.Controller
+namespace Game.Controller.PlayerStates
 {
     public class AirbournePlayerState : PlayerStateBehaviour
     {
@@ -42,6 +43,7 @@ namespace Game.Controller
             controller.OnEnterGround += EnterGround;
             controller.OnPressJump += Jump;
             controller.OnSpecialA += controller.StartHook; //hooking!!!!
+            controller.OnDash += Dash;
             //controller.OnEnterWall += EnterWall;
         }
 
@@ -50,6 +52,7 @@ namespace Game.Controller
             controller.OnEnterGround -= EnterGround;
             controller.OnPressJump -= Jump;
             controller.OnSpecialA -= controller.StartHook; //hooking!!!!
+            controller.OnDash -= Dash;
             //Body.gravityScale = 1;
             //controller.OnEnterWall -= EnterWall;
         }
@@ -115,7 +118,14 @@ namespace Game.Controller
         /// </summary>
         void Dash()
         {
-            throw new System.NotImplementedException();
+            //1. use stamina
+            if (controller.Stamina >= controller.DashCost)
+            {
+                controller.Stamina -= controller.DashCost;
+                //2. other fun stuff
+                controller.SwitchToState(new DashingPlayerState(controller.MoveInput, true));
+                //throw new System.NotImplementedException();
+            }
         }
 
         /// <summary>

@@ -4407,12 +4407,15 @@ MonoBehaviour:
   groundedTolerance: 0.24
   airJumps: 1
   airControl: 0.6
+  terminalVelocityY: -50
   hookController: {fileID: 1263488364}
   movementAction: {fileID: 5672190668058900007, guid: a9108a9613b38dd43aa04bde90e289c2,
     type: 3}
   jumpAction: {fileID: 335763634227698153, guid: a9108a9613b38dd43aa04bde90e289c2,
     type: 3}
   specialAction: {fileID: -8888745304648998724, guid: a9108a9613b38dd43aa04bde90e289c2,
+    type: 3}
+  dashAction: {fileID: 7876669670123320772, guid: a9108a9613b38dd43aa04bde90e289c2,
     type: 3}
   renderer: {fileID: 802207984}
 --- !u!114 &1263488364
@@ -4541,7 +4544,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &1320740710
 MonoBehaviour:
   m_ObjectHideFlags: 0

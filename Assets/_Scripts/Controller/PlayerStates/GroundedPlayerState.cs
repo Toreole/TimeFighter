@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
+using Game.Controller;
 
 using static Game.Util;
 
-namespace Game.Controller
+namespace Game.Controller.PlayerStates
 {
     public class GroundedPlayerState : PlayerStateBehaviour
     {

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
+using Game.Controller.PlayerStates;
 
 using static Game.Util;
 
@@ -45,6 +46,8 @@ namespace Game.Controller
         protected InputActionReference movementAction;
         [SerializeField]
         protected InputActionReference jumpAction, specialAction;
+        [SerializeField]
+        protected InputActionReference dashAction;
         [SerializeField, Header("Rendering")]
         protected new SpriteRenderer renderer;
 
@@ -166,6 +169,8 @@ namespace Game.Controller
 
         public event System.Action OnTakeDamage;
 
+        public event System.Action OnDash;
+
         /// <summary>
         /// the bool dictates whether the player performs a roll
         /// </summary>
@@ -250,6 +255,11 @@ namespace Game.Controller
             {
                 if (specialAction.action.triggered)
                     OnSpecialA?.Invoke();
+            }
+            if (dashAction.action != null)
+            {
+                if (dashAction.action.triggered)
+                    OnDash?.Invoke();
             }
         }
 
