@@ -30,8 +30,9 @@ namespace Game.Controller.PlayerStates
 
             //! Temp fix attempt. should avoid infinite loops of dashing into collision.
             //this ignores the dash buffer.
-            if(delta <= 0)
+            if (delta <= Mathf.Epsilon)
             {
+                Debug.Log("0");
                 if (controller.IsGrounded)
                     controller.SwitchToState<GroundedPlayerState>();
                 else
@@ -51,7 +52,7 @@ namespace Game.Controller.PlayerStates
                     controller.Stamina -= controller.DashCost;
                     origin = Body.position;
                     dashDirection = input;
-                    lastDistance = 0;
+                    lastDistance = -0.1f;
                     return;
                 }
                 //if no dash is buffered, continue with other stuff.
@@ -86,6 +87,7 @@ namespace Game.Controller.PlayerStates
             //originalVelocity = Body.velocity;
             origin = Body.position;
             Body.gravityScale = 0f;
+            lastDistance = -0.1f;
 
             controller.OnDash += BufferDash;
             controller.OnEnterGround += GroundCancel;
