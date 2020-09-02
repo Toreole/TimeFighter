@@ -10,19 +10,51 @@ namespace Game.Controller.PlayerStates
         Vector2 dashDirection;
         float dashDistance;
         Vector3 origin;
-        Vector2 originalVelocity;
+        //Vector2 originalVelocity;
+        float lastDistance;
+        bool dashBuffer = false;
 
         public override void FixedStep(Vector2 input, float deltaTime)
         {
             //moves the dashing player forward
             Body.velocity = dashDirection * controller.DashSpeed;
 
+            //handle entering a wall.
             if(controller.IsTouchingWall)
                 controller.SwitchToState<WallPlayerState>();
 
-            if (Vector3.Distance(origin, Body.position) >= dashDistance)
+            //distance travelled
+            float distTravelled = Vector3.Distance(origin, Body.position);
+            float delta = distTravelled - lastDistance;
+            lastDistance = distTravelled;
+
+            //! Temp fix attempt. should avoid infinite loops of dashing into collision.
+            //this ignores the dash buffer.
+            if(delta <= 0)
             {
-                //Body.velocity = originalVelocity;
+                if (controller.IsGrounded)
+                    controller.SwitchToState<GroundedPlayerState>();
+                else
+                    controller.SwitchToState<AirbournePlayerState>();
+                Body.velocity = Vector2.zero;
+                return;
+            }
+
+            //finish the dash.
+            if (distTravelled >= dashDistance)
+            {
+                //perform the buffered dash next.
+                //for this dont switch the state, just reset.
+                if (dashBuffer)
+                {
+                    dashBuffer = false;
+                    controller.Stamina -= controller.DashCost;
+                    origin = Body.position;
+                    dashDirection = input;
+                    lastDistance = 0;
+                    return;
+                }
+                //if no dash is buffered, continue with other stuff.
                 Body.velocity *= 0.5f;
                 if (controller.IsTouchingWall && wasMidAir)
                 {
@@ -37,6 +69,12 @@ namespace Game.Controller.PlayerStates
             }
         }
 
+        void BufferDash()
+        {
+            if (controller.Stamina >= controller.DashCost)
+                dashBuffer = true;
+        }
+
         void GroundCancel(LandingType landing)
         {
             controller.SwitchToState<GroundedPlayerState>();
@@ -45,10 +83,11 @@ namespace Game.Controller.PlayerStates
         public override void OnEnterState()
         {
             dashDistance = controller.DashDistance * (wasMidAir ? 0.5f : 1f);
-            originalVelocity = Body.velocity;
+            //originalVelocity = Body.velocity;
             origin = Body.position;
             Body.gravityScale = 0f;
 
+            controller.OnDash += BufferDash;
             controller.OnEnterGround += GroundCancel;
         }
 
@@ -56,6 +95,7 @@ namespace Game.Controller.PlayerStates
         {
             Body.gravityScale = 1f;
             controller.OnEnterGround -= GroundCancel;
+            controller.OnDash += BufferDash;
         }
 
         public DashingPlayerState(Vector2 direction, bool wasInMidAirBefore)
