@@ -23,6 +23,7 @@ namespace Game
         public float Health { get => currentHealth; }
         public float MaxHealth => maxHealth;
         public bool IsInvincible => isInvincible;
+        public bool IsDead => currentHealth < 0f;
         public Rigidbody2D Body => body;
         public Vector2 Position => transform.position;
 
