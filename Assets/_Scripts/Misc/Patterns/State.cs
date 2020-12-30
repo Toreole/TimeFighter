@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Game.Patterns.States
 {
     ///A generic approach to the state pattern.
-    public abstract class State<T> : IState where T : MonoBehaviour, IStateMachine
+    public abstract class State<T> where T : StateMachine<T>
     {
         ///<summary>Enter => true. Transitioning to another state => false. Transition Priority!</summary>
         protected bool activeControl = false; 
@@ -27,9 +27,5 @@ namespace Game.Patterns.States
             activeControl = false;
         }
 
-    }
-    
-    public interface IState
-    {
     }
 }
