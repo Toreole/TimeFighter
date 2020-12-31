@@ -1,15 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Game.Events;
 using UnityEngine;
 using Game.Patterns.States;
 using NaughtyAttributes;
+using Game.Serialization;
 
 namespace Game.Demo.Boss
 {
     public class BossController : StateMachine<BossController>//, IDamageable //IDamagable implementation inside of here? needs collision in that case...
     {
         [SerializeField]
-        protected BoxCollider2D initialTrigger;
+        protected GameEvent startEvent; 
         [SerializeField, Tag]
         protected string playerTag;
         [SerializeField]
@@ -34,6 +34,7 @@ namespace Game.Demo.Boss
         void Start()
         {
             currentState = new BossIdleState(); //just assign default value in here. Idle state does absolutely nothing in this case.
+            startEvent.AddListener(StartBossEncounter);
         }
 
         // Update is called once per frame
@@ -42,15 +43,9 @@ namespace Game.Demo.Boss
             currentState.Update(this);
         }
 
-        private void OnTriggerEnter2D(Collider2D other) 
+        private void StartBossEncounter()
         {
-            if(other.CompareTag(playerTag))
-            {
-                //Destroy the trigger, its not needed anymore.
-                Destroy(initialTrigger);
-                //Enter combat state:
-                //TransitionToState(...)
-            }
+            
         }
 
         public void ResetBoss()
@@ -58,9 +53,36 @@ namespace Game.Demo.Boss
             throw new System.NotImplementedException();
         }
 
+//Serialization for this boss is something to worry about at a much later time.
+#region Serialization
+
+        public class BossData : ObjectData 
+        {
+
+        }
+        public override void Deserialize(ObjectData data)
+        {
+            var bossData = data as BossData;
+            throw new System.NotImplementedException();
+        }
+
+        public override ObjectData Serialize()
+        {
+            return new BossData();
+            throw new System.NotImplementedException();
+        }
+
+#endregion
+
         [System.Serializable]
         public class BossFist
         {
+            public BossHand instance;
+            [SerializeField]
+            private Transform locale;
+            public HandState activity;
+
+            public Vector3 preferredPosition => locale.position;
         }
     }
 }
