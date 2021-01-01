@@ -8,7 +8,7 @@ namespace Game.Patterns.States
     public abstract class State<T> where T : StateMachine<T>
     {
         ///<summary>Enter => true. Transitioning to another state => false. Transition Priority!</summary>
-        protected bool activeControl = false; 
+        protected bool activeControl = true; 
 
         ///<summary>
         ///Update method for all states required.

@@ -10,6 +10,8 @@ namespace Game.Demo.Boss
         [SerializeField]
         protected Rigidbody2D body; //rigidbody movement? probably right?
 
+        //this needs to know whether the player is on it
+
     }
 
     public enum HandState 
@@ -18,6 +20,8 @@ namespace Game.Demo.Boss
         Ready = 1,
         Attacking = 2,
         Waiting = 3,
-        Returning = 4
+        Returning = 4,
+        MountedByPlayer = 5,
+        Disabled = 6
     }
 }

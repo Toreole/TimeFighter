@@ -15,6 +15,10 @@ namespace Game.Demo.Boss
                 o.ResetBoss();
                 return;
             }
+            o.MoveHands();
+            o.FollowTarget();
         }
+        //Combat states need to tick down the cooldown on attacks and trigger attacks.
+
     }
 }

@@ -9,10 +9,7 @@ namespace Game.Patterns.States
     public abstract class StateMachine<T> : SerializedMonoBehaviour where T : StateMachine<T> 
     {
         protected State<T> currentState;
-        public void TransitionToState(State<T> s)
-        {
-            currentState = s;
-        }
+        public abstract void TransitionToState(State<T> s);
     }
 
 }

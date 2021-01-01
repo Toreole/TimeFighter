@@ -132,6 +132,7 @@ GameObject:
   - component: {fileID: 103424752}
   - component: {fileID: 103424754}
   - component: {fileID: 103424753}
+  - component: {fileID: 103424755}
   m_Layer: 12
   m_Name: Head
   m_TagString: Untagged
@@ -231,6 +232,31 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &103424755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 103424751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9ba3ec017ea8294388dd2a76cc1eec8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startEvent: {fileID: 0}
+  fistsToAttackWith:
+  - instance: {fileID: 1352998924}
+    locale: {fileID: 2015442448}
+  - instance: {fileID: 221306548}
+    locale: {fileID: 2029206276}
+  handSmoothing: 2
+  handSpeed: 5
+  globalAttackTimer: 4
+  slamAttackCooldown: 7
+  punchAttackCooldown: 10
+  mountedHandAttackDelay: 5
+  attackSpeed: 1
 --- !u!1 &208848318
 GameObject:
   m_ObjectHideFlags: 0
@@ -348,6 +374,7 @@ GameObject:
   - component: {fileID: 221306546}
   - component: {fileID: 221306545}
   - component: {fileID: 221306544}
+  - component: {fileID: 221306548}
   m_Layer: 12
   m_Name: FistLeft
   m_TagString: Untagged
@@ -480,6 +507,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &221306548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221306542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a38636cb23a6e534a965b0d9b072a2c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  body: {fileID: 0}
 --- !u!1 &288438974
 GameObject:
   m_ObjectHideFlags: 0
@@ -818,8 +859,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 605576390}
-  - component: {fileID: 605576391}
-  - component: {fileID: 605576392}
   m_Layer: 12
   m_Name: ==Boss
   m_TagString: Enemy
@@ -844,46 +883,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!61 &605576391
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 605576389}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 1.5857582}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 5, y: 4}
-  m_EdgeRadius: 0
---- !u!114 &605576392
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 605576389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e9ba3ec017ea8294388dd2a76cc1eec8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  initialTrigger: {fileID: 0}
-  playerTag: 
 --- !u!1 &615425589
 GameObject:
   m_ObjectHideFlags: 0
@@ -1570,6 +1569,7 @@ GameObject:
   - component: {fileID: 1352998922}
   - component: {fileID: 1352998921}
   - component: {fileID: 1352998920}
+  - component: {fileID: 1352998924}
   m_Layer: 12
   m_Name: FistRight
   m_TagString: Untagged
@@ -1702,6 +1702,20 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1352998924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1352998918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a38636cb23a6e534a965b0d9b072a2c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 0}
+  body: {fileID: 0}
 --- !u!1 &1843438950
 GameObject:
   m_ObjectHideFlags: 0
