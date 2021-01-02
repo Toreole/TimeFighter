@@ -6,7 +6,7 @@ namespace Game.Demo.Boss
     {
         public override void Enter(BossController o)
         {
-            throw new System.NotImplementedException();
+            
         }
 
         public override void Exit(BossController o)
@@ -16,8 +16,8 @@ namespace Game.Demo.Boss
 
         public override void Update(BossController o)
         {
-            //when hitting 30% health
-            if(o.PercentageHealth <= 0.3f)
+            //when at the set threshold for the second phase to trigger.
+            if(o.PercentageHealth <= o.IntermissionHealthThreshold)
             {
                 TransitionToState(o, new BossIntermissionState());
                 return;

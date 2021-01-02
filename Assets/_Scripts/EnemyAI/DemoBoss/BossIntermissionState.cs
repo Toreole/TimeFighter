@@ -6,9 +6,12 @@ namespace Game.Demo.Boss
     public class BossIntermissionState : State<BossController>
     {
 
+        float enterTime = 0f;
+
         public override void Enter(BossController o)
         {
-            throw new System.NotImplementedException();
+            //o.Invincible = true; //Should the boss be invincible during the intermission?
+            enterTime = Time.time;
         }
 
         public override void Exit(BossController o)
@@ -18,7 +21,8 @@ namespace Game.Demo.Boss
 
         public override void Update(BossController o)
         {
-            throw new System.NotImplementedException();
+            if(Time.time - enterTime >= 5f) //5 second intermission
+                TransitionToState(o, new BossPhaseTwo());
         }
     }
 }

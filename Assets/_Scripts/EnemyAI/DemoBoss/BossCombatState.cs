@@ -17,6 +17,7 @@ namespace Game.Demo.Boss
             }
             o.MoveHands();
             o.FollowTarget();
+            o.TickDownAttackTimers(Time.deltaTime * o.AttackSpeed);
         }
         //Combat states need to tick down the cooldown on attacks and trigger attacks.
 

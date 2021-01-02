@@ -7,19 +7,26 @@ namespace Game.Demo.Boss
 {
     public class BossPhaseTwo : BossCombatState
     {
-        
+        float lastBuff = 0f;
+
         public override void Enter(BossController o)
         {
-            throw new System.NotImplementedException();
+            lastBuff = Time.time;
+            o.AttackSpeed *= o.EnrageSpeedBuff;
         }
 
         public override void Exit(BossController o)
         {
-            throw new System.NotImplementedException();
+            
         }
 
         public override void Update(BossController o)
         {
+            if(Time.time - lastBuff >= o.EnrageInterval)
+            {
+                lastBuff = Time.time;
+                o.AttackSpeed *= o.EnrageSpeedBuff;
+            }
             base.Update(o);
         }
     }

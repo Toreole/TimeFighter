@@ -3,11 +3,15 @@ using UnityEngine;
 using Game.Patterns.States;
 using NaughtyAttributes;
 using Game.Serialization;
+using UnityEngine.UI;
+using Game.UI;
 
 namespace Game.Demo.Boss
 {
     public class BossController : StateMachine<BossController>, IDamageable //IDamagable implementation inside of here? needs collision in that case...
     {
+        [SerializeField]
+        private new string name; //new string because unity cant do shit and has named a property "name". who does that? properties are PascalCase aaaaaaaaaaaa
         [SerializeField]
         protected GameEvent startEvent;
 
@@ -15,7 +19,11 @@ namespace Game.Demo.Boss
         public float PercentageHealth => health /maxHealth;
 
         private float health;
+        [SerializeField]
         private float maxHealth;
+        [SerializeField]
+        private float intermissionHealthThreshold = 0.3f;
+        public float IntermissionHealthThreshold => intermissionHealthThreshold;
 
         //for single depth push-down automata. specific for this boss rn.
         State<BossController> stateBuffer;
@@ -25,13 +33,16 @@ namespace Game.Demo.Boss
 
         public float DamageStunTime => damageStunTime;
 
+        //UI:
+        private Slider healthBar;
+
 #region Attacks
 
         [SerializeField]
-        private BossFist[] fistsToAttackWith; //Fists have their own behaviour more or less. Should be animated.
+        private BossHand[] hands; //Fists have their own behaviour more or less. Should be animated.
         //fists have two attacks: one where they charge straight at the player as a fist fr fr (hulk go smash!!!!) so they can go diagonally
         //and one attack where they open the palm and go straight down, they move above the player and then slam down real fast. (insta-kill)
-        public BossFist[] Hands => fistsToAttackWith;
+        public BossHand[] Hands => hands;
         [SerializeField] //smoothdamp time and max speed for returning.
         protected float handSmoothing = 2f, handSpeed = 5;
 
@@ -46,13 +57,20 @@ namespace Game.Demo.Boss
 
         [SerializeField]
         private float attackSpeed = 1; //the rate at which attack cooldowns go down (multiplier for deltatime).
+        [SerializeField]
+        private float enrageSpeedBuff = 1.3f; //30% faster.
+        [SerializeField]
+        private float enrageInterval = 25f; //every [interval] seconds, the enrageSpeedBuff gets applied in P2
 
         public float HandSmoothing => handSmoothing;
         public float HandSpeed => handSpeed;
-        public float GlobalAttackTimer {get; set;} = 4f;
+        public float GlobalAttackTimer {get; protected set;} = 4f;
 
-        public float SlamAttackTimer {get; set;} = 7f;
-        public float PunchAttackTimer {get; set;} = 10f;
+        public float SlamAttackTimer {get; protected set;} = 7f;
+        public float PunchAttackTimer {get; protected set;} = 10f;
+        public float AttackSpeed {get => attackSpeed; set => attackSpeed = value; }
+        public float EnrageSpeedBuff => enrageSpeedBuff;
+        public float EnrageInterval => enrageInterval;
 
         public bool CanAttack(out BossHand hand)
         {
@@ -60,7 +78,7 @@ namespace Game.Demo.Boss
             foreach(var h in Hands)
                 if(h.ActivityStatus == HandState.Ready )
                 {
-                    hand = h.instance;
+                    hand = h;
                     return true;
                 }
             hand = null;
@@ -72,6 +90,7 @@ namespace Game.Demo.Boss
         // Start is called before the first frame update
         void Start()
         {
+            health = maxHealth;
             currentState = new BossIdleState(); //just assign default value in here. Idle state does absolutely nothing in this case.
             startEvent.AddListener(StartBossEncounter);
         }
@@ -82,15 +101,19 @@ namespace Game.Demo.Boss
             currentState.Update(this);
         }
 
-        private void StartBossEncounter()
+        private void StartBossEncounter(Object ent)
         {
+            Debug.Log("Boss Started");
+            Target = ent as Entity;
             //Show healthbar in persistent UI
+            healthBar = PersistentUI.GetBossHealthAndSetupDisplay(this.name, maxHealth, health);
             //optional: startup animation.
             TransitionToState(new BossPhaseOne());
         }
 
         public void ResetBoss()
         {
+            health = maxHealth;
             throw new System.NotImplementedException();
         }
 
@@ -99,7 +122,7 @@ namespace Game.Demo.Boss
         {
             foreach(var hand in Hands)
             {
-                var transform = hand.instance.transform;
+                var transform = hand.transform;
                 //Attacking and Waiting are handled by the Hand itself.
                 //In here we only need to return it to the preferred position and make it ready.
                 if(hand.ActivityStatus == HandState.Returning)
@@ -181,20 +204,6 @@ namespace Game.Demo.Boss
             return new BossData();
             throw new System.NotImplementedException();
         }
-        #endregion
-
-        [System.Serializable]
-        public class BossFist //All of these variables could easily be on the BossHand script aswell????????
-        {
-            public BossHand instance;
-            [SerializeField]
-            private Transform locale;
-            public HandState ActivityStatus {get; set;}
-            public bool IsReady => ActivityStatus == HandState.Ready;
-            
-            [System.NonSerialized] internal Vector2 returnVelocity = Vector2.zero;
-
-            public Vector3 preferredPosition => locale.position;
-        }
+#endregion
     }
 }

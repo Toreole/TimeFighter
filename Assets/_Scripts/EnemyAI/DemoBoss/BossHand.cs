@@ -9,8 +9,31 @@ namespace Game.Demo.Boss
         protected Animator animator;
         [SerializeField]
         protected Rigidbody2D body; //rigidbody movement? probably right?
+        [SerializeField]
+        private Transform locale;
 
-        //this needs to know whether the player is on it
+
+        private Vector3 startingPosition;
+
+        //more like a flag and less of a state. this is not a statemachine, its just describing the latest activity of the hand, 
+        //which is determined by the BossController, it's states, and collisions with objects in the world.
+        public HandState ActivityStatus {get; set;} = HandState.Returning;
+        public bool IsReady => ActivityStatus == HandState.Ready;
+        
+        [System.NonSerialized] internal Vector2 returnVelocity = Vector2.zero;
+
+        public Vector3 preferredPosition => locale.position;
+
+        private void Awake() 
+        {
+            startingPosition = transform.position;
+        }
+
+        public void ResetHand()
+        {
+            transform.position = startingPosition;
+            ActivityStatus = HandState.Returning;
+        }
 
     }
 
