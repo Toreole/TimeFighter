@@ -252,8 +252,8 @@ MonoBehaviour:
   hands:
   - {fileID: 221306548}
   - {fileID: 1352998924}
-  handSmoothing: 2
-  handSpeed: 5
+  handSmoothing: 0.85
+  handSpeed: 4.8
   globalAttackCooldown: 4
   slamAttackCooldown: 7
   punchAttackCooldown: 10

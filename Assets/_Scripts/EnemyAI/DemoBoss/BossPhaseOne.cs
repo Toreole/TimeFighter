@@ -11,7 +11,7 @@ namespace Game.Demo.Boss
 
         public override void Exit(BossController o)
         {
-            throw new System.NotImplementedException();
+            
         }
 
         public override void Update(BossController o)
@@ -22,6 +22,17 @@ namespace Game.Demo.Boss
                 TransitionToState(o, new BossIntermissionState());
                 return;
             }
+
+            //can we attack? out gives the first available hand.
+            if(o.CanAttack(out BossHand attackingHand))
+            {
+                var targetPos = o.Target.Position;
+                //o.PunchAttackTimer; o.SlamAttackTimer; the timers for these attacks.
+                //How to determine which attack should happen?
+                //depend on where the target is relative to the hand? below on Y => slam?
+                //just pick the first available attack? like with an if/elseif/elseif
+            }
+
             base.Update(o);
         }
     }

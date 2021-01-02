@@ -61,6 +61,8 @@ namespace Game.Demo.Boss
         private float enrageSpeedBuff = 1.3f; //30% faster.
         [SerializeField]
         private float enrageInterval = 25f; //every [interval] seconds, the enrageSpeedBuff gets applied in P2
+        [SerializeField]
+        private float handSlamSpeed, handPunchSpeed, handTrackSpeed;
 
         public float HandSmoothing => handSmoothing;
         public float HandSpeed => handSpeed;
@@ -68,7 +70,14 @@ namespace Game.Demo.Boss
 
         public float SlamAttackTimer {get; protected set;} = 7f;
         public float PunchAttackTimer {get; protected set;} = 10f;
-        public float AttackSpeed {get => attackSpeed; set => attackSpeed = value; }
+        public float AttackSpeed {get => attackSpeed; 
+            set 
+            { 
+                attackSpeed = value;
+                foreach(var h in hands)//update the speed that the hands should attack with.
+                    h.SetSpeeds(handTrackSpeed, handSlamSpeed, handPunchSpeed, attackSpeed);
+            }
+        }
         public float EnrageSpeedBuff => enrageSpeedBuff;
         public float EnrageInterval => enrageInterval;
 
@@ -92,6 +101,8 @@ namespace Game.Demo.Boss
         {
             health = maxHealth;
             currentState = new BossIdleState(); //just assign default value in here. Idle state does absolutely nothing in this case.
+            foreach(var hand in hands)
+                hand.SetSpeeds(handTrackSpeed, handSlamSpeed, handPunchSpeed);
             startEvent.AddListener(StartBossEncounter);
         }
 

@@ -16,7 +16,7 @@ namespace Game.Demo.Boss
 
         public override void Exit(BossController o)
         {
-            throw new System.NotImplementedException();
+
         }
 
         public override void Update(BossController o)
