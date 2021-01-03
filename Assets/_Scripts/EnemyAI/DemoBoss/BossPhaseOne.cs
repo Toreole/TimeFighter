@@ -31,6 +31,11 @@ namespace Game.Demo.Boss
                 //How to determine which attack should happen?
                 //depend on where the target is relative to the hand? below on Y => slam?
                 //just pick the first available attack? like with an if/elseif/elseif
+                if(o.SlamAttackTimer <= 0)
+                {
+                    o.SlamAttackTimer = 7f;//TODO: NEED BETTER WAY OF RESETTING THIS!!!!!!
+                    attackingHand.Slam(o.Target);
+                }
             }
 
             base.Update(o);

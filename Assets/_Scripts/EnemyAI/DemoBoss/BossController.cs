@@ -67,10 +67,10 @@ namespace Game.Demo.Boss
 
         public float HandSmoothing => handSmoothing;
         public float HandSpeed => handSpeed;
-        public float GlobalAttackTimer {get; protected set;} = 4f;
+        public float GlobalAttackTimer {get; set;} = 4f;
 
-        public float SlamAttackTimer {get; protected set;} = 7f;
-        public float PunchAttackTimer {get; protected set;} = 10f;
+        public float SlamAttackTimer {get; set;} = 7f;
+        public float PunchAttackTimer {get; set;} = 10f;
         public float AttackSpeed {get => attackSpeed; 
             set 
             { 

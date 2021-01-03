@@ -33,5 +33,6 @@ namespace Game
         public Vector2 Position => transform.position;
 
         public abstract void Damage(float amount);
+        public abstract void Stun(float time);
     }
 }

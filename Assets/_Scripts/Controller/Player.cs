@@ -27,12 +27,21 @@ namespace Game.Controller
 
         public override void Damage(float amount)
         {
-            
+            currentHealth -= amount;
+            //TODO: the rest 
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
              
+        }
+
+        //TODO: make this better.
+        public override void Stun(float time)
+        {
+            body.velocity = Vector2.zero;
+            if(controller)
+                controller.IgnorePlayerInput = true;
         }
     }
 }

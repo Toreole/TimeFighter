@@ -11,6 +11,7 @@ namespace Game.Demo.Boss
         {
             if(o.Target.IsDead) //Every state while in combat should check whether the target(player) has died. Then reset the encounter.
             {
+                Debug.Log("Boss Target has died.");
                 TransitionToState(o, new BossIdleState());
                 o.ResetBoss();
                 return;

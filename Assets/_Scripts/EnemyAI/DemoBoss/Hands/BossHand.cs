@@ -7,8 +7,6 @@ namespace Game.Demo.Boss
     ///<summary>Outsourcing some movement from the BossController. Takes some commands from the BC.</summary>
     public class BossHand : MonoBehaviour, IDamageable
     {
-        internal static readonly HandSlamState SlamState = new HandSlamState();
-        internal static readonly HandPunchState PunchState = new HandPunchState();
         internal static readonly HandNoControlState NoControlState = new HandNoControlState();
 
         [SerializeField] //obviously required for animations to work.
@@ -23,12 +21,13 @@ namespace Game.Demo.Boss
         internal string playerTag;
 
         private Vector3 startingPosition;
-        private float trackSpeed, slamSpeed, punchSpeed;
-        private float speedMultiplier;
+        internal float trackSpeed, slamSpeed, punchSpeed; //TODO: instead of internal make this somehow nicer with properties or having the settings directly on the hand instead of on the boss???
+        internal float speedMultiplier;
 
         //just so the boss controller knows whats going on here.
         public HandState ActivityStatus {get; set;} = HandState.Returning;
         public bool IsReady => ActivityStatus == HandState.Ready;
+        public Rigidbody2D Body => body;
         
         [System.NonSerialized] internal Vector2 returnVelocity = Vector2.zero;
 
@@ -63,7 +62,7 @@ namespace Game.Demo.Boss
 
         void Update()
         {
-            currentState.Update(this);
+            currentState.Update(this, speedMultiplier);
         }
 
         //As collisions and physics are handled in FixedUpdate, also handle ignored collisions in here.
