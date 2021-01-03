@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System.Collections.Generic;
+using Game.Patterns.States;
 using UnityEngine;
 
 namespace Game.Demo.Boss
@@ -6,24 +7,40 @@ namespace Game.Demo.Boss
     ///<summary>Outsourcing some movement from the BossController. Takes some commands from the BC.</summary>
     public class BossHand : MonoBehaviour, IDamageable
     {
+        internal static readonly HandSlamState SlamState = new HandSlamState();
+        internal static readonly HandPunchState PunchState = new HandPunchState();
+        internal static readonly HandNoControlState NoControlState = new HandNoControlState();
+
         [SerializeField] //obviously required for animations to work.
-        protected Animator animator;
+        private Animator animator;
         [SerializeField]
-        protected Rigidbody2D body; //rigidbody movement? probably right?
+        private Rigidbody2D body; //rigidbody movement? probably right?
         [SerializeField]
         private Transform locale;
+        [SerializeField]
+        private new Collider2D collider;
+        [SerializeField, NaughtyAttributes.Tag]
+        internal string playerTag;
 
         private Vector3 startingPosition;
         private float trackSpeed, slamSpeed, punchSpeed;
+        private float speedMultiplier;
 
-        //more like a flag and less of a state. this is not a statemachine, its just describing the latest activity of the hand, 
-        //which is determined by the BossController, it's states, and collisions with objects in the world.
+        //just so the boss controller knows whats going on here.
         public HandState ActivityStatus {get; set;} = HandState.Returning;
         public bool IsReady => ActivityStatus == HandState.Ready;
         
         [System.NonSerialized] internal Vector2 returnVelocity = Vector2.zero;
 
         public Vector3 preferredPosition => locale.position;
+
+        //This is way too complicated for this scope. dont do it.
+        //internal bool isPlayerAttached = false; //is the player currently attached?
+        //internal float playerAttachTime = 0f; //when did the player attach?
+
+        List<Collider2D> ignoredColliders = new List<Collider2D>();
+
+        HandBehaviourState currentState = BossHand.NoControlState; //hand starts out without control.
 
         private void Awake() 
         {
@@ -35,12 +52,33 @@ namespace Game.Demo.Boss
             this.trackSpeed = trackSpeed * multiplier;
             this.slamSpeed = slamSpeed * multiplier;
             this.punchSpeed = punchSpeed * multiplier;
+            this.speedMultiplier = multiplier;
         }
 
         public void ResetHand()
         {
             transform.position = startingPosition;
             ActivityStatus = HandState.Returning;
+        }
+
+        void Update()
+        {
+            currentState.Update(this);
+        }
+
+        //As collisions and physics are handled in FixedUpdate, also handle ignored collisions in here.
+        private void FixedUpdate() 
+        {
+            foreach(var other in ignoredColliders)
+                if(other && !other.Distance(collider).isOverlapped) //if it doesnt overlap with the hands collider anymore
+                    Physics2D.IgnoreCollision(other, collider, false);// re-enable the collision between the two.
+        }
+
+        ///<summary>Temporarily ignores collisions with this collider</summary>
+        public void IgnoreCollisionWith(Collider2D other)
+        {
+            Physics2D.IgnoreCollision(other, this.collider);
+            ignoredColliders.Add(other);
         }
 
         //perform a slam attack on the target.
@@ -53,14 +91,7 @@ namespace Game.Demo.Boss
         //6. mark hand for returning.
         public void Slam(Entity target)
         {
-            ActivityStatus = HandState.Attacking;
-            //setup in here
-            StartCoroutine(DoSlam(target));
-        }
-
-        private IEnumerator DoSlam(Entity target)
-        {
-            yield return null;
+            TransitionToState(new HandTrackTargetState(target));
         }
 
         //try to punch the target.
@@ -78,14 +109,31 @@ namespace Game.Demo.Boss
         //From IDamagable, used by punches
         public void Damage(float amount)
         {
-            throw new System.NotImplementedException();
+            currentState.OnDamaged();
         }
 
         //collision enter MIGHT be used, but checking the rigidbody contacts could suffice.
         //collision is relevant for both punch and slam so idk. Maybe also for detecing whether the player is mounted while this hand is waiting/returning?
         private void OnCollisionEnter2D(Collision2D other)
         {
-            throw new System.NotImplementedException();
+            currentState.OnCollisionEnter(other, this);
+        }
+
+        private void OnCollisionExit2D(Collision2D other) 
+        {
+            currentState.OnCollisionExit(other, this);
+        }
+
+        public void TransitionToState(HandBehaviourState s)
+        {
+            currentState.Exit(this);
+            s.Enter(this);
+            currentState = s;
+        }
+
+        public void SetActiveCollision(bool activeCollision)
+        {
+            collider.enabled = activeCollision;
         }
     }
 

@@ -258,9 +258,12 @@ MonoBehaviour:
   slamAttackCooldown: 7
   punchAttackCooldown: 10
   mountedHandAttackDelay: 5
-  attackSpeed: 1
+  baseAttackSpeed: 1
   enrageSpeedBuff: 1.3
   enrageInterval: 25
+  handSlamSpeed: 0
+  handPunchSpeed: 0
+  handTrackSpeed: 0
 --- !u!1 &208848318
 GameObject:
   m_ObjectHideFlags: 0
@@ -526,6 +529,11 @@ MonoBehaviour:
   animator: {fileID: 0}
   body: {fileID: 221306545}
   locale: {fileID: 2029206276}
+  startingPosition: {x: 0, y: 0, z: 0}
+  trackSpeed: 0
+  slamSpeed: 0
+  punchSpeed: 0
+  <ActivityStatus>k__BackingField: 4
 --- !u!1 &288438974
 GameObject:
   m_ObjectHideFlags: 0
@@ -1794,6 +1802,11 @@ MonoBehaviour:
   animator: {fileID: 0}
   body: {fileID: 1352998921}
   locale: {fileID: 2015442448}
+  startingPosition: {x: 0, y: 0, z: 0}
+  trackSpeed: 0
+  slamSpeed: 0
+  punchSpeed: 0
+  <ActivityStatus>k__BackingField: 4
 --- !u!1 &1843438950
 GameObject:
   m_ObjectHideFlags: 0
@@ -1858,6 +1871,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 100
   isInvincible: 0
+  collider: {fileID: 1843438952}
   controller: {fileID: 0}
 --- !u!1 &1911089230
 GameObject:
