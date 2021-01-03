@@ -19,6 +19,11 @@ namespace Game
         protected float currentHealth;
         [SerializeField]
         protected bool isInvincible = false;
+        [Header("Physics")]
+        [SerializeField]
+        protected new Collider2D collider;
+
+        public Collider2D Collider => collider;
 
         public float Health { get => currentHealth; }
         public float MaxHealth => maxHealth;

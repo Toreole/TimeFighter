@@ -6,7 +6,7 @@ namespace Game.Patterns.States
     //StateMachine<T> where T : StateMachine<T> looks super scuffed but it is required for the states to work correctly.
     //this way new StateMachines like a boss are done via -> public class Boss : StateMachine<Boss>
     //this could easily be an interface aswell, but every StateMachine controller object is complex enough to warrant being serialized.
-    public abstract class StateMachine<T> : SerializedMonoBehaviour where T : StateMachine<T> 
+    public abstract class StateMachine<T> : UnityEngine.MonoBehaviour where T : StateMachine<T> 
     {
         protected State<T> currentState;
         public abstract void TransitionToState(State<T> s);

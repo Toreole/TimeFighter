@@ -20,7 +20,7 @@ namespace Game
 
         public void Load(LevelData data)
         {
-            SerializedMonoBehaviour target;
+            ISerialized target;
             foreach(ObjectData objData in data.objectData)
             {
                 //get the targetted serializedobject in the scene
@@ -40,7 +40,7 @@ namespace Game
             //add all serialized objects to the list.
             foreach(var sObj in idToObject.values)
             {
-                data.objectData.Add(sObj.Serialize());
+                data.objectData.Add((sObj as ISerialized).Serialize());
             }
             return data;
         }
@@ -84,22 +84,29 @@ namespace Game
 
         static void Recollect(LevelManager manager)
         {
-            SerializedMonoBehaviour[] objects = FindObjectsOfType<SerializedMonoBehaviour>();
-            if (objects.Length == 0)
+            GameObject[] sceneObjects = GameObject.FindObjectsOfType<GameObject>();
+            List<ISerialized> serializeTargets = new List<ISerialized>(sceneObjects.Length >> 3);
+            foreach(var go in sceneObjects)
+            {
+                var serialized = go.GetComponent<ISerialized>();
+                if(serialized != null)
+                    serializeTargets.Add(serialized);
+            }
+            if (serializeTargets.Count == 0)
                 return;
-            foreach (var serializedObject in objects)
+            foreach (var serializedObject in serializeTargets)
             {
                 //if the string is Null or Empty it means that it does no have an ID yet.
                 if (string.IsNullOrEmpty(serializedObject.ObjectID))
                 {
-                    serializedObject.OverrideID( GetUniqueID(manager));
-                    EditorUtility.SetDirty(serializedObject); //mark the object for saving in the editor.
+                    serializedObject.ObjectID = GetUniqueID(manager);
+                    EditorUtility.SetDirty(serializedObject as Object); //mark the object for saving in the editor.
                 }
             }
             //clear the dictionary ones.
             manager.idToObject.Clear();
-            foreach (var sObject in objects)
-                manager.idToObject.Add(sObject.ObjectID, sObject);
+            foreach (var sObject in serializeTargets)
+                manager.idToObject.Add(sObject.ObjectID, sObject as Object);
 
             EditorUtility.SetDirty(manager);//mark the manager for saving in the editor.
         }
@@ -128,7 +135,7 @@ namespace Game
     public class ObjectDictionary
     {
         public List<string> keys = new List<string>();
-        public List<SerializedMonoBehaviour> values = new List<SerializedMonoBehaviour>();
+        public List<Object> values = new List<Object>(); //AAAAA has to be Object and cast to ISerialized because unity doesnt want to serialize interfaces.
 
         public void Clear()
         {
@@ -136,7 +143,7 @@ namespace Game
             values.Clear();
         }
 
-        public void Add(string key, SerializedMonoBehaviour value)
+        public void Add(string key, Object value)
         {
             keys.Add(key);
             values.Add(value);
@@ -147,11 +154,11 @@ namespace Game
             return keys.Contains(key);
         }
 
-        public bool TryGetValue(string key, out SerializedMonoBehaviour value)
+        public bool TryGetValue(string key, out ISerialized value)
         {
             if(ContainsKey(key))
             {
-                value = values[keys.IndexOf(key)];
+                value = values[keys.IndexOf(key)] as ISerialized;
                 return true;
             }
             value = null;

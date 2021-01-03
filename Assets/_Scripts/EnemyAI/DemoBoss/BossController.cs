@@ -8,7 +8,7 @@ using Game.UI;
 
 namespace Game.Demo.Boss
 {
-    public class BossController : StateMachine<BossController>, IDamageable //IDamagable implementation inside of here? needs collision in that case...
+    public class BossController : StateMachine<BossController>, IDamageable, ISerialized //IDamagable implementation inside of here? needs collision in that case...
     {
         [SerializeField]
         private new string name; //new string because unity cant do shit and has named a property "name". who does that? properties are PascalCase aaaaaaaaaaaa
@@ -56,7 +56,8 @@ namespace Game.Demo.Boss
         private float mountedHandAttackDelay = 5f; //if the player is mounting one of the hands for more than this time, attack the player on the hand.
 
         [SerializeField]
-        private float attackSpeed = 1; //the rate at which attack cooldowns go down (multiplier for deltatime).
+        private float baseAttackSpeed = 1; //the rate at which attack cooldowns go down (multiplier for deltatime).
+        private float attackSpeed = 1;
         [SerializeField]
         private float enrageSpeedBuff = 1.3f; //30% faster.
         [SerializeField]
@@ -81,11 +82,12 @@ namespace Game.Demo.Boss
         public float EnrageSpeedBuff => enrageSpeedBuff;
         public float EnrageInterval => enrageInterval;
 
+
         public bool CanAttack(out BossHand hand)
         {
             if(GlobalAttackTimer <= 0f)
             foreach(var h in Hands)
-                if(h.ActivityStatus == HandState.Ready )
+                if(h.IsReady)
                 {
                     hand = h;
                     return true;
@@ -100,9 +102,10 @@ namespace Game.Demo.Boss
         void Start()
         {
             health = maxHealth;
+            attackSpeed = baseAttackSpeed;
             currentState = new BossIdleState(); //just assign default value in here. Idle state does absolutely nothing in this case.
             foreach(var hand in hands)
-                hand.SetSpeeds(handTrackSpeed, handSlamSpeed, handPunchSpeed);
+                hand.SetSpeeds(handTrackSpeed, handSlamSpeed, handPunchSpeed, attackSpeed);
             startEvent.AddListener(StartBossEncounter);
         }
 
@@ -125,6 +128,7 @@ namespace Game.Demo.Boss
         public void ResetBoss()
         {
             health = maxHealth;
+            attackSpeed = baseAttackSpeed;
             throw new System.NotImplementedException();
         }
 
@@ -204,17 +208,20 @@ namespace Game.Demo.Boss
         {
 
         }
-        public override void Deserialize(ObjectData data)
+        public void Deserialize(ObjectData data)
         {
             var bossData = data as BossData;
             throw new System.NotImplementedException();
         }
 
-        public override ObjectData Serialize()
+        public ObjectData Serialize()
         {
             return new BossData();
             throw new System.NotImplementedException();
         }
+        [SerializeField, HideInInspector]
+        private string objectID;
+        public string ObjectID { get => objectID; set => objectID = value; }
 #endregion
     }
 }
