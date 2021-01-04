@@ -129,7 +129,13 @@ namespace Game.Demo.Boss
         {
             health = maxHealth;
             attackSpeed = baseAttackSpeed;
-            throw new System.NotImplementedException();
+            GlobalAttackTimer = globalAttackCooldown;
+            SlamAttackTimer   = slamAttackCooldown;
+            PunchAttackTimer  = punchAttackCooldown;
+
+            foreach(var hand in hands)
+                hand.ResetHand();
+            //throw new System.NotImplementedException();
         }
 
         ///<summary>Moves the Hands while under the control of the boss controller.</summary>
@@ -166,9 +172,9 @@ namespace Game.Demo.Boss
         ///<summary>Removes [amount] seconds off the attack timers</summary>
         public void TickDownAttackTimers(float amount)
         {
-            GlobalAttackTimer -= amount;
-            PunchAttackTimer -= amount;
-            SlamAttackTimer -= amount;
+            GlobalAttackTimer = Mathf.Max(0, GlobalAttackTimer - amount);
+            PunchAttackTimer = Mathf.Max(0, PunchAttackTimer - amount);
+            SlamAttackTimer = Mathf.Max(0, SlamAttackTimer - amount);
         }
 
         ///<summary>Transition to a given state</summary>
@@ -198,7 +204,8 @@ namespace Game.Demo.Boss
 
         public void Damage(float amount)
         {
-            throw new System.NotImplementedException();
+            health -= amount;
+            healthBar.value = health;
         }
 
 //Serialization for this boss is something to worry about at a much later time.
@@ -222,6 +229,37 @@ namespace Game.Demo.Boss
         [SerializeField, HideInInspector]
         private string objectID;
         public string ObjectID { get => objectID; set => objectID = value; }
+#endregion
+
+#region Debugging
+        
+        //Show some info on the GUI
+        private void OnGUI() 
+        {
+            if(!DebugUtil.ShowDebugGUI)
+                return;
+            System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+            stringBuilder.AppendLine($"<b>Active Boss: {this.name}</b>");
+            stringBuilder.AppendLine($"ObjectID: {this.objectID}");
+            stringBuilder.AppendLine($"Target: {this.Target?.name ?? "none"}");
+            stringBuilder.AppendLine($"State: {currentState.GetType().Name}");
+            stringBuilder.AppendLine($"AttackSpeed: {this.attackSpeed.ToString("0.00")}");
+            stringBuilder.AppendLine($"GlobalAttack: {GlobalAttackTimer.ToString("0.00")}");
+            stringBuilder.AppendLine($"SlamAttack: {SlamAttackTimer.ToString("0.00")}");
+            stringBuilder.AppendLine("<b>Hands:</b>");
+            foreach(var hand in hands)
+            {
+                stringBuilder.AppendLine($"  {hand.name}:");
+               stringBuilder.AppendLine($"  Status: {hand.ActivityStatus.ToString()}");
+            }
+        
+            GUI.skin.box.alignment = TextAnchor.UpperLeft;
+            GUI.skin.box.richText = true;
+            GUILayout.Box(stringBuilder.ToString());
+            if(GUILayout.Button("Damage"))
+                this.Damage(10f);
+
+        }
 #endregion
     }
 }

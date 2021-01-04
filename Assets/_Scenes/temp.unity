@@ -531,7 +531,6 @@ MonoBehaviour:
   body: {fileID: 221306545}
   locale: {fileID: 2029206276}
   collider: {fileID: 221306546}
-  playerTag: Player
 --- !u!1 &288438974
 GameObject:
   m_ObjectHideFlags: 0
@@ -1801,7 +1800,6 @@ MonoBehaviour:
   body: {fileID: 1352998921}
   locale: {fileID: 2015442448}
   collider: {fileID: 1352998922}
-  playerTag: Player
 --- !u!1 &1843438950
 GameObject:
   m_ObjectHideFlags: 0
@@ -1865,7 +1863,7 @@ MonoBehaviour:
   body: {fileID: 208848319}
   maxHealth: 100
   currentHealth: 100
-  isInvincible: 0
+  isInvincible: 1
   collider: {fileID: 1843438952}
   controller: {fileID: 0}
 --- !u!1 &1911089230
@@ -2009,6 +2007,78 @@ Transform:
   m_LocalScale: {x: 5.0835276, y: 0.38040078, z: 1}
   m_Children: []
   m_Father: {fileID: 615425590}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2002920249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2002920252}
+  - component: {fileID: 2002920251}
+  - component: {fileID: 2002920250}
+  m_Layer: 0
+  m_Name: Debug
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2002920250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2002920249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 271360f056dfe2442b894d872fd80b75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2002920251
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2002920249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a23b0110ca9e7d74db8bea3953dd416a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugUIToggleAction:
+    m_Name: Debug UI Toggle
+    m_Type: 0
+    m_ExpectedControlType: 
+    m_Id: 415d7a3b-8936-4b6b-900d-05c7a58071e7
+    m_Processors: 
+    m_Interactions: 
+    m_SingletonActionBindings:
+    - m_Name: 
+      m_Id: 13439337-7a5c-47f5-a0c0-4dbc8e08a795
+      m_Path: <Keyboard>/f12
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Debug UI Toggle
+      m_Flags: 0
+--- !u!4 &2002920252
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2002920249}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 29.201633, y: 5.100672, z: -1.6386719}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2015442447

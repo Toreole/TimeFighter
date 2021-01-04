@@ -17,8 +17,8 @@ namespace Game.Demo.Boss
         private Transform locale;
         [SerializeField]
         private new Collider2D collider;
-        [SerializeField, NaughtyAttributes.Tag]
-        internal string playerTag;
+        //[SerializeField, NaughtyAttributes.Tag]
+        //internal string playerTag;
 
         private Vector3 startingPosition;
         internal float trackSpeed, slamSpeed, punchSpeed; //TODO: instead of internal make this somehow nicer with properties or having the settings directly on the hand instead of on the boss???
@@ -58,6 +58,10 @@ namespace Game.Demo.Boss
         {
             transform.position = startingPosition;
             ActivityStatus = HandState.Returning;
+            currentState = NoControlState;
+            foreach(var col in ignoredColliders)
+                Physics2D.IgnoreCollision(col, this.collider, false);
+            ignoredColliders.Clear();
         }
 
         void Update()
@@ -143,7 +147,7 @@ namespace Game.Demo.Boss
         Attacking = 2,
         Waiting = 3,
         Returning = 4,
-        MountedByPlayer = 5,
+        //MountedByPlayer = 5,
         Disabled = 6
     }
 }
