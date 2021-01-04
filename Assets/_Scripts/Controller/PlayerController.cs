@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine.InputSystem;
 using Game.Controller.PlayerStates;
+using Game.Interactions;
 
 using static Game.Util;
 
@@ -48,6 +49,8 @@ namespace Game.Controller
         protected InputActionReference jumpAction, specialAction;
         [SerializeField]
         protected InputActionReference dashAction;
+        [SerializeField]
+        protected InputActionReference interactAction;
         [SerializeField, Header("Rendering")]
         protected new SpriteRenderer renderer;
 
@@ -207,6 +210,9 @@ namespace Game.Controller
                 controller = this
             };
             activeState.OnEnterState();
+
+            if(interactAction.action != null)
+                interactAction.action.performed += OnInteract;
         }
 
         /// <summary> 
@@ -246,7 +252,7 @@ namespace Game.Controller
                 movementRaw.x = Normalized(movementInput.x);
                 movementRaw.y = Normalized(movementInput.y);
             }
-            if (jumpAction.action != null) //jumping 
+            if (jumpAction.action != null) //jumping  //TODO all these .action.triggered can be replaced by using the action.performed event
             {
                 jumpPressed = jumpAction.action.triggered;
                 jumpHold = jumpAction.action.phase == InputActionPhase.Started;
@@ -511,6 +517,16 @@ namespace Game.Controller
             //print("start hook");
             if (hookController)
                 hookController.Throw();
+        }
+
+        private void OnInteract(InputAction.CallbackContext context)
+        {
+            //Try to interact.
+            if(IsGrounded && Body.velocity.x < 0.4f)
+            {
+                Interactable.Current?.Interact(player);
+                //buffer the current state / go into a no-control state until the interaction is complete (animation?)
+            }
         }
     }
 

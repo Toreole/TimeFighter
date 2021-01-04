@@ -12,6 +12,7 @@ namespace Game.Controller
     /// </summary>
     public class Player : Entity
     {
+        public const string Tag = "Player";
         [Header("Player Fields")]
         [SerializeField]
         protected PlayerController controller;

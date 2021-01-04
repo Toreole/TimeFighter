@@ -13,7 +13,7 @@ namespace Game.Controller
     {
         //protected instance so it can be used in a static context
         protected static CameraController _instance;
-        public static Camera Current => _instance.camera;
+        public static Camera Current {get; private set;}
 
         //The actual camera object
         protected new Camera camera;
@@ -63,6 +63,7 @@ namespace Game.Controller
             if (!camera)
                 camera = GetComponent<Camera>();
             _instance = this;
+            Current = this.camera;
             camera.orthographicSize = defaultSize;
         }
 
