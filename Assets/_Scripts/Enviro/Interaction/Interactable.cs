@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Game.Misc;
 
 namespace Game.Interactions
 {
@@ -30,6 +31,20 @@ namespace Game.Interactions
             {
                 Game.UI.PersistentUI.HideInteraction();
                 Current = null;
+            }
+        }
+
+        private void OnGUI()
+        {
+            if(DebugUtil.ShowDebugGUI && Current == this)
+            {
+                System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+                stringBuilder.AppendLine($"<b>Interactable</b>: {this.name}");
+                stringBuilder.AppendLine($"pos: {transform.position.x} / {transform.position.y}");
+                GUI.skin.box.richText = true;
+                GUI.skin.box.alignment = TextAnchor.UpperLeft;
+                GUI.Box(new Rect(220, 0, 300, 150), stringBuilder.ToString());
+                //GUILayout.Box(stringBuilder.ToString());
             }
         }
 
