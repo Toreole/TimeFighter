@@ -18,6 +18,12 @@ namespace Game.UI
         protected Slider bossHealthbar;
         [SerializeField]
         protected TextMeshProUGUI bossName;
+        [SerializeField]
+        protected RectTransform interactionIconHolder;
+        [SerializeField]
+        protected GameObject interactionKeyboardIcon, interactionGamepadIcon;
+
+        private new Camera camera;
 
         private static PersistentUI Instance
         {
@@ -41,12 +47,21 @@ namespace Game.UI
             DontDestroyOnLoad(this.gameObject);
         }
 
+        private void Start() 
+        {
+            camera = Game.Controller.CameraController.Current ?? Camera.main; //use the CameraController first, if unavailable use Camera.main
+            Debug.Log(camera == true);
+        }
+
         public static void AutoSave(bool activeSaving) 
             =>   Instance.autoSaveIcon.SetActive(activeSaving);
 
         private static PersistentUI CreateInstance()
         {
-            return Instantiate(Resources.Load<GameObject>("UI/PersistentUI")).GetComponent<PersistentUI>();
+            var pui = Instantiate(Resources.Load<GameObject>("UI/PersistentUI")).GetComponent<PersistentUI>();
+            //just making sure that there is a camera.
+            pui.camera = Game.Controller.CameraController.Current ?? Camera.main;
+            return pui;
         }
 
         public static Slider GetBossHealthAndSetupDisplay(string name, float maxHealth, float currentHealth)
@@ -62,5 +77,42 @@ namespace Game.UI
 
         public static void HideBossUI()
             => Instance.bossDataDisplay.SetActive(false);
+
+
+        private Transform lastInteractTarget;
+        private Vector3 offset;
+
+
+        //LateUpdate adjusts the Interaction Icon. //TODO: Scale it appropriately, on a higher camera orthographic size, scale should be smaller.
+        private void LateUpdate() 
+        {
+            if(lastInteractTarget)
+            {
+                var rt = Instance.transform as RectTransform;
+                var sizeDelta = rt.sizeDelta;
+                Vector2 uiOffset = new Vector2(sizeDelta.x * 0.5f, sizeDelta.y * 0.5f);
+
+                Vector2 viewportPos = Instance.camera.WorldToViewportPoint(lastInteractTarget.position + offset);
+                Vector2 proportionalPos = new Vector2(viewportPos.x * sizeDelta.x, viewportPos.y * sizeDelta.y);
+                Instance.interactionIconHolder.localPosition = proportionalPos - uiOffset;
+
+                Instance.interactionGamepadIcon.SetActive(Game.Controller.Utility.KeybOrController.UseController);
+                Instance.interactionKeyboardIcon.SetActive(!Game.Controller.Utility.KeybOrController.UseController);
+            }
+        }
+
+        //TODO: maybe fade it or something idk, make it look nice at some point
+        public static void PlaceInteractionAt(Transform worldSpaceTarget, Vector3 offset)
+        {
+            Instance.lastInteractTarget = worldSpaceTarget;
+            Instance.offset = offset;
+            Instance.interactionIconHolder.gameObject.SetActive(true);
+        }
+
+        public static void HideInteraction()
+        {
+            Instance.lastInteractTarget = null;
+            Instance.interactionIconHolder.gameObject.SetActive(false);
+        }
     }
 }
