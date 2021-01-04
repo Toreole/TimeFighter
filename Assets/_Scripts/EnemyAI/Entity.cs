@@ -19,13 +19,20 @@ namespace Game
         protected float currentHealth;
         [SerializeField]
         protected bool isInvincible = false;
+        [Header("Physics")]
+        [SerializeField]
+        protected new Collider2D collider;
+
+        public Collider2D Collider => collider;
 
         public float Health { get => currentHealth; }
         public float MaxHealth => maxHealth;
         public bool IsInvincible => isInvincible;
+        public bool IsDead => currentHealth < 0f;
         public Rigidbody2D Body => body;
         public Vector2 Position => transform.position;
 
         public abstract void Damage(float amount);
+        public abstract void Stun(float time);
     }
 }

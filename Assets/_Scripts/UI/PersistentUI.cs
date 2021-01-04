@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 namespace Game.UI
 {
@@ -12,6 +12,12 @@ namespace Game.UI
     {
         [SerializeField]
         protected GameObject autoSaveIcon;
+        [SerializeField]
+        protected GameObject bossDataDisplay;
+        [SerializeField]
+        protected Slider bossHealthbar;
+        [SerializeField]
+        protected TextMeshProUGUI bossName;
 
         private static PersistentUI Instance
         {
@@ -42,5 +48,19 @@ namespace Game.UI
         {
             return Instantiate(Resources.Load<GameObject>("UI/PersistentUI")).GetComponent<PersistentUI>();
         }
+
+        public static Slider GetBossHealthAndSetupDisplay(string name, float maxHealth, float currentHealth)
+        {
+            PersistentUI pui = Instance;
+            pui.bossDataDisplay.SetActive(true);
+            pui.bossName.text = name;
+            var healthbar = pui.bossHealthbar;
+            healthbar.maxValue = maxHealth;
+            healthbar.value = currentHealth;
+            return healthbar;
+        }
+
+        public static void HideBossUI()
+            => Instance.bossDataDisplay.SetActive(false);
     }
 }

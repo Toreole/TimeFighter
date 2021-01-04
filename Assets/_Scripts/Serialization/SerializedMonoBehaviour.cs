@@ -3,12 +3,12 @@ using System.Collections;
 
 namespace Game.Serialization
 {
-    public abstract class SerializedMonoBehaviour : MonoBehaviour
+    public abstract class SerializedMonoBehaviour : MonoBehaviour, ISerialized
     {
         //this object's ID, not to be changed in the editor.
         protected string objectID = "";
         //get property, can be overridden if necessary. (like NPCs with custom IDs that persist across scenes)
-        public string ObjectID { get; }
+        public string ObjectID { get => objectID; set => objectID = value; }
 #if UNITY_EDITOR
         internal void OverrideID(string id) => objectID = id;
 #endif
