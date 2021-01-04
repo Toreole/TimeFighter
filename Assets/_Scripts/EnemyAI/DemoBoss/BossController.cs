@@ -149,7 +149,7 @@ namespace Game.Demo.Boss
                 if(hand.ActivityStatus == HandState.Returning)
                 {
                     //Try smoothdamping the position of the hand.
-                    transform.position = Vector2.SmoothDamp(transform.position, hand.preferredPosition, ref hand.returnVelocity, handSmoothing, handSpeed, Time.deltaTime);
+                    transform.position = Vector2.SmoothDamp(transform.position, hand.preferredPosition, ref hand.returnVelocity, handSmoothing / attackSpeed, handSpeed, Time.deltaTime);
                     //if its approximately at the position it should be at, mark it as ready.
                     if((transform.position - hand.preferredPosition).sqrMagnitude < 0.01f)
                         hand.ActivityStatus = HandState.Ready;
@@ -206,6 +206,10 @@ namespace Game.Demo.Boss
         {
             health -= amount;
             healthBar.value = health;
+            if(health <= 0)
+            {
+                //TODO: Let the boss die.
+            }
         }
 
 //Serialization for this boss is something to worry about at a much later time.
@@ -236,7 +240,7 @@ namespace Game.Demo.Boss
         //Show some info on the GUI
         private void OnGUI() 
         {
-            if(!DebugUtil.ShowDebugGUI)
+            if(!DebugUtil.ShowDebugGUI || health <= 0) //if the debugGUI is disabled, or the boss is dead, return.
                 return;
             System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
             stringBuilder.AppendLine($"<b>Active Boss: {this.name}</b>");
