@@ -123,6 +123,7 @@ namespace Game.Demo.Boss
             healthBar = PersistentUI.GetBossHealthAndSetupDisplay(this.name, maxHealth, health);
             //optional: startup animation.
             TransitionToState(new BossPhaseOne());
+            Game.Controller.CameraController.DynamicZoom(10, 1.5f);
         }
 
         public void ResetBoss()
@@ -209,6 +210,11 @@ namespace Game.Demo.Boss
             if(health <= 0)
             {
                 //TODO: Let the boss die.
+                PersistentUI.HideBossUI();
+                foreach(var hand in hands)
+                    hand.ResetHand();
+                Game.Controller.CameraController.ResetZoom();
+                Destroy(this);
             }
         }
 

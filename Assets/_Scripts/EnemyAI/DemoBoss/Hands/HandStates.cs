@@ -7,6 +7,7 @@ namespace Game.Demo.Boss
     public class HandTrackTargetState : HandBehaviourState
     {
         Entity target;
+        float startTime; 
 
         public HandTrackTargetState(Entity target)
         {
@@ -16,6 +17,7 @@ namespace Game.Demo.Boss
         public override void Enter(BossHand hand)
         {
             hand.ActivityStatus = HandState.Attacking;
+            startTime = Time.time;
         }
 
         //Move above the player.
@@ -23,8 +25,11 @@ namespace Game.Demo.Boss
         {
             Vector2 targetPosition = target.Position + new Vector2(0f, 7f);
             var body = hand.Body;
-            body.MovePosition(Vector2.MoveTowards(body.position, targetPosition, hand.trackSpeed * Time.deltaTime));
-            if(body.position == targetPosition)
+            float timeOffset = (Time.time - startTime) / 3f;
+            //accelerate a little bit over time. //-- Unclamped is funky, maybe ill use it lmao.
+            float speed = hand.trackSpeed + timeOffset * 4f;
+            body.MovePosition(Vector2.MoveTowards(body.position, targetPosition, speed * Time.deltaTime));
+            if(Vector2.SqrMagnitude(body.position - targetPosition) < 0.05f) //if its about there.
             {
                 hand.TransitionToState(new HandWaitQueue(0.3f, new HandSlamState()));
             }
@@ -62,7 +67,7 @@ namespace Game.Demo.Boss
                     if(collision.GetContact(0).normal.y > 0.6f)
                     {
                         //stun the entity for 1000 seconds (thats enough)
-                        entity.Stun(1000f);
+                        entity.Stun(1000f, true);
                         //add the entity to the list of slammed entities that will be killed at the end of the slam.
                         slammedEntities.Add(entity);
                         //now just ignore the collision between these objects for now.

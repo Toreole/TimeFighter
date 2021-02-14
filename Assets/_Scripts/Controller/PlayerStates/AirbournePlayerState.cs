@@ -12,10 +12,16 @@ namespace Game.Controller.PlayerStates
             //Update the facing direction.
             controller.FlipX = lastVel.x > 0 ? false : lastVel.x < 0 ? true : controller.FlipX;
 
-            float xAccel = Mathf.Abs(input.x) * deltaTime * controller.Acceleration;
-            float xMovement = Mathf.MoveTowards(lastVel.x, Util.Normalized(input.x) * controller.BaseSpeed, xAccel * controller.AirControl);
+            float xAccel = Util.Normalized(input.x) * deltaTime * controller.Acceleration;
+            float maxXMov = Mathf.Max(controller.BaseSpeed, lastVel.x);
+            float minXMov = Mathf.Min(-controller.BaseSpeed, lastVel.x);
+            //testing.
+            float acceleration = xAccel * controller.AirControl;
+            float speed = lastVel.x + acceleration;
+            float clampedSpeed = Mathf.Clamp(speed, minXMov, maxXMov);
+            //float xMovement = Mathf.MoveTowards(lastVel.x, Util.Normalized(input.x) * controller.BaseSpeed, xAccel * controller.AirControl);
             
-            Vector2 velocity = new Vector2(xMovement, Body.velocity.y);
+            Vector2 velocity = new Vector2(clampedSpeed, Body.velocity.y);
             if(input.y < -0.1f)
                 velocity.y += input.y * Time.deltaTime * controller.AirControl * controller.Acceleration;
             velocity.y = Mathf.Max(controller.TerminalVelocityY, velocity.y);

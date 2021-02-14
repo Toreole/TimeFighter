@@ -35,6 +35,8 @@ namespace Game.Controller.PlayerStates
                 Debug.Log("0");
                 if (controller.IsGrounded)
                     controller.SwitchToState<GroundedPlayerState>();
+                else if(controller.IsTouchingWall && controller.WallHasFlag(GroundFlags.Climbable))
+                    controller.SwitchToState<WallPlayerState>();
                 else
                     controller.SwitchToState<AirbournePlayerState>();
                 Body.velocity = Vector2.zero;

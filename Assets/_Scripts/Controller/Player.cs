@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using System.Reflection;
 using System.Diagnostics;
+using Game.Controller.PlayerStates;
 
 namespace Game.Controller
 {
@@ -38,11 +39,14 @@ namespace Game.Controller
         }
 
         //TODO: make this better.
-        public override void Stun(float time)
+        public override void Stun(float time, bool cancelMovement)
         {
-            body.velocity = Vector2.zero;
+            if(cancelMovement)
+                body.velocity = Vector2.zero;
             if(controller)
-                controller.IgnorePlayerInput = true;
+            {
+                controller.SwitchToState(new PlayerStunnedState(time));
+            }
         }
     }
 }

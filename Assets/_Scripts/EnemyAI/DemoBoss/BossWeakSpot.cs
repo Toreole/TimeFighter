@@ -12,13 +12,17 @@ namespace Game.Demo.Boss
         [SerializeField]
         private float knockbackStrength;
 
-        public override void Interact(Game.Controller.Player entity)
+        public override void Interact(Game.Controller.Player player)
         {
             boss.Damage(damagePerInteraction);
             
-            Vector2 forceDirection = entity.Position - (Vector2)transform.position;
+            Vector2 selfPosition = transform.position;
+            float xDirection = Util.Normalized(player.Position.x - selfPosition.x);
+            Vector2 forceDirection = new Vector2(xDirection, 0.7f);
             forceDirection.Normalize();
-            entity.Body.AddForce(forceDirection * knockbackStrength * entity.Body.mass, ForceMode2D.Impulse);
+            player.Stun(2f, false);
+            //why isnt this adding force????
+            player.Body.AddForce(forceDirection * knockbackStrength * player.Body.mass, ForceMode2D.Impulse);
         }
     }
 }
