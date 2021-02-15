@@ -13,6 +13,8 @@ namespace Game
         /// Gravity * 2.
         /// </summary>
         public const float g2 = 19.62f;
+
+        public const float oneThird = 1f/3f;
         public static float Normalized(float f) => (f > 0)? 1f : (f < 0)? -1f : 0f;
         public static int NormalizeInt(float f) => (f > 0) ? 1 : (f < 0) ? -1 : 0;
         
