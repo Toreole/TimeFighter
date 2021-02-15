@@ -80,6 +80,8 @@ namespace Game.Demo.Boss
             } 
             else if(collision.gameObject.isStatic)
             {
+                //Powerful slam hit the ground, shake the camera to show the power of this powerful power boi
+                Game.Controller.CameraController.Shake(1f);
                 //static collision hit!!!
                 foreach(var ent in slammedEntities)
                     ent.Damage(999999f);
