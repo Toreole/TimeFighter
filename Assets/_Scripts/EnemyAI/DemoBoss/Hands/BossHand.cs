@@ -66,12 +66,13 @@ namespace Game.Demo.Boss
 
         void Update()
         {
-            currentState.Update(this, speedMultiplier);
         }
 
         //As collisions and physics are handled in FixedUpdate, also handle ignored collisions in here.
         private void FixedUpdate() 
         {
+            //this should probably use fixedupdate instead.
+            currentState.Update(this, speedMultiplier);
             foreach(var other in ignoredColliders)
                 if(other && !other.Distance(collider).isOverlapped) //if it doesnt overlap with the hands collider anymore
                     Physics2D.IgnoreCollision(other, collider, false);// re-enable the collision between the two.
