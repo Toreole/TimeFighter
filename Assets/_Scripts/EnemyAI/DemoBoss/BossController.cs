@@ -97,6 +97,15 @@ namespace Game.Demo.Boss
         }
 
 #endregion
+#region Animation
+        private static readonly int PHASE_PARAM = Animator.StringToHash("Phase");   
+
+        [Header("Animation")]
+        [SerializeField]
+        private Animator animator;
+
+        public void SetAnimationPhase(int phaseID) => animator.SetInteger(PHASE_PARAM, phaseID);   
+#endregion
 
         // Start is called before the first frame update
         void Start()
@@ -133,6 +142,7 @@ namespace Game.Demo.Boss
             GlobalAttackTimer = globalAttackCooldown;
             SlamAttackTimer   = slamAttackCooldown;
             PunchAttackTimer  = punchAttackCooldown;
+            SetAnimationPhase(0);
 
             foreach(var hand in hands)
                 hand.ResetHand();
@@ -166,7 +176,8 @@ namespace Game.Demo.Boss
             float offset = Target.Position.x - transform.position.x;
             if(Mathf.Abs(offset) > 5)
             {
-                transform.position += new Vector3(1, 0) * Util.Normalized(offset) * Time.deltaTime;
+                //move parent as this is the child of the boss root.
+                transform.parent.position += new Vector3(1, 0) * Util.Normalized(offset) * Time.deltaTime;
             }
         }
 
@@ -214,6 +225,7 @@ namespace Game.Demo.Boss
                 foreach(var hand in hands)
                     hand.ResetHand();
                 Game.Controller.CameraController.ResetZoom();
+                SetAnimationPhase(-1);
                 Destroy(this);
             }
         }

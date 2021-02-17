@@ -6,7 +6,7 @@ namespace Game.Demo.Boss
     {
         public override void Enter(BossController o)
         {
-            
+            o.SetAnimationPhase(1);
         }
 
         public override void Exit(BossController o)

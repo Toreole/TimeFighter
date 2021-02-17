@@ -47,12 +47,12 @@ namespace Game.Controller
         protected Vector3 cameraOffset = Vector3.up;
         [SerializeField]
         protected float shakeFalloff = 2f;
-
-        [SerializeField]
-        private float debugShakeMagnitude = 2f;
         
         private float currentSpeed = 0f;
         private Vector3 previousTargetPosition;
+
+        //override the default transform property because its stupid and ugly and slow and dumb
+        private new Transform transform;
 
         //helper to reset zoom.
         //public static float DefaultSize => _instance.defaultSize;
@@ -70,17 +70,8 @@ namespace Game.Controller
             _instance = this;
             Current = this.camera;
             camera.orthographicSize = defaultSize;
-
-        }
-
-        bool alreadyShaking = false;
-        void Update()
-        {
-            if(!alreadyShaking)
-            {
-                StartCoroutine(DoShake(this.debugShakeMagnitude));
-                alreadyShaking = true;
-            }
+            //we need to assign transform to the base, or do GetComponent, in this case because its shorter :))
+            this.transform = base.transform;
         }
 
         //camera movement is done in lateupdate to not act weirdly with anything that hapens in update

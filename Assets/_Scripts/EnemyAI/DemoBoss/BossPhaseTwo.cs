@@ -13,6 +13,7 @@ namespace Game.Demo.Boss
         {
             lastBuff = Time.time;
             o.AttackSpeed *= o.EnrageSpeedBuff;
+            o.SetAnimationPhase(2);
         }
 
         public override void Exit(BossController o)
