@@ -8,10 +8,12 @@ namespace Game.Demo.Boss
     {
         Entity target;
         float startTime; 
+        float groundedY;
 
         public HandTrackTargetState(Entity target)
         {
             this.target = target;
+            groundedY = target.Position.y;
         }
 
         public override void Enter(BossHand hand)
@@ -23,11 +25,15 @@ namespace Game.Demo.Boss
         //Move above the player.
         public override void Update(BossHand hand, float speedMultiplier)
         {
-            Vector2 targetPosition = target.Position + new Vector2(0f, 7f);
+            //this whole thing isnt perfect in any way, but at least it somewhat works.
+            Vector2 targetPosition = target.Position;
+            if(target.IsGrounded)
+                groundedY = Mathf.Min(target.Position.y, groundedY);
+            targetPosition.y = groundedY + 7.0f;
             var body = hand.Body;
-            float timeOffset = (Time.time - startTime) / 3f;
+            float timeOffset = (Time.time - startTime) / 7f;
             //accelerate a little bit over time. //-- Unclamped is funky, maybe ill use it lmao.
-            float speed = hand.trackSpeed + timeOffset * 4f;
+            float speed = hand.trackSpeed + timeOffset * 3f;
             body.MovePosition(Vector2.MoveTowards(body.position, targetPosition, speed * Time.deltaTime));
             if(Vector2.SqrMagnitude(body.position - targetPosition) < 0.05f) //if its about there.
             {

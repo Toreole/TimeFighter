@@ -1,9 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
-using System.Reflection;
-using System.Diagnostics;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
 using Game.Controller.PlayerStates;
 
 namespace Game.Controller
@@ -18,6 +14,8 @@ namespace Game.Controller
         [SerializeField]
         protected PlayerController controller;
 
+        public override bool IsGrounded => controller.IsGrounded;
+
         /// <summary>
         /// Setup all player components
         /// </summary>
@@ -31,6 +29,10 @@ namespace Game.Controller
         {
             currentHealth -= amount;
             //TODO: the rest 
+            //--DEBUG ONLY:
+            //Simply restart the scene when the player dies. dont care.
+            if(currentHealth <= 0)
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);    
         }
 
         private void OnTriggerEnter2D(Collider2D collision)

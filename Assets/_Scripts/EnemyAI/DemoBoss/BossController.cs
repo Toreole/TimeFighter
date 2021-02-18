@@ -107,9 +107,12 @@ namespace Game.Demo.Boss
         public void SetAnimationPhase(int phaseID) => animator.SetInteger(PHASE_PARAM, phaseID);   
 #endregion
 
+        private new Transform transform;
+
         // Start is called before the first frame update
         void Start()
         {
+            transform = base.transform.parent;
             health = maxHealth;
             attackSpeed = baseAttackSpeed;
             currentState = new BossIdleState(); //just assign default value in here. Idle state does absolutely nothing in this case.
@@ -142,6 +145,7 @@ namespace Game.Demo.Boss
             GlobalAttackTimer = globalAttackCooldown;
             SlamAttackTimer   = slamAttackCooldown;
             PunchAttackTimer  = punchAttackCooldown;
+            PersistentUI.HideBossUI();
             SetAnimationPhase(0);
 
             foreach(var hand in hands)
@@ -176,8 +180,8 @@ namespace Game.Demo.Boss
             float offset = Target.Position.x - transform.position.x;
             if(Mathf.Abs(offset) > 5)
             {
-                //move parent as this is the child of the boss root.
-                transform.parent.position += new Vector3(1, 0) * Util.Normalized(offset) * Time.deltaTime;
+                //Move.
+                transform.localPosition += new Vector3((Util.Normalized(offset) * Time.deltaTime), 0);
             }
         }
 

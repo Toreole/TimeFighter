@@ -31,6 +31,7 @@ namespace Game
         public bool IsDead => currentHealth < 0f;
         public Rigidbody2D Body => body;
         public Vector2 Position => transform.position;
+        public virtual bool IsGrounded {get;}
 
         public abstract void Damage(float amount);
         public abstract void Stun(float time, bool cancelMovement);
