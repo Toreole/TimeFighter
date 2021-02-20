@@ -72,6 +72,9 @@ namespace Game
             Debug.DrawLine(start, end, color);
         }
 
-        public static float Power(this float b, float power) => Mathf.Pow(b, power);
+        public static float ToPower(this float b, float power) => Mathf.Pow(b, power);
+
+        public static bool ContainsX(this Bounds bounds, Vector2 position)
+            => bounds.min.x <= position.x && position.x <= bounds.max.x;
     }
 }

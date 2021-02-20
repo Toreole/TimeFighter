@@ -6,6 +6,7 @@ namespace Game.Demo.Boss
     {
         public override void Enter(BossController o)
         {
+            o.IsInvincible = false;
             o.SetAnimationPhase(1);
         }
 

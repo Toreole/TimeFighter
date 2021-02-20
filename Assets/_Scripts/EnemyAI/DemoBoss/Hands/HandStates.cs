@@ -51,7 +51,7 @@ namespace Game.Demo.Boss
         public override void Enter(BossHand o)
         {
             o.ActivityStatus = HandState.Attacking;
-            o.SetActiveCollision(true);
+            //o.SetActiveCollision(true);
             speed = o.slamSpeed;
         }
 
@@ -77,7 +77,7 @@ namespace Game.Demo.Boss
                         //add the entity to the list of slammed entities that will be killed at the end of the slam.
                         slammedEntities.Add(entity);
                         //now just ignore the collision between these objects for now.
-                        hand.IgnoreCollisionWith(collision.collider);
+                        hand.IgnoreCollisionWith(entity.Collider);
                         //use a joint to move the entity along with this hand.
                         var joint = hand.gameObject.AddComponent<RelativeJoint2D>();
                         joint.connectedBody = entity.Body;
@@ -180,7 +180,7 @@ namespace Game.Demo.Boss
         public override void Enter(BossHand hand)
         {
             hand.ActivityStatus = HandState.Returning;
-            hand.SetActiveCollision(false);
+            //hand.SetActiveCollision(false);
         }
 
         public override void Update(BossHand hand, float ts){}

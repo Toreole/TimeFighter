@@ -7482,7 +7482,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPack: {fileID: 0}
-  info: 73
+  info: 72
 --- !u!212 &486802998988119750
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -7767,6 +7767,7 @@ MonoBehaviour:
   startEvent: {fileID: 1451047594}
   maxHealth: 100
   intermissionHealthThreshold: 0.3
+  moveDistanceThreshold: 6.5
   damageStunTime: 3.5
   hands:
   - {fileID: 486802999887126649}
@@ -7824,7 +7825,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: -3
-  m_Sprite: {fileID: 21300000, guid: 83b6670b9a0e77942907ccc80b695a67, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4efd3d0f2ba12d747964bd5fba6e69ec, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -7920,7 +7921,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPack: {fileID: 0}
-  info: 73
+  info: 72
 --- !u!212 &486802999887126654
 SpriteRenderer:
   m_ObjectHideFlags: 0

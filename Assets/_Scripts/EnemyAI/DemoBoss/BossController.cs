@@ -24,14 +24,29 @@ namespace Game.Demo.Boss
         [SerializeField]
         private float intermissionHealthThreshold = 0.3f;
         public float IntermissionHealthThreshold => intermissionHealthThreshold;
+        [SerializeField]
+        private BossWeakSpot weakSpot;
+
+        [SerializeField]
+        private float moveDistanceThreshold = 5f;
 
         //for single depth push-down automata. specific for this boss rn.
         State<BossController> stateBuffer;
 
         [SerializeField]
         protected float damageStunTime = 3.5f;
-
+        
         public float DamageStunTime => damageStunTime;
+
+        private bool isInvincible = true;
+        public bool IsInvincible {
+            get => isInvincible;
+            set 
+            {
+                weakSpot.enabled = !value;
+                isInvincible = value;
+            }
+        }
 
         //UI:
         private Slider healthBar;
@@ -82,18 +97,26 @@ namespace Game.Demo.Boss
         public float EnrageSpeedBuff => enrageSpeedBuff;
         public float EnrageInterval => enrageInterval;
 
-
         public bool CanAttack(out BossHand hand)
         {
             if(GlobalAttackTimer <= 0f)
             foreach(var h in Hands)
-                if(h.IsReady)
+                if(h.IsReady && !IsTargetOnHand(h))
                 {
                     hand = h;
                     return true;
                 }
             hand = null;
             return false;
+        }
+
+        //Defined by the target being grounded, within the horizontal bounds of the hand, and above the max Y of the hands bounds.
+        private bool IsTargetOnHand(BossHand hand)
+        {
+            var bounds = hand.Bounds;
+            var targetPos = Target.Position;
+
+            return bounds.ContainsX(targetPos) && targetPos.y >= bounds.max.y && Target.IsGrounded; 
         }
 
 #endregion
@@ -178,7 +201,7 @@ namespace Game.Demo.Boss
         public void FollowTarget()
         {
             float offset = Target.Position.x - transform.position.x;
-            if(Mathf.Abs(offset) > 5)
+            if(Mathf.Abs(offset) >= moveDistanceThreshold)
             {
                 //Move.
                 transform.localPosition += new Vector3((Util.Normalized(offset) * Time.deltaTime), 0);
