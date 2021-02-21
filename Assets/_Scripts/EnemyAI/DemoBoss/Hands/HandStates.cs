@@ -188,10 +188,11 @@ namespace Game.Demo.Boss
         {
             if(collision.gameObject.isStatic)
                 return; //static collisions are irrelevant.
-            Entity entity = collision.gameObject.GetComponent<Entity>();
+            Entity entity = collision.collider.GetComponentInParent<Entity>();
             BossHand otherHand = collision.gameObject.GetComponent<BossHand>();
             if(entity)
             {
+                Debug.Log("test");
                 //Ignore collisions with invincible entities.
                 if(entity.IsInvincible)
                 {
@@ -201,7 +202,7 @@ namespace Game.Demo.Boss
                 {
                     float collisionNormalX = collision.GetContact(0).normal.x;
                     //if the collisions normal is roughly pointing in the same direction as where the hand is going:
-                    if(collisionNormalX > 0.5f && movementDirection > 0f || collisionNormalX < -0.5f && movementDirection < 0f)
+                    if(collisionNormalX > 0.5f && movementDirection < 0f || collisionNormalX < -0.5f && movementDirection > 0f)
                     {
                         //stun the entity for 1000 seconds (thats enough)
                         entity.Stun(1000f, true);
