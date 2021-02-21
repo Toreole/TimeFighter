@@ -96,16 +96,10 @@ namespace Game.Demo.Boss
             TransitionToState(new HandTrackTargetState(target));
         }
 
-        //try to punch the target.
-        //1. move in a straight line
-        //2. taking damage stops movement (-> skip to 5.)
-        //3. knock back any and all entities hit (damage them)
-        //4. move until terrain is hit
-        //5. short delay
-        //6. mark hand for returning.
-        public void Punch(Entity target)
+        //Clap both hands at the target.
+        public void Clap(Entity target, float side)
         {
-            throw new System.NotImplementedException();
+            TransitionToState(new HandClapPrepState(target, side));
         }
 
         //From IDamagable, used by punches
@@ -137,6 +131,10 @@ namespace Game.Demo.Boss
         {
             collider.enabled = activeCollision;
         }
+
+#region DEBUGGING
+        public HandBehaviourState GetCurrentState() => currentState;
+#endregion
     }
 
     public enum HandState 

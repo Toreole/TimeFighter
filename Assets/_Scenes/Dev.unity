@@ -4440,7 +4440,7 @@ MonoBehaviour:
   acceleration: 13
   rollFallThreshold: -7
   fallDamageThreshold: -25
-  maxStamina: 100
+  maxStamina: 50
   staminaRegen: 20
   dashDistance: 4
   dashCost: 25
@@ -7431,7 +7431,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &486802998988119745
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7482,7 +7482,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPack: {fileID: 0}
-  info: 72
+  info: 64
 --- !u!212 &486802998988119750
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -7602,7 +7602,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 486802999656449486}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.15, y: -3.63, z: 0}
+  m_LocalPosition: {x: -5.7, y: -3.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 486802999701085245}
@@ -7648,7 +7648,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 486802999667853506}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.68, y: -3.57, z: 0}
+  m_LocalPosition: {x: 5.7, y: -3.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 486802999701085245}
@@ -7742,7 +7742,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 486802999701085218}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.15000153, y: 7.65, z: 14.59375}
+  m_LocalPosition: {x: 0, y: 7.65, z: 14.59375}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 486802999656449481}
@@ -7767,6 +7767,7 @@ MonoBehaviour:
   startEvent: {fileID: 1451047594}
   maxHealth: 100
   intermissionHealthThreshold: 0.3
+  weakSpot: {fileID: 486802998974076214}
   moveDistanceThreshold: 6.5
   damageStunTime: 3.5
   hands:
@@ -7775,8 +7776,8 @@ MonoBehaviour:
   handSmoothing: 0.85
   handSpeed: 4.8
   globalAttackCooldown: 4
-  slamAttackCooldown: 7
-  punchAttackCooldown: 10
+  slamAttackCooldown: 9.5
+  clapAttackCooldown: 6
   mountedHandAttackDelay: 5
   baseAttackSpeed: 1
   enrageSpeedBuff: 1.15
@@ -7921,7 +7922,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundPack: {fileID: 0}
-  info: 72
+  info: 64
 --- !u!212 &486802999887126654
 SpriteRenderer:
   m_ObjectHideFlags: 0

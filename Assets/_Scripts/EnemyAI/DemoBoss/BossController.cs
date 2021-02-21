@@ -25,7 +25,7 @@ namespace Game.Demo.Boss
         private float intermissionHealthThreshold = 0.3f;
         public float IntermissionHealthThreshold => intermissionHealthThreshold;
         [SerializeField]
-        private BossWeakSpot weakSpot;
+        private GameObject weakSpot;
 
         [SerializeField]
         private float moveDistanceThreshold = 5f;
@@ -43,7 +43,7 @@ namespace Game.Demo.Boss
             get => isInvincible;
             set 
             {
-                weakSpot.enabled = !value;
+                weakSpot.SetActive(!value);
                 isInvincible = value;
             }
         }
@@ -66,7 +66,7 @@ namespace Game.Demo.Boss
         [SerializeField]
         private float slamAttackCooldown = 7f; //the palm slams down every cd.
         [SerializeField]
-        private float punchAttackCooldown = 10f; //the time between fists go out to punch
+        private float clapAttackCooldown = 10f; //the time between fists go out to punch
         [SerializeField]
         private float mountedHandAttackDelay = 5f; //if the player is mounting one of the hands for more than this time, attack the player on the hand.
 
@@ -82,10 +82,12 @@ namespace Game.Demo.Boss
 
         public float HandSmoothing => handSmoothing;
         public float HandSpeed => handSpeed;
-        public float GlobalAttackTimer {get; set;} = 4f;
-
-        public float SlamAttackTimer {get; set;} = 7f;
-        public float PunchAttackTimer {get; set;} = 10f;
+        public float GlobalAttackTimer {get; set;}
+        public float GlobalAttackCooldown => globalAttackCooldown;
+        public float SlamAttackTimer {get; set;}
+        public float SlamCooldown => slamAttackCooldown;
+        public float ClapAttackTimer {get; set;}
+        public float ClapCooldown => clapAttackCooldown;
         public float AttackSpeed {get => attackSpeed; 
             set 
             { 
@@ -97,6 +99,7 @@ namespace Game.Demo.Boss
         public float EnrageSpeedBuff => enrageSpeedBuff;
         public float EnrageInterval => enrageInterval;
 
+        ///<summary>Check if the boss can attack with a single handed attack. out: the hand to attack with</summary>
         public bool CanAttack(out BossHand hand)
         {
             if(GlobalAttackTimer <= 0f)
@@ -108,6 +111,15 @@ namespace Game.Demo.Boss
                 }
             hand = null;
             return false;
+        }
+
+        ///<summary>Check if the boss can attack with both hands at the same time.</summary>
+        public bool CanAttackBothHands()
+        {
+            for(int i = 0; i < hands.Length;  i++)
+                if(!hands[i].IsReady)
+                    return false;
+            return true;
         }
 
         //Defined by the target being grounded, within the horizontal bounds of the hand, and above the max Y of the hands bounds.
@@ -154,6 +166,12 @@ namespace Game.Demo.Boss
         {
             Debug.Log("Boss Started");
             Target = ent as Entity;
+
+            //Reset the attack timers to default values.
+            GlobalAttackTimer = globalAttackCooldown;
+            SlamAttackTimer = slamAttackCooldown;
+            ClapAttackTimer = clapAttackCooldown;
+
             //Show healthbar in persistent UI
             healthBar = PersistentUI.GetBossHealthAndSetupDisplay(this.name, maxHealth, health);
             //optional: startup animation.
@@ -167,7 +185,7 @@ namespace Game.Demo.Boss
             attackSpeed = baseAttackSpeed;
             GlobalAttackTimer = globalAttackCooldown;
             SlamAttackTimer   = slamAttackCooldown;
-            PunchAttackTimer  = punchAttackCooldown;
+            ClapAttackTimer  = clapAttackCooldown;
             PersistentUI.HideBossUI();
             SetAnimationPhase(0);
 
@@ -212,7 +230,7 @@ namespace Game.Demo.Boss
         public void TickDownAttackTimers(float amount)
         {
             GlobalAttackTimer = Mathf.Max(0, GlobalAttackTimer - amount);
-            PunchAttackTimer = Mathf.Max(0, PunchAttackTimer - amount);
+            ClapAttackTimer = Mathf.Max(0, ClapAttackTimer - amount);
             SlamAttackTimer = Mathf.Max(0, SlamAttackTimer - amount);
         }
 
@@ -295,11 +313,13 @@ namespace Game.Demo.Boss
             stringBuilder.AppendLine($"AttackSpeed: {this.attackSpeed.ToString("0.00")}");
             stringBuilder.AppendLine($"GlobalAttack: {GlobalAttackTimer.ToString("0.00")}");
             stringBuilder.AppendLine($"SlamAttack: {SlamAttackTimer.ToString("0.00")}");
+            stringBuilder.AppendLine($"ClapAttack: {ClapAttackTimer.ToString("0.00")}");
             stringBuilder.AppendLine("<b>Hands:</b>");
             foreach(var hand in hands)
             {
                 stringBuilder.AppendLine($"  {hand.name}:");
-               stringBuilder.AppendLine($"  Status: {hand.ActivityStatus.ToString()}");
+                stringBuilder.AppendLine($"  Status: {hand.ActivityStatus.ToString()}");
+                stringBuilder.AppendLine($"  Controller: {hand.GetCurrentState().GetType().Name}");
             }
         
             GUI.skin.box.alignment = TextAnchor.UpperLeft;

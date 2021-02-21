@@ -20,7 +20,28 @@ namespace Game.Demo.Boss
             o.FollowTarget();
             o.TickDownAttackTimers(Time.deltaTime * o.AttackSpeed);
 
-            //can we attack? out gives the first available hand.
+            //Checks if both hands can attack at the same time. this takes priority.
+            if(o.CanAttackBothHands() && o.ClapAttackTimer <= 0f)
+            {
+                o.ClapAttackTimer = o.ClapCooldown;
+                var hands = o.Hands;
+                float maxX = float.MinValue;
+                for(int i = 0; i < hands.Length; i++)
+                {
+                    //body position instead of transform position because the builtin transform is wack.
+                    float x = hands[i].Body.position.x;
+                    maxX = Mathf.Max(maxX, x);
+                }
+                //do the same loop, but this time give the order to attack.
+                for(int i = 0; i < o.Hands.Length; i++)
+                {
+                    float x = hands[i].Body.position.x;
+                    //the one at maximumX should come from the right side.
+                    hands[i].Clap(o.Target, maxX == x ? 1f : -1f);
+                }
+            }
+
+            //Can the boss attack with a single-handed attack?
             if(o.CanAttack(out BossHand attackingHand))
             {
                 var targetPos = o.Target.Position;
@@ -28,10 +49,10 @@ namespace Game.Demo.Boss
                 //How to determine which attack should happen?
                 //depend on where the target is relative to the hand? below on Y => slam?
                 //just pick the first available attack? like with an if/elseif/elseif
-                if(o.SlamAttackTimer <= 0)
+                if(o.SlamAttackTimer <= 0f)
                 {
-                    o.SlamAttackTimer = 7f;//TODO: NEED BETTER WAY OF RESETTING THIS!!!!!!
-                    o.GlobalAttackTimer = 4f;
+                    o.SlamAttackTimer = o.SlamCooldown;
+                    o.GlobalAttackTimer = o.GlobalAttackCooldown;
                     attackingHand.Slam(o.Target);
                 }
             }

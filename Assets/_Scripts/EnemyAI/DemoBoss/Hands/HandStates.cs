@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Game.Patterns.States;
+using System.Collections.Generic;
 
 namespace Game.Demo.Boss
 {
@@ -45,7 +46,7 @@ namespace Game.Demo.Boss
     ///<summary>Slams down until static collision is hit. Kills all vulnerable entities on the way.</summary>
     public class HandSlamState : HandBehaviourState
     {
-        System.Collections.Generic.List<Entity> slammedEntities = new System.Collections.Generic.List<Entity>();
+        List<Entity> slammedEntities = new List<Entity>();
 
         float speed;
         public override void Enter(BossHand o)
@@ -58,7 +59,7 @@ namespace Game.Demo.Boss
         public override void OnCollisionEnter(Collision2D collision, BossHand hand)
         {
             //checking whether we collided with an entity. Entities usually have colliders in the first child so based on that we're checking a parent.
-            Entity entity = collision.collider.GetComponentInParent<Entity>();
+            Entity entity = collision.collider.GetComponentInParent<Entity>(); //--NOTE: Should theoretically get all DAMAGABLES instead
             if(entity)
             {
                 Debug.Log("Slam found entity", entity);
@@ -122,29 +123,124 @@ namespace Game.Demo.Boss
         }
     }
 
-    public class HandPunchState : HandBehaviourState
+    ///<summary>Moves the hands into position for "clapping"</summary>
+    public class HandClapPrepState : HandBehaviourState
     {
+        private static int handsReady = 0;
+        private Transform target;
+        private float side;
+        bool ready = false;
+        public HandClapPrepState(Entity target, float xOffset)
+        {
+            this.target = target.transform;
+            side = xOffset;
+        }
+
         public override void Enter(BossHand o)
         {
-            throw new System.NotImplementedException();
-        }
-
-        public override void OnCollisionEnter(Collision2D collision, BossHand hand)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public override void OnCollisionExit(Collision2D collision, BossHand hand)
-        {
-            throw new System.NotImplementedException();
+            //hacky, but should do the job.
+            //reset the amount of hands that are ready.
+            handsReady = 0;
+            o.ActivityStatus = HandState.Attacking;
         }
 
         public override void Update(BossHand o, float speedMultiplier)
         {
-            throw new System.NotImplementedException();
+            //5 clapping should start at 5 meters from the player.
+            Vector2 targetPosition = target.position + new Vector3(side * 5f, 0f);
+            Vector2 nextPosition = Vector2.MoveTowards(o.Body.position, targetPosition, o.trackSpeed * Time.deltaTime);
+            o.Body.MovePosition(nextPosition);
+
+            float sqrDist = Vector2.SqrMagnitude(nextPosition - targetPosition);
+            if(!ready &&  sqrDist <= 0.1f )
+            {
+                handsReady++;
+                ready = true;
+            }
+            else if(ready && sqrDist > 0.1f)
+            {
+                ready = false;
+                handsReady --;
+            }
+            //Check whether both hands are ready, then go.
+            if(handsReady == 2)
+            {
+                //the hand should move in the opposite direction of where it started.
+                o.TransitionToState(new HandClapState(-side));
+            }
         }
     }
 
+    ///<summary>Claps the hands together.</summary>
+    public class HandClapState : HandBehaviourState
+    {
+        float movementDirection;
+        List<Entity> clappedEntities = new List<Entity>(2);
+
+        public HandClapState(float direction) => movementDirection = direction;
+
+        public override void Enter(BossHand o)
+        {
+            //Enter might not be needed really.
+        }
+
+        public override void OnCollisionEnter(Collision2D collision, BossHand hand)
+        {
+            if(collision.gameObject.isStatic)
+                return; //static collisions are irrelevant.
+            Entity entity = collision.gameObject.GetComponent<Entity>();
+            BossHand otherHand = collision.gameObject.GetComponent<BossHand>();
+            if(entity)
+            {
+                //Ignore collisions with invincible entities.
+                if(entity.IsInvincible)
+                {
+                    hand.IgnoreCollisionWith(entity.Collider);
+                }
+                else
+                {
+                    float collisionNormalX = collision.GetContact(0).normal.x;
+                    //if the collisions normal is roughly pointing in the same direction as where the hand is going:
+                    if(collisionNormalX > 0.5f && movementDirection > 0f || collisionNormalX < -0.5f && movementDirection < 0f)
+                    {
+                        //stun the entity for 1000 seconds (thats enough)
+                        entity.Stun(1000f, true);
+                        //add the entity to the list of clapped entities that will be killed at the end of the clap.
+                        clappedEntities.Add(entity);
+                        //in here: disable the collider.
+                        entity.Collider.enabled = false;
+                        //use a joint to move the entity along with this hand.
+                        var joint = hand.gameObject.AddComponent<RelativeJoint2D>();
+                        joint.connectedBody = entity.Body;
+                        joint.breakForce = Mathf.Infinity; //double check idk.
+                    }
+                }
+            }
+            else if(otherHand)
+            {
+                Game.Controller.CameraController.Shake(1.0f);
+                //"kill" all entities inside the clap.
+                for(int i = 0; i < clappedEntities.Count; i++)
+                {
+                    clappedEntities[i].Damage(999999f);
+                    clappedEntities[i].Collider.enabled = true; //re-enable the collider we disabled earlier.
+                }
+                foreach(var joint in hand.GetComponents<RelativeJoint2D>())
+                    Object.Destroy(joint);
+                //stay in this position for half a second, then return to idle.
+                hand.TransitionToState(new HandWaitQueue(0.5f, BossHand.NoControlState));
+            }
+        }
+
+        //Actually fixedUpdate! this simply moves the hand.
+        public override void Update(BossHand o, float speedMultiplier)
+        {
+            float x = o.slamSpeed * Time.deltaTime * movementDirection;
+            o.Body.MovePosition(o.Body.position + new Vector2(x, 0));
+        }
+    }
+
+    ///<summary>Queues up a State to be entered after a given delay. Default is 2 seconds.</summary>
     public class HandWaitQueue : HandBehaviourState
     {
         HandBehaviourState nextState;
