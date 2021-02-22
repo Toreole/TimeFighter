@@ -271,6 +271,7 @@ namespace Game.Demo.Boss
                     hand.ResetHand();
                 Game.Controller.CameraController.ResetZoom();
                 SetAnimationPhase(-1);
+                weakSpot.SetActive(false);
                 Destroy(this);
             }
         }
