@@ -274,6 +274,8 @@ namespace Game.Demo.Boss
                 weakSpot.SetActive(false);
                 Destroy(this);
             }
+            else
+                PushOverrideState(new BossDamagedState());
         }
 
 //Serialization for this boss is something to worry about at a much later time.
