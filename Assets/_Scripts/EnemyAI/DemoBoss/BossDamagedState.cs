@@ -11,10 +11,14 @@ namespace Game.Demo.Boss
         public override void Enter(BossController o)
         {
             enterTime = Time.time;
+            o.IsInvincible = true;
         }
 
         //No exit for this needed rn.
-        public override void Exit(BossController o) { }
+        public override void Exit(BossController o) 
+        { 
+            o.IsInvincible = false;
+        }
 
         public override void Update(BossController o)
         {

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEngine.InputSystem;
 using Game.Controller.PlayerStates;
@@ -179,6 +179,9 @@ namespace Game.Controller
         /// </summary>
         public event System.Action<LandingType> OnEnterGround;
         public event System.Action OnLeaveGround;
+
+        ///<summary>DEBUG ONLY!!!!</summary>
+        private string activeStateType;
 
         /// <summary>
         /// Params: GroundData: Wall Information
@@ -449,14 +452,16 @@ namespace Game.Controller
                 if (hit = Physics2D.Raycast(Body.position, direction, length, groundMask))
                 {
                     //verify angle limit.
-                    if (Mathf.Abs(hit.normal.x) >= 0.98f)
+                    Vector2 normal = hit.normal;
+                    Vector2 side = new Vector2(Util.Normalized(normal.x), 0f);
+                    if (Vector2.SignedAngle(normal, side).InRange(-10f, 10f))
                     {
                         currentWall.materialInfo = hit.collider.GetComponent<GroundData>() ?? currentWall.materialInfo;
                         currentWall.normal = hit.normal;
                         currentWall.point = hit.point;
                         Vector2 tangent = Vector3.Cross(currentWall.normal, Vector3.forward);
                         currentWall.upTangent = tangent.y < 0 ? -tangent : tangent;
-                        IsTouchingWall = true; //use property, this can call the event
+                        isTouchingWall = true; //use property, this can call the event
                         return true;
                     }
                 }
@@ -475,6 +480,7 @@ namespace Game.Controller
             activeState = new T();
             activeState.controller = this;
             activeState.OnEnterState();
+            activeStateType = activeState.GetType().Name;
         }
         /// <summary>
         /// Switch to a given state. Required when a state needs extra info passed in from previous state.
@@ -485,6 +491,7 @@ namespace Game.Controller
             activeState = state;
             activeState.controller = this;
             state.OnEnterState();
+            activeStateType = activeState.GetType().Name;
         }
 
         //public void SetActiveInput(bool active)
@@ -531,6 +538,7 @@ namespace Game.Controller
     }
 
     //EDIT: class instead of struct.
+    [System.Serializable]
     public class WallInfo
     {
         public GroundData materialInfo;

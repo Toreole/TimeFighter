@@ -45,9 +45,14 @@ namespace Game.Controller
         protected float lookAheadTimeX = 0.5f, lookAheadTimeY = 0.1f;
         [SerializeField]
         protected Vector3 cameraOffset = Vector3.up;
+        [SerializeField]
+        protected float shakeFalloff = 2f;
         
         private float currentSpeed = 0f;
         private Vector3 previousTargetPosition;
+
+        //override the default transform property because its stupid and ugly and slow and dumb
+        private new Transform transform;
 
         //helper to reset zoom.
         //public static float DefaultSize => _instance.defaultSize;
@@ -65,6 +70,8 @@ namespace Game.Controller
             _instance = this;
             Current = this.camera;
             camera.orthographicSize = defaultSize;
+            //we need to assign transform to the base, or do GetComponent, in this case because its shorter :))
+            this.transform = base.transform;
         }
 
         //camera movement is done in lateupdate to not act weirdly with anything that hapens in update
@@ -166,5 +173,35 @@ namespace Game.Controller
         }
 
         public static void ResetZoom(float time = 0.4f) => _instance.M_DynamicZoom(_instance.defaultSize, time);
+
+        private Coroutine shakeRoutine;
+        public static void Shake(float magnitude)
+        {
+            if(_instance.shakeRoutine != null)
+                _instance.StopCoroutine(_instance.shakeRoutine);
+            _instance.shakeRoutine = _instance.StartCoroutine(_instance.DoShake(magnitude));
+        }
+
+        private static readonly WaitForEndOfFrame wait = new WaitForEndOfFrame();
+        private IEnumerator DoShake(float startingMagnitude)
+        {
+            //Shake falloff is based on a x³ exponential curve.
+            //So falloff is stronger at the start, and the slows down as it approaches 0.
+            //usecase: f(x) = -n * (x-a)³
+            //x1 is the offset of the curve to have the magnitude be the result of f(x) at x=0.
+            float x1 = Mathf.Pow(startingMagnitude / shakeFalloff, Util.oneThird);
+
+            //f(x) = -shakeFalloff * (x -x1)³ -----  magnitude is equal or below zero, stop shaking. --- Recalculate shake magnitude.
+            //the falloff curve will hit 0 at exactly x1, so thats when to stop.
+            for(float t = 0; t <= x1; t += Time.deltaTime)
+            {
+                float magnitude = -shakeFalloff * Mathf.Pow(t - x1, 3f); 
+                Vector3 offset = Random.insideUnitCircle; offset.Normalize();
+                Vector3 targetPos = target.position + offset * magnitude;
+                targetPos.z = transform.position.z;
+                transform.position = targetPos;
+                yield return null;
+            }
+        }
     }
 }

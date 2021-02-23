@@ -28,6 +28,7 @@ namespace Game.Demo.Boss
         public HandState ActivityStatus {get; set;} = HandState.Returning;
         public bool IsReady => ActivityStatus == HandState.Ready;
         public Rigidbody2D Body => body;
+        public Bounds Bounds => collider.bounds;
         
         [System.NonSerialized] internal Vector2 returnVelocity = Vector2.zero;
 
@@ -54,6 +55,7 @@ namespace Game.Demo.Boss
             this.speedMultiplier = multiplier;
         }
 
+        //--TODO: Smooth it out.
         public void ResetHand()
         {
             transform.position = startingPosition;
@@ -64,17 +66,21 @@ namespace Game.Demo.Boss
             ignoredColliders.Clear();
         }
 
-        void Update()
-        {
-            currentState.Update(this, speedMultiplier);
-        }
-
         //As collisions and physics are handled in FixedUpdate, also handle ignored collisions in here.
         private void FixedUpdate() 
         {
-            foreach(var other in ignoredColliders)
-                if(other && !other.Distance(collider).isOverlapped) //if it doesnt overlap with the hands collider anymore
+            //this should probably use fixedupdate instead.
+            currentState.Update(this, speedMultiplier);
+            for(int i = 0; i < ignoredColliders.Count; i++)
+            {
+                var other = ignoredColliders[i];
+                if(other && other.Distance(collider).distance > 0.1f)//if it doesnt overlap with the hands collider anymore
+                { 
                     Physics2D.IgnoreCollision(other, collider, false);// re-enable the collision between the two.
+                    ignoredColliders.Remove(other);
+                    return;
+                }
+            }
         }
 
         ///<summary>Temporarily ignores collisions with this collider</summary>
@@ -85,28 +91,15 @@ namespace Game.Demo.Boss
         }
 
         //perform a slam attack on the target.
-        //1. move above the target
-        //2. fall down
-        //3. wait until solid terrain was found (collision)
-        //!!!! ignore collision with invincible entities (i-frame dodges)
-        //4. kill all entities between the hand and the collision
-        //5. short delay
-        //6. mark hand for returning.
         public void Slam(Entity target)
         {
             TransitionToState(new HandTrackTargetState(target));
         }
 
-        //try to punch the target.
-        //1. move in a straight line
-        //2. taking damage stops movement (-> skip to 5.)
-        //3. knock back any and all entities hit (damage them)
-        //4. move until terrain is hit
-        //5. short delay
-        //6. mark hand for returning.
-        public void Punch(Entity target)
+        //Clap both hands at the target.
+        public void Clap(Entity target, float side)
         {
-            throw new System.NotImplementedException();
+            TransitionToState(new HandClapPrepState(target, side));
         }
 
         //From IDamagable, used by punches
@@ -138,6 +131,10 @@ namespace Game.Demo.Boss
         {
             collider.enabled = activeCollision;
         }
+
+#region DEBUGGING
+        public HandBehaviourState GetCurrentState() => currentState;
+#endregion
     }
 
     public enum HandState 

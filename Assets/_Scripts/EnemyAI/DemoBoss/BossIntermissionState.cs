@@ -12,11 +12,13 @@ namespace Game.Demo.Boss
         {
             //o.Invincible = true; //Should the boss be invincible during the intermission?
             enterTime = Time.time;
+            o.SetAnimationPhase(2);
+            o.IsInvincible = true;
         }
 
         public override void Exit(BossController o)
         {
-
+            o.IsInvincible = false;
         }
 
         public override void Update(BossController o)

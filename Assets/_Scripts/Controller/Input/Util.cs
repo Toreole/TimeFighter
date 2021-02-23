@@ -76,6 +76,9 @@ namespace Game
             return key.ToString();
         }
 
+        public static bool InRange(this float x, float min, float max)
+            => min <= x && x <= max;
+
         //public static bool HasDuplicates(this ControlScheme scheme, out List<DuplicateKeyBind> duplicates)
         //{
         //    duplicates = new List<DuplicateKeyBind>();
